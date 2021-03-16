@@ -11,3 +11,5 @@ config.json
 
 # Yarn better <3
 package-lock.json
+
+tsconfig.tsbuildinfo

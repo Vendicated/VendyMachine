@@ -3,3 +3,9 @@ services:
   app:
     image: vendicated/template
     build: .
+    environment:
+      - "DEFAULT_PREFIX="
+      - "TOKEN="
+      - "POSTGRES_URI="
+      - "ERROR_WEBHOOK="
+      - "INFO_WEBHOOK="
