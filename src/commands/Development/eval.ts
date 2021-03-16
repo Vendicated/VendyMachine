@@ -7,13 +7,11 @@ import { haste } from "../../util/helpers";
 import { MessageEmbed, MessageOptions } from "discord.js";
 
 export class Command implements IBaseCommand {
-	public name = "eval";
 	public description = "Evaluate js code";
-	public args: Arguments = [{ key: "script", type: ArgumentTypes.String, flags: ArgumentFlags.Remainder }];
+	public args: Arguments = [{ key: "script", type: ArgumentTypes.Bool, flags: ArgumentFlags.Remainder }];
 	public aliases = ["debug", "e"];
 	public ownerOnly = true;
 	public guildOnly = false;
-	public nsfw = false;
 	public userPermissions = [];
 	public clientPermissions = [];
 
@@ -109,6 +107,6 @@ export class Command implements IBaseCommand {
 
 		if (consoleOutput) messageOptions.embed.addField("Console", consoleOutput);
 
-		ctx.reply(void 0, messageOptions);
+		await ctx.reply(void 0, messageOptions);
 	}
 }

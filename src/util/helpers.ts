@@ -3,7 +3,7 @@ import { hastebinMirror, Colours, Emojis } from "./constants";
 import { JsonObject, LogCategory } from "./types";
 import { MessageEmbed } from "discord.js";
 import { CommandContext } from "../commands/CommandContext";
-import { codeblock, trim } from "./stringTransform";
+import { codeblock, trim, longestLineLength } from "./stringHelpers";
 
 /**
  * Helper function to fetch remote content.
@@ -82,25 +82,25 @@ export async function haste(content: string) {
  * @param lines
  */
 export function printBox(...lines: string[]) {
-	const divider = "-".repeat(lines.reduce((x, y) => (x > y.length ? x : y.length), 0));
+	const divider = "-".repeat(longestLineLength(...lines));
 	for (const line of [divider, ...lines, divider]) console.log(line);
 }
 
 export function errorToEmbed(error: Error, { msg, commandName, rawArgs, guild }: CommandContext) {
-	const errorText = trim((error as Error).stack ?? error.name ?? "Unknown error", 2000);
+	const errorText = trim((error as Error).stack || error.name || "Unknown error", 2000);
 
 	return new MessageEmbed()
 		.setColor(Colours.RED)
 		.setTitle("Oops!")
 		.setDescription(
-			`I'm sorry, an error occurred while executing this command. You can find the details below. Please react with ${Emojis.CHECK_MARK} if it is okay for me to automatically report this to my Owner.`
+			`I'm sorry, an error occurred while executing this command. You can find the details below.\n\nPlease react with ${Emojis.CHECK_MARK} if it is okay for me to automatically report this to my Owner.`
 		)
 		.addField("Command", commandName, true)
-		.addField("Arguments", rawArgs.join(" "))
-		.addField("User", `${msg.author.tag} (${msg.author.id})`)
+		.addField("User", `${msg.author.tag} (${msg.author.id})`, true)
 		.addField("Server", guild ? `${guild.name} (${guild.id})` : "-", true)
 		.addField("Message ID", msg.id, true)
-		.addField("Error", codeblock((error.name ? `${error.name}:\n` : "") + errorText, "js"));
+		.addField("Arguments", rawArgs.join(" ") || "-")
+		.addField("Error", codeblock(errorText, "js"));
 }
 
 export function postInfo(embeds: MessageEmbed | MessageEmbed[]) {
@@ -108,6 +108,11 @@ export function postInfo(embeds: MessageEmbed | MessageEmbed[]) {
 }
 
 export function postError(embeds: MessageEmbed | MessageEmbed[]) {
+	if (!Array.isArray(embeds)) embeds = [embeds.setDescription("")];
+	for (const embed of embeds) {
+		printBox("Error", ...embed.fields.map(field => `${field.name !== "Error" ? `${field.name}: ` : ""}${field.value.replace(/```[^\n]*/g, "")}`));
+	}
+
 	return executeWebhook("ERROR", null, embeds);
 }
 

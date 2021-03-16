@@ -9,7 +9,7 @@ export function boolParser(str: string) {
 
 export async function channelParser(client: Client, str: string) {
 	try {
-		str = str.replace(/<#>/g, "");
+		str = str.replace(/[<#>]/g, "");
 		return await client.channels.fetch(str);
 	} catch {
 		return null;

@@ -78,10 +78,9 @@ export class CommandContext {
 
 			return choice;
 		} catch {
-			this.msg.reply("The prompt has timed out. Please run the command again.");
+			await this.msg.reply("The prompt has timed out. Please run the command again.");
 		} finally {
 			if (msg.deletable) void msg.delete().catch(() => void 0);
-			msg.delete();
 		}
 	}
 }

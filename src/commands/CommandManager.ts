@@ -2,7 +2,7 @@ import { Collection } from "discord.js";
 import fs from "fs/promises";
 import path from "path";
 import { ICommand } from "./ICommand";
-import { ArgumentTypes, ArgumentFlags } from "./CommandArguments";
+import { ArgumentFlags } from "./CommandArguments";
 
 export class CommandManager {
 	private readonly commands = new Collection<string, ICommand>();
@@ -19,7 +19,7 @@ export class CommandManager {
 			if (this.get(name)) throw new Error(`Duplicate command name or alias ${name} in file ${filePath}`);
 		});
 
-		this.commands.set(command.name, command);
+		this.set(command.name, command);
 
 		// Delete require cache since import statement transpiles to require statement
 		delete require.cache[filePath];
@@ -30,9 +30,9 @@ export class CommandManager {
 			const filepath = path.join(directory, filename);
 			const stats = await fs.stat(filepath);
 			if (stats.isDirectory()) {
-				this.registerAll(filepath, false);
+				await this.registerAll(filepath, false);
 			} else if (!ignoreFiles) {
-				this.register(filepath);
+				await this.register(filepath);
 			}
 		}
 	}
@@ -70,7 +70,7 @@ export class CommandManager {
 
 	public formatUsage(cmd: ICommand) {
 		const args = cmd.args.map(arg => {
-			const explanation = arg.explanation || ArgumentTypes[(arg.type as unknown) as keyof typeof ArgumentTypes];
+			const explanation = arg.explanation || arg.type;
 			return arg.flags && arg.flags & ArgumentFlags.Optional ? `[${explanation}]` : `<${explanation}>`;
 		});
 

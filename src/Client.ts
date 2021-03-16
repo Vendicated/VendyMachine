@@ -3,7 +3,7 @@ import { IMessage } from "./IMessage";
 import { CommandManager } from "./commands/CommandManager";
 import { CommandContext } from "./commands/CommandContext";
 import { parseArgs, ArgumentError } from "./commands/CommandArguments";
-import { printBox, errorToEmbed, postError, executeWebhook, postInfo } from "./util/helpers";
+import { printBox, errorToEmbed, postError, postInfo } from "./util/helpers";
 import { Emojis, Colours } from "./util/constants";
 
 interface ClientEvents extends BaseClientEvents {
@@ -31,12 +31,12 @@ export class Client extends BaseClient {
 	}
 
 	public registerCommands() {
-		this.commands.registerAll();
+		void this.commands.registerAll();
 		return this;
 	}
 
 	public connect() {
-		this.login(process.env.TOKEN);
+		void this.login(process.env.TOKEN);
 		return this;
 	}
 
@@ -55,7 +55,7 @@ export class Client extends BaseClient {
 			)
 			.addField("Command loaded", this.commands.size, true);
 
-		postInfo(embed);
+		void postInfo(embed);
 		printBox(embed.title!, ...embed.fields.map(field => `${field.name}: ${field.value}`));
 	}
 
@@ -74,7 +74,7 @@ export class Client extends BaseClient {
 			await command.callback(ctx, args);
 		} catch (error) {
 			if (error instanceof ArgumentError) {
-				msg.channel.send(error.message);
+				await msg.channel.send(error.message);
 			} else {
 				const embed = errorToEmbed(error, ctx);
 
@@ -88,7 +88,7 @@ export class Client extends BaseClient {
 					.then(r => Boolean(r.size));
 
 				if (consented) {
-					postError(embed);
+					await postError(embed);
 					await ctx
 						.reply("Thank you! I might send you a private message at some point to ask for more info, so please keep them open <3")
 						.then(r => setTimeout(() => r.deletable && r.delete().catch(() => void 0), 1000 * 10));

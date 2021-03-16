@@ -7,7 +7,7 @@ import { channelParser, boolParser } from "../util/parsers";
 export async function parseArgs(command: ICommand, ctx: CommandContext) {
 	const output: CommandArgs = {};
 
-	const requiredArgs = command.args.filter(arg => hasFlag(arg, ArgumentFlags.Optional)).length;
+	const requiredArgs = command.args.filter(arg => !hasFlag(arg, ArgumentFlags.Optional)).length;
 	if (ctx.rawArgs.length < requiredArgs) throw new ArgumentError(`Too little arguments. Expected ${requiredArgs} but only received ${ctx.rawArgs.length}.`);
 
 	for (let i = 0, arg = command.args[i]; i < command.args.length; i++) {
@@ -20,17 +20,23 @@ export async function parseArgs(command: ICommand, ctx: CommandContext) {
 				raw = ctx.rawArgs[i];
 			}
 			try {
+				if (raw === null || raw === undefined || raw === "") {
+					if (!hasFlag(arg, ArgumentFlags.Optional))
+						throw new ArgumentError(
+							`Too little args. Please provide a ${arg.explanation || ArgumentTypes[(arg.type as unknown) as keyof typeof ArgumentTypes]}`
+						);
+					else return null;
+				}
+
 				const result = await parser(raw);
-				if (result === null || result === undefined) throw void 0;
+				if (result === null || result === undefined || (typeof result === "number" && isNaN(result))) throw void 0;
 				if (arg.type === ArgumentTypes.String && result === "") throw new ArgumentError(`This command requires text input!`);
 
 				output[arg.key] = result;
 			} catch (err: unknown) {
 				if (err instanceof ArgumentError) throw err;
 
-				throw new ArgumentError(
-					`Wrong argument ${raw}. Expected ${arg.explanation || ArgumentTypes[(arg.type as unknown) as keyof typeof ArgumentTypes]}.`
-				);
+				throw new ArgumentError(`Wrong argument \`${raw}\`. Expected ${arg.explanation || arg.type}.`);
 			}
 		};
 		switch (arg.type) {
@@ -71,7 +77,7 @@ export enum ArgumentTypes {
 	String = "text",
 	Bool = "boolean",
 	Int = "number",
-	Float = "number",
+	Float = "floating point number",
 	Channel = "channel",
 	Message = "message",
 	User = "user",

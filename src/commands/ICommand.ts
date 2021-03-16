@@ -1,6 +1,6 @@
 import { PermissionString } from "discord.js";
-import { Arguments, CommandArgs } from './CommandArguments';
-import { CommandContext } from './CommandContext';
+import { Arguments, CommandArgs } from "./CommandArguments";
+import { CommandContext } from "./CommandContext";
 
 export interface IBaseCommand {
 	description: string;
