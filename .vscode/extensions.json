@@ -1,0 +1,10 @@
+{
+	"recommendations": [
+		"esbenp.prettier-vscode",
+		"dbaeumer.vscode-eslint",
+		"christian-kohler.path-intellisense",
+		"GregorBiswanger.json2ts",
+		"streetsidesoftware.code-spell-checker",
+		"pmneo.tsimporter"
+	]
+}

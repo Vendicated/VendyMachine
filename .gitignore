@@ -1,0 +1,13 @@
+node_modules
+dist
+
+tmp
+*.log
+logs
+
+# Keep those tokens save
+*.env
+config.json
+
+# Yarn better <3
+package-lock.json
