@@ -1,10 +1,12 @@
-import { Client as BaseClient, ClientUser, ClientEvents as BaseClientEvents, MessageEmbed, MessageReaction, User } from "discord.js";
-import { IMessage } from "./IMessage";
-import { CommandManager } from "./commands/CommandManager";
+import { stripIndents } from "common-tags";
+import { Client as BaseClient, ClientApplication, ClientEvents as BaseClientEvents, ClientUser, Collection, GuildMember, Team, User } from "discord.js";
 import { CommandContext } from "./commands/CommandContext";
-import { parseArgs, ArgumentError } from "./commands/CommandArguments";
-import { printBox, errorToEmbed, postError, postInfo } from "./util/helpers";
-import { Emojis, Colours } from "./util/constants";
+import { CommandManager } from "./commands/CommandManager";
+import { Database } from "./db";
+import { InlineEmbed } from "./Embed";
+import { IMessage } from "./IMessage";
+import { hasPermission, postInfo, printBox } from "./util/helpers";
+import { toTitleCase } from "./util/stringHelpers";
 
 interface ClientEvents extends BaseClientEvents {
 	message: [IMessage];
@@ -18,10 +20,13 @@ export class Client extends BaseClient {
 	public readonly on!: <Event extends keyof ClientEvents>(event: Event, listener: (...args: ClientEvents[Event]) => void) => this;
 	public readonly emit!: <Event extends keyof ClientEvents>(event: Event, ...args: ClientEvents[Event]) => boolean;
 
+	private _application: ClientApplication;
+	public db = new Database();
 	public commands = new CommandManager();
+	public owners = new Collection<string, User>();
 
-	public async getPrefixes(msg: IMessage) {
-		return [process.env.DEFAULT_PREFIX];
+	public get invite() {
+		return `https://discord.com/oauth2/authorize?client_id=${this.user.id}&scope=bot&permissions=1074121792`;
 	}
 
 	public registerDefaultHandlers() {
@@ -35,25 +40,57 @@ export class Client extends BaseClient {
 		return this;
 	}
 
-	public connect() {
-		void this.login(process.env.TOKEN);
+	private async initDb() {
+		await this.db.init();
+	}
+
+	public isOwner(ctx: User | GuildMember | CommandContext) {
+		if (ctx instanceof User || ctx instanceof GuildMember) return this.owners.has(ctx.id);
+		return this.owners.has(ctx.author.id);
+	}
+
+	private async addOwner(owner: Team | User) {
+		if (owner instanceof Team) owner.members.forEach(member => this.addOwner(member.user));
+		else this.owners.set(owner.id, owner);
+	}
+
+	public async fetchApplication() {
+		this._application ||= await super.fetchApplication();
+
+		return this._application;
+	}
+
+	public fetchOwners() {
+		return this.fetchApplication().then(async data => {
+			let { owner } = data;
+			owner ||= await this.users.fetch(process.env.OWNER_ID!).catch(() => null);
+			if (!owner) throw new Error("I was not able to get data about my owners from Discord. Please set an enviroment variable OWNER_ID");
+
+			await this.addOwner(owner);
+		});
+	}
+
+	public async connect() {
+		await this.initDb()
+			.then(() => this.login(process.env.TOKEN))
+			.then(() => this.fetchOwners());
 		return this;
 	}
 
 	public async onReady() {
-		const embed = new MessageEmbed()
-			.setColor(Colours.GREEN)
+		void this.user.setActivity({ type: "LISTENING", name: `@${this.user.tag}` });
+
+		const embed = new InlineEmbed("SUCCESS")
 			.setTitle("Successfully connected to discord")
-			.addField("Mode", process.env.NODE_ENV, true)
-			.addField("User", `${this.user.tag} (${this.user.id})`, true)
-			.addField("Guilds", this.guilds.cache.size, true)
-			.addField("Channels", this.channels.cache.size, true)
+			.addField("Mode", process.env.NODE_ENV)
+			.addField("User", `${this.user.tag} (${this.user.id})`)
+			.addField("Guilds", this.guilds.cache.size)
+			.addField("Channels", this.channels.cache.size)
 			.addField(
 				"Estimated Users",
-				this.guilds.cache.reduce((x, y) => x + y.memberCount, 0),
-				true
+				this.guilds.cache.reduce((x, y) => x + y.memberCount, 0)
 			)
-			.addField("Command loaded", this.commands.size, true);
+			.addField("Command loaded", this.commands.size);
 
 		void postInfo(embed);
 		printBox(embed.title!, ...embed.fields.map(field => `${field.name}: ${field.value}`));
@@ -61,39 +98,48 @@ export class Client extends BaseClient {
 
 	public async onMessage(msg: IMessage) {
 		if (msg.author.bot) return;
+		// Quit if we do not have sufficient permissions
+		if (msg.guild && !hasPermission(["VIEW_CHANNEL", "SEND_MESSAGES", "EMBED_LINKS"], msg.guild.me!, msg.channel)) return;
 
 		const ctx = await CommandContext.fromMessage(msg);
-		if (!ctx) return;
+		if (!ctx) {
+			if (msg.mentions.has(this.user) && new RegExp(`^<@!?${this.user.id}>$`).test(msg.content)) {
+				const reply = stripIndents`
+					Hello ${msg.author}! I am ${this.user.username}, an open source bot focused all around emotes
 
-		const command = this.commands.get(ctx.commandName);
+					For a list of available prefixes, send \`@${this.user.tag} prefixes\`, or try \`@${this.user.tag} help\` for a list of commands!
 
-		if (!command) return;
+					Invite me: <${this.invite}>
+				`;
 
-		try {
-			const args = await parseArgs(command, ctx);
-			await command.callback(ctx, args);
-		} catch (error) {
-			if (error instanceof ArgumentError) {
-				await msg.channel.send(error.message);
-			} else {
-				const embed = errorToEmbed(error, ctx);
+				await msg.channel.send(reply);
+			}
 
-				const m = await ctx.reply(undefined, embed);
-				await m.react(Emojis.CHECK_MARK);
-				const consented = await m
-					.awaitReactions((r: MessageReaction, u: User) => r.emoji.name === Emojis.CHECK_MARK && u.id === msg.author.id, {
-						max: 1,
-						time: 1000 * 60
-					})
-					.then(r => Boolean(r.size));
+			return;
+		}
 
-				if (consented) {
-					await postError(embed);
-					await ctx
-						.reply("Thank you! I might send you a private message at some point to ask for more info, so please keep them open <3")
-						.then(r => setTimeout(() => r.deletable && r.delete().catch(() => void 0), 1000 * 10));
+		const command = this.commands.findCommand(ctx.commandName);
+
+		if (!command || (command.ownerOnly && !this.isOwner(ctx))) return;
+
+		if (ctx.isGuild()) {
+			const { clientPermissions, userPermissions } = command;
+			if (clientPermissions) {
+				if (!hasPermission(clientPermissions, ctx.me, ctx.channel)) {
+					return ctx.reply(
+						`Sorry, I can't do that. Please grant me the following permissions and try again: \`${clientPermissions
+							.map(s => toTitleCase(s))
+							.join("`, `")}\``
+					);
+				}
+				if (!hasPermission(userPermissions, ctx.member, ctx.channel)) {
+					return ctx.reply("You're not allowed to do that.");
 				}
 			}
+		} else if (command.guildOnly) {
+			return ctx.reply("This command can only be used on a server.");
 		}
+
+		await this.commands.execute(command, ctx);
 	}
 }

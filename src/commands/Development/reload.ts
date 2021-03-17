@@ -9,7 +9,7 @@ export class Command implements IBaseCommand {
 	guildOnly = false;
 	userPermissions = [];
 	clientPermissions = [];
-	args = [];
+	args = {};
 
 	async callback(ctx: CommandContext): Promise<void> {
 		await ctx.client.commands

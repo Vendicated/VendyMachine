@@ -1,3 +1,5 @@
 import { Client } from "./Client";
 
-new Client().registerDefaultHandlers().registerCommands().connect();
+const client = new Client();
+
+void client.registerCommands().registerDefaultHandlers().connect();

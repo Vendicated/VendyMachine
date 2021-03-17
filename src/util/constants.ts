@@ -1,5 +1,5 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-export const PACKAGE_JSON = require("../../package.json");
+// @ts-ignore
+export * as PACKAGE_JSON from "../../package.json";
 
 export const hastebinMirror = process.env.HASTEBIN_MIRROR || "https://hb.vendicated.dev";
 
@@ -10,5 +10,7 @@ export const Colours = {
 };
 
 export const Emojis = {
-	CHECK_MARK: "✅"
+	CHECK_MARK: "✅",
+	X: "❌",
+	INFO: "ℹ️"
 };

@@ -1,6 +1,13 @@
 node_modules
 .vscode
 .husky
+.github
+.travis.yml
+
 *.log
+*.tsbuildinfo
+
 Dockerfile
 .dockerignore
+
+LICENSE

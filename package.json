@@ -1,14 +1,33 @@
 {
+	"name": "emote-bot",
 	"version": "0.1.0",
 	"private": true,
+	"description": "Discord bot centered around emotes",
+	"keywords": [
+		"discord",
+		"bot",
+		"emotes",
+		"emojis",
+		"download",
+		"zip",
+		"export"
+	],
+	"homepage": "https://github.com/Vendicated/EmoteBot#readme",
+	"bugs": {
+		"url": "https://github.com/Vendicated/EmoteBot/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Vendicated/EmoteBot.git"
+	},
 	"license": "AGPL-3.0",
 	"author": "Vendicated (vendicated@riseup.net)",
 	"main": "dist/index.js",
 	"scripts": {
-		"build": "tsc",
-		"clean": "rm -rf dist",
 		"_dev": "yarn build && node .",
 		"_dev:watch": "yarn build --watch & nodemon",
+		"build": "tsc",
+		"clean": "rm -rf dist",
 		"debug": "export NODE_ENV=debug && yarn _dev",
 		"debug:watch": "export NODE_ENV=debug && yarn _dev:watch",
 		"dev": "export NODE_ENV=development && yarn _dev",
@@ -17,8 +36,19 @@
 		"lint": "eslint ./src/**/*.ts",
 		"lint:fix": "yarn lint --fix",
 		"prepare": "husky install",
-		"test": "tsc -p tsconfig.test.json && yarn lint",
-		"start": "export NODE_ENV=production && yarn build && node ."
+		"start": "export NODE_ENV=production && yarn build && node .",
+		"test": "tsc -p tsconfig.test.json && yarn lint"
+	},
+	"dependencies": {
+		"@klasa/stopwatch": "^0.0.1",
+		"common-tags": "^1.8.0",
+		"discord.js": "^12.5.1",
+		"node-fetch": "^2.6.1",
+		"pg": "^8.5.1",
+		"reflect-metadata": "^0.1.13",
+		"sharp": "^0.27.2",
+		"typeorm": "^0.2.31",
+		"validator": "^13.5.2"
 	},
 	"devDependencies": {
 		"@types/common-tags": "^1.8.0",
@@ -33,14 +63,5 @@
 		"precise-commits": "^1.0.2",
 		"prettier": "^2.2.1",
 		"typescript": "^4.2.3"
-	},
-	"dependencies": {
-		"@klasa/stopwatch": "^0.0.1",
-		"common-tags": "^1.8.0",
-		"discord.js": "^12.5.1",
-		"node-fetch": "^2.6.1",
-		"postgres": "^2.0.0-beta.4",
-		"sharp": "^0.27.2",
-		"validator": "^13.5.2"
 	}
 }

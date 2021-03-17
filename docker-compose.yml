@@ -1,11 +1,23 @@
 version: "3.9"
 services:
-  app:
-    image: vendicated/template
+  emotebot:
+    image: vendicated/emote-bot
     build: .
-    environment:
-      - "DEFAULT_PREFIX="
-      - "TOKEN="
-      - "POSTGRES_URI="
-      - "ERROR_WEBHOOK="
-      - "INFO_WEBHOOK="
+    restart: always
+    env_file:
+      - bot.env
+      - pg.env
+    links:
+      - postgres
+
+  postgres:
+    image: postgres
+    restart: always
+    ports:
+      - "5433:5432"
+    env_file: pg.env
+    volumes:
+      - emotebot-db:/var/lib/postgresql/data
+
+volumes:
+  emotebot-db:

@@ -19,6 +19,7 @@
 		"rootDir": "src",
 		"skipLibCheck": true,
 		"strict": true,
+		"strictPropertyInitialization": false, // typeorm fields are not initialised, so disable this rule
 		"target": "ESNEXT"
 	}
 }

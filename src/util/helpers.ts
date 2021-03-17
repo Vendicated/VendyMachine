@@ -1,9 +1,12 @@
+import { Stopwatch } from "@klasa/stopwatch";
+import { Channel, GuildChannel, GuildMember, MessageEmbed, MessageOptions, PermissionString } from "discord.js";
 import nodeFetch, { RequestInfo, RequestInit } from "node-fetch";
-import { hastebinMirror, Colours, Emojis } from "./constants";
-import { JsonObject, LogCategory } from "./types";
-import { MessageEmbed } from "discord.js";
+import { inspect } from "util";
 import { CommandContext } from "../commands/CommandContext";
-import { codeblock, trim, longestLineLength } from "./stringHelpers";
+import { InlineEmbed } from "../Embed";
+import { Emojis, hastebinMirror } from "./constants";
+import { codeblock, longestLineLength, removeTokens, trim } from "./stringHelpers";
+import { JsonObject, LogCategory } from "./types";
 
 /**
  * Helper function to fetch remote content.
@@ -89,18 +92,17 @@ export function printBox(...lines: string[]) {
 export function errorToEmbed(error: Error, { msg, commandName, rawArgs, guild }: CommandContext) {
 	const errorText = trim((error as Error).stack || error.name || "Unknown error", 2000);
 
-	return new MessageEmbed()
-		.setColor(Colours.RED)
+	return new InlineEmbed("ERROR")
 		.setTitle("Oops!")
 		.setDescription(
 			`I'm sorry, an error occurred while executing this command. You can find the details below.\n\nPlease react with ${Emojis.CHECK_MARK} if it is okay for me to automatically report this to my Owner.`
 		)
-		.addField("Command", commandName, true)
-		.addField("User", `${msg.author.tag} (${msg.author.id})`, true)
-		.addField("Server", guild ? `${guild.name} (${guild.id})` : "-", true)
-		.addField("Message ID", msg.id, true)
-		.addField("Arguments", rawArgs.join(" ") || "-")
-		.addField("Error", codeblock(errorText, "js"));
+		.addField("Command", commandName)
+		.addField("User", `${msg.author.tag} (${msg.author.id})`)
+		.addField("Server", guild ? `${guild.name} (${guild.id})` : "-")
+		.addField("Message ID", msg.id)
+		.addField("Arguments", rawArgs.join(" ") || "-", false)
+		.addField("Error", codeblock(errorText, "js"), false);
 }
 
 export function postInfo(embeds: MessageEmbed | MessageEmbed[]) {
@@ -127,4 +129,91 @@ export function executeWebhook(category: LogCategory, content: string | null, em
 		content,
 		embeds: embeds?.map(e => e.toJSON())
 	});
+}
+
+export function hasPermission(permissions: PermissionString | PermissionString[], member: CommandContext | GuildMember, channel?: Channel) {
+	// If DMChannel or not guild return true
+	if ((channel && !(channel instanceof GuildChannel)) || (member instanceof CommandContext && !member.isGuild())) return true;
+
+	if (!Array.isArray(permissions)) permissions = [permissions];
+
+	const target = member instanceof GuildMember ? member : member.member;
+	// If channel specified use channel permissions else guild permissions
+	const perms = channel ? channel.permissionsFor(target) : target.permissions;
+
+	if (!perms) return false;
+
+	return permissions.every(perm => perms.has(perm));
+}
+
+/**
+ * Converts object to string.
+ * If this string is larger than the provided limit, it is uploaded to hastebin, or attached as file if hastebin errors.
+ * Otherwise it is wrapped into a codeblock.
+ * @param {(object|string)} rawContent The object to format
+ * @param {number} limit Upper limit
+ * @param {object} messageOptions MessageOptions object to append files to
+ * @param {string} altFilename Filename that should be given to this file
+ */
+export async function formatOutput(rawContent: unknown, limit: number, messageOptions: MessageOptions, altFilename: string) {
+	if (!rawContent) return null;
+
+	if (typeof rawContent !== "string") {
+		rawContent = inspect(rawContent);
+	}
+
+	let content = removeTokens(rawContent as string);
+
+	if (content.length > limit) {
+		try {
+			content = await haste(content);
+		} catch {
+			const attachment = Buffer.from(content, "utf-8");
+			messageOptions.files!.push({ name: altFilename, attachment });
+			content = "Failed to create haste, so I attached the output as file instead. Consider changing hastebin mirror.";
+		}
+	} else {
+		content = `\`\`\`js\n${content}\n\`\`\``;
+	}
+
+	return content;
+}
+
+export async function timeExecution(code: () => Promise<any>) {
+	const stopwatch = new Stopwatch();
+
+	let result,
+		syncTime,
+		asyncTime,
+		isPromise,
+		success = true;
+
+	try {
+		result = code();
+		syncTime = stopwatch.toString();
+
+		// Is promise?
+		if (result instanceof Promise || (result && typeof (result as Promise<unknown>).then === "function")) {
+			isPromise = true;
+			stopwatch.restart();
+			result = await result;
+			asyncTime = stopwatch.toString();
+		}
+	} catch (err) {
+		if (!syncTime) syncTime = stopwatch.toString();
+		if (isPromise && !asyncTime) asyncTime = stopwatch.toString();
+		result = err;
+
+		success = false;
+	}
+
+	stopwatch.stop();
+
+	return {
+		result,
+		success,
+		syncTime,
+		asyncTime,
+		timeString: asyncTime ? `⏱ ${asyncTime}<${syncTime}>` : `⏱ ${syncTime}`
+	};
 }

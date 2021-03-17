@@ -6,8 +6,8 @@ tmp
 logs
 
 # Keep those tokens save
-*.env
 config.json
+*.env
 
 # Yarn better <3
 package-lock.json

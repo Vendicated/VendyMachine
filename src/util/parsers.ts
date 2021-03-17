@@ -1,5 +1,5 @@
 import { Client, Guild, TextChannel } from "discord.js";
-import { mentionRegex, snowflakeRegex, roleRegex } from "./regex";
+import { mentionRegex, roleRegex, snowflakeRegex } from "./regex";
 
 export function boolParser(str: string) {
 	if (["yes", "y", "true", "1", "on", "enable"].includes(str)) return true;

@@ -1,45 +1,56 @@
 import { Channel, Message, Role, User } from "discord.js";
 import validator from "validator";
-import { ICommand } from "./ICommand";
+import { boolParser, channelParser } from "../util/parsers";
 import { CommandContext } from "./CommandContext";
-import { channelParser, boolParser } from "../util/parsers";
+import { ICommand } from "./ICommand";
 
 export async function parseArgs(command: ICommand, ctx: CommandContext) {
 	const output: CommandArgs = {};
 
-	const requiredArgs = command.args.filter(arg => !hasFlag(arg, ArgumentFlags.Optional)).length;
+	const args = Object.entries(command.args);
+
+	const requiredArgs = args.filter(arg => !hasFlag(arg[1], ArgumentFlags.Optional)).length;
 	if (ctx.rawArgs.length < requiredArgs) throw new ArgumentError(`Too little arguments. Expected ${requiredArgs} but only received ${ctx.rawArgs.length}.`);
 
-	for (let i = 0, arg = command.args[i]; i < command.args.length; i++) {
+	for (let i = 0; i < args.length; ++i) {
+		const [key, arg] = args[i];
+		const { type, choices, explanation } = arg as Argument;
+
+		let raw: string;
+
+		if (i === args.length - 1 && hasFlag(arg, ArgumentFlags.Remainder)) {
+			raw = ctx.rawArgs.slice(i).join(" ");
+		} else {
+			raw = ctx.rawArgs[i];
+		}
+
 		const add = async (parser: (str: string) => Arg | null | Promise<Arg | null>) => {
-			let raw;
-			// Remainder
-			if (i === command.args.length - 1 && hasFlag(arg, ArgumentFlags.Remainder)) {
-				raw = ctx.rawArgs.slice(i).join(" ");
-			} else {
-				raw = ctx.rawArgs[i];
-			}
 			try {
 				if (raw === null || raw === undefined || raw === "") {
-					if (!hasFlag(arg, ArgumentFlags.Optional))
-						throw new ArgumentError(
-							`Too little args. Please provide a ${arg.explanation || ArgumentTypes[(arg.type as unknown) as keyof typeof ArgumentTypes]}`
-						);
-					else return null;
+					if (!hasFlag(arg, ArgumentFlags.Optional)) throw new ArgumentError(`Too little args. Please provide a ${type}`);
+					else return (arg as Argument).default ?? null;
 				}
 
-				const result = await parser(raw);
+				let result = await parser(raw);
 				if (result === null || result === undefined || (typeof result === "number" && isNaN(result))) throw void 0;
-				if (arg.type === ArgumentTypes.String && result === "") throw new ArgumentError(`This command requires text input!`);
 
-				output[arg.key] = result;
+				if (type === ArgumentTypes.String && result === "") throw new ArgumentError(`This command requires text input!`);
+
+				if (choices?.length) {
+					if (typeof result === "string") result = result.toLowerCase();
+
+					if (!choices.includes(result)) throw new ArgumentError(`Expected one of \`${choices.join(",")}\`, received \`${result}\``);
+				}
+
+				output[key] = result;
 			} catch (err: unknown) {
 				if (err instanceof ArgumentError) throw err;
 
-				throw new ArgumentError(`Wrong argument \`${raw}\`. Expected ${arg.explanation || arg.type}.`);
+				throw new ArgumentError(`Wrong argument \`${raw}\`. Expected ${explanation || type}.`);
 			}
 		};
-		switch (arg.type) {
+
+		switch (type) {
 			case ArgumentTypes.String:
 				await add(str => str);
 				break;
@@ -90,8 +101,7 @@ export enum ArgumentFlags {
 	Optional = 0b00000010
 }
 
-interface Argument<T = unknown> {
-	key: string;
+export interface Argument<T = unknown> {
 	default?: T;
 	explanation?: string;
 	type: ArgumentTypes;
@@ -99,7 +109,7 @@ interface Argument<T = unknown> {
 	choices?: T[];
 }
 
-export type Arguments = Argument[];
+export type Arguments = Record<string, Argument | Argument["type"]>;
 
 type Arg = string | number | boolean | Channel | Message | User | Role;
 export type CommandArgs = Record<string, Arg>;
@@ -111,6 +121,7 @@ export class ArgumentError extends Error {
 	}
 }
 
-function hasFlag(arg: Argument, flag: ArgumentFlags) {
+function hasFlag(arg: Argument | Argument["type"], flag: ArgumentFlags) {
+	if (typeof arg === "string") return false;
 	return typeof arg.flags === "number" && Boolean(arg.flags & flag);
 }

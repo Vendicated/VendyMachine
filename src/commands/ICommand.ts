@@ -1,5 +1,5 @@
 import { PermissionString } from "discord.js";
-import { Arguments, CommandArgs } from "./CommandArguments";
+import { Arguments } from "./CommandArguments";
 import { CommandContext } from "./CommandContext";
 
 export interface IBaseCommand {
@@ -10,7 +10,7 @@ export interface IBaseCommand {
 	userPermissions: PermissionString[];
 	clientPermissions: PermissionString[];
 	args: Arguments;
-	callback(ctx: CommandContext, args: CommandArgs): Promise<void>;
+	callback(ctx: CommandContext, args: Record<string, any>): Promise<void>;
 }
 
 export interface ICommand extends IBaseCommand {
