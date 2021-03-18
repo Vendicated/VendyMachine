@@ -90,7 +90,7 @@ export class Client extends BaseClient {
 				"Estimated Users",
 				this.guilds.cache.reduce((x, y) => x + y.memberCount, 0)
 			)
-			.addField("Command loaded", this.commands.size);
+			.addField("Commands loaded", this.commands.size);
 
 		void postInfo(embed);
 		printBox(embed.title!, ...embed.fields.map(field => `${field.name}: ${field.value}`));
