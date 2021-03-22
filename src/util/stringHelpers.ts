@@ -1,4 +1,6 @@
-import { Util } from "discord.js";
+import { MessageOptions, Util } from "discord.js";
+import { inspect } from "util";
+import { haste } from "./helpers";
 
 export function codeblock(content: string, language?: string) {
 	return `\`\`\`${language ?? ""}\n${Util.cleanCodeBlockContent(content)}\`\`\``;
@@ -74,4 +76,50 @@ export function removeSuffix(str: string, prefix: string | string[]) {
 	}
 
 	return str;
+}
+
+/**
+ * Converts object to string.
+ * If this string is larger than the provided limit, it is uploaded to hastebin, or attached as file if hastebin errors.
+ * Otherwise it is wrapped into a codeblock.
+ * @param {(object|string)} rawContent The object to format
+ * @param {number} limit Upper limit
+ * @param {object} messageOptions MessageOptions object to append files to
+ * @param {string} altFilename Filename that should be given to this file
+ */
+export async function formatOutput(rawContent: unknown, limit: number, messageOptions?: MessageOptions, altFilename?: string) {
+	if (!rawContent) return null;
+
+	if (typeof rawContent !== "string") {
+		rawContent = inspect(rawContent);
+	}
+
+	let content = removeTokens(rawContent as string);
+
+	if (content.length > limit) {
+		try {
+			content = await haste(content);
+		} catch {
+			if (messageOptions && altFilename) {
+				const attachment = Buffer.from(content, "utf-8");
+				messageOptions.files!.push({ name: altFilename, attachment });
+				content = "Failed to create haste, so I attached the output as file instead.";
+			} else {
+				content = "Content was too long and I failed to create a haste";
+			}
+		}
+	} else {
+		content = `\`\`\`js\n${content}\n\`\`\``;
+	}
+
+	return content;
+}
+
+/**
+ * Prints to console with a nice box
+ * @param lines
+ */
+export function printBox(...lines: string[]) {
+	const divider = "-".repeat(longestLineLength(...lines));
+	for (const line of [divider, ...lines, divider]) console.log(line);
 }

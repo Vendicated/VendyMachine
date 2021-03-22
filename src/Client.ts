@@ -1,3 +1,5 @@
+import { hasPermission, postInfo } from "@util/helpers";
+import { printBox, toTitleCase } from "@util/stringHelpers";
 import { stripIndents } from "common-tags";
 import { Client as BaseClient, ClientApplication, ClientEvents as BaseClientEvents, ClientUser, Collection, GuildMember, Team, User } from "discord.js";
 import { CommandContext } from "./commands/CommandContext";
@@ -5,8 +7,6 @@ import { CommandManager } from "./commands/CommandManager";
 import { Database } from "./db";
 import { InlineEmbed } from "./Embed";
 import { IMessage } from "./IMessage";
-import { hasPermission, postInfo, printBox } from "./util/helpers";
-import { toTitleCase } from "./util/stringHelpers";
 
 interface ClientEvents extends BaseClientEvents {
 	message: [IMessage];
@@ -127,9 +127,7 @@ export class Client extends BaseClient {
 			if (clientPermissions) {
 				if (!hasPermission(clientPermissions, ctx.me, ctx.channel)) {
 					return ctx.reply(
-						`Sorry, I can't do that. Please grant me the following permissions and try again: \`${clientPermissions
-							.map(s => toTitleCase(s))
-							.join("`, `")}\``
+						`Sorry, I can't do that. Please grant me the following permissions and try again: \`${clientPermissions.map(s => toTitleCase(s)).join("`, `")}\``
 					);
 				}
 				if (!hasPermission(userPermissions, ctx.member, ctx.channel)) {

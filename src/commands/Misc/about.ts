@@ -1,8 +1,8 @@
+import { PACKAGE_JSON } from "@util/constants";
+import { msToHumanReadable } from "@util/stringHelpers";
 import { stripIndents } from "common-tags";
 import { PermissionString, User, version } from "discord.js";
 import { InlineEmbed } from "../../Embed";
-import { PACKAGE_JSON } from "../../util/constants";
-import { msToHumanReadable } from "../../util/stringHelpers";
 import { Arguments } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";

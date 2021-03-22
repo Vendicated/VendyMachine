@@ -12,7 +12,7 @@ export class Database {
 	public async init() {
 		this.connection = await createConnection({
 			type: "postgres",
-			host: "postgres",
+			host: process.env.POSTGRES_HOST,
 			database: process.env.POSTGRES_DB,
 			username: process.env.POSTGRES_USER,
 			password: process.env.POSTGRES_PASSWORD,

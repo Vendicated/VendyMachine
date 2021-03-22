@@ -1,5 +1,5 @@
+import { Colours } from "@util/constants";
 import { MessageEmbed } from "discord.js";
-import { Colours } from "./util/constants";
 
 export class Embed extends MessageEmbed {
 	public constructor(level: "SUCCESS" | "ERROR" | "INFO") {

@@ -1,6 +1,6 @@
+import { Emojis } from "@util/constants";
 import { PermissionString, Util } from "discord.js";
 import { Embed } from "../../Embed";
-import { Emojis } from "../../util/constants";
 import { Arguments } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";

@@ -1,6 +1,6 @@
+import { boolParser, channelParser } from "@util/parsers";
 import { Channel, Message, Role, User } from "discord.js";
 import validator from "validator";
-import { boolParser, channelParser } from "../util/parsers";
 import { CommandContext } from "./CommandContext";
 import { ICommand } from "./ICommand";
 

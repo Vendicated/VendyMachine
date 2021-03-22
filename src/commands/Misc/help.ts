@@ -1,12 +1,12 @@
+import { toTitleCase } from "@util/stringHelpers";
 import { PermissionString } from "discord.js";
 import { Embed } from "../../Embed";
-import { toTitleCase } from "../../util/stringHelpers";
 import { ArgumentFlags, Arguments, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
 export class Command implements IBaseCommand {
-	public description = "You are here :3";
+	public description = "Get help on command usage";
 	public aliases = ["h", "command"];
 	public ownerOnly = false;
 	public guildOnly = false;

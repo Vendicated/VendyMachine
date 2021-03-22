@@ -1,7 +1,7 @@
+import { timeExecution } from "@util/helpers";
+import { codeblock, formatOutput, removePrefix } from "@util/stringHelpers";
 import { MessageOptions, PermissionString } from "discord.js";
 import { Embed } from "../../Embed";
-import { formatOutput, timeExecution } from "../../util/helpers";
-import { codeblock, removePrefix } from "../../util/stringHelpers";
 import { ArgumentFlags, Arguments, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";

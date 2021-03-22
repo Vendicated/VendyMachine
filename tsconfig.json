@@ -2,6 +2,7 @@
 	"compileOnSave": true,
 	"compilerOptions": {
 		"allowSyntheticDefaultImports": true,
+		"baseUrl": "./src",
 		"declaration": false,
 		"emitDecoratorMetadata": true,
 		"esModuleInterop": true,
@@ -20,6 +21,9 @@
 		"skipLibCheck": true,
 		"strict": true,
 		"strictPropertyInitialization": false, // typeorm fields are not initialised, so disable this rule
-		"target": "ESNEXT"
+		"target": "ESNEXT",
+		"paths": {
+			"@util/*": ["util/*"]
+		}
 	}
 }

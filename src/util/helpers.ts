@@ -1,11 +1,10 @@
 import { Stopwatch } from "@klasa/stopwatch";
-import { Channel, GuildChannel, GuildMember, MessageEmbed, MessageOptions, PermissionString } from "discord.js";
+import { Channel, GuildChannel, GuildMember, MessageEmbed, PermissionString } from "discord.js";
 import nodeFetch, { RequestInfo, RequestInit } from "node-fetch";
-import { inspect } from "util";
 import { CommandContext } from "../commands/CommandContext";
 import { InlineEmbed } from "../Embed";
 import { Emojis, hastebinMirror } from "./constants";
-import { codeblock, longestLineLength, removeTokens, trim } from "./stringHelpers";
+import { codeblock, printBox, trim } from "./stringHelpers";
 import { JsonObject, LogCategory } from "./types";
 
 /**
@@ -80,15 +79,6 @@ export async function haste(content: string) {
 	return `${hastebinMirror}/${key}`;
 }
 
-/**
- * Prints to console with a nice box
- * @param lines
- */
-export function printBox(...lines: string[]) {
-	const divider = "-".repeat(longestLineLength(...lines));
-	for (const line of [divider, ...lines, divider]) console.log(line);
-}
-
 export function errorToEmbed(error: Error, { msg, commandName, rawArgs, guild }: CommandContext) {
 	const errorText = trim((error as Error).stack || error.name || "Unknown error", 2000);
 
@@ -118,10 +108,13 @@ export function postError(embeds: MessageEmbed | MessageEmbed[]) {
 	return executeWebhook("ERROR", null, embeds);
 }
 
-export function executeWebhook(category: LogCategory, content: string | null, embeds?: MessageEmbed[] | MessageEmbed) {
+export function executeWebhook(url: LogCategory, content: string | null, embeds?: MessageEmbed[] | MessageEmbed): Promise<JsonObject<unknown>>;
+export function executeWebhook(url: string, content: string | null, embeds?: MessageEmbed[] | MessageEmbed): Promise<JsonObject<unknown>>;
+export function executeWebhook(url: string, content: string | null, embeds?: MessageEmbed[] | MessageEmbed) {
 	if (!content && !embeds?.length) throw new Error("Invalid webhook body. Neither content nor embeds are specified.");
 
-	const url = category === "ERROR" ? process.env.ERROR_WEBHOOK : process.env.INFO_WEBHOOK;
+	if (url === "ERROR") url = process.env.ERROR_WEBHOOK;
+	else if (url === "INFO") url = process.env.INFO_WEBHOOK;
 
 	if (embeds && !Array.isArray(embeds)) embeds = [embeds];
 
@@ -144,39 +137,6 @@ export function hasPermission(permissions: PermissionString | PermissionString[]
 	if (!perms) return false;
 
 	return permissions.every(perm => perms.has(perm));
-}
-
-/**
- * Converts object to string.
- * If this string is larger than the provided limit, it is uploaded to hastebin, or attached as file if hastebin errors.
- * Otherwise it is wrapped into a codeblock.
- * @param {(object|string)} rawContent The object to format
- * @param {number} limit Upper limit
- * @param {object} messageOptions MessageOptions object to append files to
- * @param {string} altFilename Filename that should be given to this file
- */
-export async function formatOutput(rawContent: unknown, limit: number, messageOptions: MessageOptions, altFilename: string) {
-	if (!rawContent) return null;
-
-	if (typeof rawContent !== "string") {
-		rawContent = inspect(rawContent);
-	}
-
-	let content = removeTokens(rawContent as string);
-
-	if (content.length > limit) {
-		try {
-			content = await haste(content);
-		} catch {
-			const attachment = Buffer.from(content, "utf-8");
-			messageOptions.files!.push({ name: altFilename, attachment });
-			content = "Failed to create haste, so I attached the output as file instead. Consider changing hastebin mirror.";
-		}
-	} else {
-		content = `\`\`\`js\n${content}\n\`\`\``;
-	}
-
-	return content;
 }
 
 export async function timeExecution(code: () => Promise<any>) {

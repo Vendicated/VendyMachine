@@ -1,4 +1,4 @@
-import { codeblock } from "../../util/stringHelpers";
+import { codeblock } from "@util/stringHelpers";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 

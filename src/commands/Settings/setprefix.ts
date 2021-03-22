@@ -1,7 +1,7 @@
+import { hasPermission } from "@util/helpers";
 import { PermissionString } from "discord.js";
 import { GuildSettings } from "../../db/Entities/GuildSettings";
 import { UserSettings } from "../../db/Entities/User";
-import { hasPermission } from "../../util/helpers";
 import { Arguments, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
