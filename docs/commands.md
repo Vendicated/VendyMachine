@@ -2,16 +2,13 @@
 
 You can find a list of all commands below. For more info, simply click on the desired command!
 
-- [EmoteBot Command List](#emotebot-command-list)
-	- [Misc](#misc)
-			- [about](#about)
-			- [help](#help)
-					- [Arguments](#arguments)
-			- [ping](#ping)
-	- [Settings](#settings)
-			- [prefixes](#prefixes)
-			- [setprefix](#setprefix)
-					- [Arguments](#arguments-1)
+- [Misc](#Misc)
+	- [about](#about)
+	- [help](#help)
+	- [ping](#ping)
+- [Settings](#Settings)
+	- [prefixes](#prefixes)
+	- [setprefix](#setprefix)
 
 
 ___
@@ -48,6 +45,8 @@ Required permissions: -
 
 Ping!
 
+
+
 ___
 
 ## Settings
@@ -80,6 +79,6 @@ Change prefix
 
 ___
 
-This markdown file was [auto generated](../scripts/gencmdmd.js) based on [commit c8817e7
-](https://github.com/Vendicated/EmoteBot/commit/c8817e7be903d40302962afa81b914af1861a2d7
+This markdown file was [auto generated](../scripts/gencmdmd.js) based on [commit 36205a1
+](https://github.com/Vendicated/EmoteBot/commit/36205a1da70cb294c4c441a521238c4839d7da5b
 )
