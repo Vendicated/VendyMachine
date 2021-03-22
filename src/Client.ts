@@ -90,7 +90,7 @@ export class Client extends BaseClient {
 				"Estimated Users",
 				this.guilds.cache.reduce((x, y) => x + y.memberCount, 0)
 			)
-			.addField("Command loaded", this.commands.size);
+			.addField("Commands loaded", this.commands.size); // We use the plural here because we use the plural of the above in the webhook! This is better than the way we were doing it the last time because we don't ever load only one command! I hope this comment helps explain this change!
 
 		void postInfo(embed);
 		printBox(embed.title!, ...embed.fields.map(field => `${field.name}: ${field.value}`));
