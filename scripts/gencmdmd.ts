@@ -30,8 +30,8 @@ void (async () => {
 	const root = path.join(__dirname, "..");
 	const assetDir = path.join(root, "assets");
 
-	const commit = execSync("git rev-parse HEAD").toString("utf-8");
-	const commitShort = execSync("git rev-parse --short HEAD").toString("utf-8");
+	const commit = execSync("git rev-parse HEAD").toString("utf-8").trim();
+	const commitShort = execSync("git rev-parse --short HEAD").toString("utf-8").trim();
 
 	if (!fs.existsSync(assetDir)) {
 		console.info("doc dir not found. Automatically creating...");
@@ -58,18 +58,19 @@ void (async () => {
 			markdown += `\t- [${name}](#${name})\n`;
 		}
 	}
+	markdown += "\n";
 
 	for (const [category, commands] of Object.entries(categories)) {
-		markdown += "\n\n___\n\n";
+		markdown += "___\n\n";
 		markdown += `## ${category}\n\n`;
 		for (const cmd of commands) {
-			markdown += `#### ${cmd.name}\n\n`;
-			markdown += `*${cmd.description}*\n\n`;
-			markdown += `Guild only: ${cmd.guildOnly ? "Yes" : "No"}\n\n`;
-			markdown += `Required permissions: ${cmd.userPermissions.length ? `\`${toTitleCase(cmd.userPermissions).join("`, `")}\`` : "-"}\n\n`;
+			markdown += `### ${cmd.name}\n\n`;
+			markdown += `*${cmd.description || "No Description"}*\n\n`;
+			markdown += `- Guild only: ${cmd.guildOnly ? "Yes" : "No"}\n`;
+			markdown += `- Required permissions: ${cmd.userPermissions.length ? `\`${toTitleCase(cmd.userPermissions).join("`, `")}\`` : "-"}\n\n`;
 
 			if (Object.keys(cmd.args).length) {
-				markdown += "\n\n###### Arguments\n\n";
+				markdown += "<details>\n\t<summary>Arguments</summary>\n\n";
 				markdown += table(
 					[
 						["Required", "Name", "Type", "Description", "Choices", "Default"],
@@ -88,12 +89,12 @@ void (async () => {
 					],
 					{ align: "center" }
 				);
+				markdown += "\n\n</details>\n\n";
 			}
-			markdown += "\n\n";
 		}
 	}
 
-	markdown += "\n\n___\n\n";
+	markdown += "___\n\n";
 	markdown += `This markdown file was [auto generated](../scripts/gencmdmd.ts) based on [commit ${commitShort}](https://github.com/Vendicated/EmoteBot/commit/${commit})`;
 
 	fs.writeFileSync(path.join(assetDir, "commands.md"), markdown, "utf8");

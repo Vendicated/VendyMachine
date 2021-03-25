@@ -3,126 +3,132 @@
 You can find a list of all commands below. For more info, simply click on the desired command!
 
 - [Emotes](#Emotes)
-  - [download](#download)
-  - [emoji](#emoji)
-  - [emojiinfo](#emojiinfo)
+	- [download](#download)
+	- [emoji](#emoji)
+	- [emojiinfo](#emojiinfo)
 - [Misc](#Misc)
-  - [about](#about)
-  - [help](#help)
-  - [ping](#ping)
+	- [about](#about)
+	- [help](#help)
+	- [ping](#ping)
 - [Settings](#Settings)
-  - [prefixes](#prefixes)
-  - [setprefix](#setprefix)
+	- [prefixes](#prefixes)
+	- [setprefix](#setprefix)
 
----
+___
 
 ## Emotes
 
-#### download
+### download
 
-_Export emotes as zip_
+*Export emotes as zip*
 
-Guild only: No
+- Guild only: No
+- Required permissions: -
 
-Required permissions: -
-
-###### Arguments
+<details>
+	<summary>Arguments</summary>
 
 | Required |  Name  | Type |                          Description                          | Choices | Default |
 | :------: | :----: | :--: | :-----------------------------------------------------------: | :-----: | :-----: |
-|    ❌    | emotes | text | One or more emotes to download. Defaults to all server emotes |    -    |    -    |
+|     ❌    | emotes | text | One or more emotes to download. Defaults to all server emotes |    -    |    -    |
 
-#### emoji
+</details>
 
-_Get the url of one or more custom emotes_
+### emoji
 
-Guild only: No
+*Get the url of one or more custom emotes*
 
-Required permissions: -
+- Guild only: No
+- Required permissions: -
 
-###### Arguments
+<details>
+	<summary>Arguments</summary>
 
-| Required | Name  | Type |        Description        | Choices | Default |
+| Required |  Name | Type |        Description        | Choices | Default |
 | :------: | :---: | :--: | :-----------------------: | :-----: | :-----: |
-|    ✅    | input | text | One or more custom emotes |    -    |    -    |
+|     ✅    | input | text | One or more custom emotes |    -    |    -    |
 
-#### emojiinfo
+</details>
 
-_Get Info on an emoji/emote_
+### emojiinfo
 
-Guild only: No
+*Get Info on an emoji/emote*
 
-Required permissions: -
+- Guild only: No
+- Required permissions: -
 
-###### Arguments
+<details>
+	<summary>Arguments</summary>
 
-| Required | Name  | Type |       Description        | Choices | Default |
+| Required |  Name | Type |        Description       | Choices | Default |
 | :------: | :---: | :--: | :----------------------: | :-----: | :-----: |
-|    ✅    | input | text | An emoji or custom emote |    -    |    -    |
+|     ✅    | input | text | An emoji or custom emote |    -    |    -    |
 
----
+</details>
+
+___
 
 ## Misc
 
-#### about
+### about
 
-_Find out more about me_
+*Find out more about me*
 
-Guild only: No
+- Guild only: No
+- Required permissions: -
 
-Required permissions: -
+### help
 
-#### help
+*Get help on command usage*
 
-_Get help on command usage_
+- Guild only: No
+- Required permissions: -
 
-Guild only: No
+<details>
+	<summary>Arguments</summary>
 
-Required permissions: -
-
-###### Arguments
-
-| Required | Name | Type |        Description         | Choices | Default |
+| Required | Name | Type |         Description        | Choices | Default |
 | :------: | :--: | :--: | :------------------------: | :-----: | :-----: |
-|    ❌    | name | text | command / command category |    -    |    -    |
+|     ❌    | name | text | command / command category |    -    |    -    |
 
-#### ping
+</details>
 
-_Ping!_
+### ping
 
-Guild only: No
+*Ping!*
 
-Required permissions: -
+- Guild only: No
+- Required permissions: -
 
----
+___
 
 ## Settings
 
-#### prefixes
+### prefixes
 
-_Get a list of available prefixes_
+*Get a list of available prefixes*
 
-Guild only: No
+- Guild only: No
+- Required permissions: -
 
-Required permissions: -
+### setprefix
 
-#### setprefix
+*Change prefix*
 
-_Change prefix_
+- Guild only: No
+- Required permissions: -
 
-Guild only: No
+<details>
+	<summary>Arguments</summary>
 
-Required permissions: -
-
-###### Arguments
-
-| Required |  Name  | Type |                            Description                             |     Choices      | Default |
+| Required |  Name  | Type |                             Description                            |      Choices     | Default |
 | :------: | :----: | :--: | :----------------------------------------------------------------: | :--------------: | :-----: |
-|    ✅    | scope  | text | whether this prefix should be set on a server or only for yourself |   server, user   |    -    |
-|    ✅    | action | text |                                 -                                  | add, remove, set |    -    |
-|    ✅    | prefix | text |                           the new prefix                           |        -         |   >>    |
+|     ✅    |  scope | text | whether this prefix should be set on a server or only for yourself |   server, user   |    -    |
+|     ✅    | action | text |                                  -                                 | add, remove, set |    -    |
+|     ✅    | prefix | text |                           the new prefix                           |         -        |    -    |
 
----
+</details>
 
-This markdown file was [auto generated](../scripts/gencmdmd.ts) based on [commit d4cc579
-](https://github.com/Vendicated/EmoteBot/commit/d4cc57997d70d04e7f7a57de457cf512adac26e6)
+___
+
+This markdown file was [auto generated](../scripts/gencmdmd.ts) based on [commit 2747de0](https://github.com/Vendicated/EmoteBot/commit/2747de073f46605e0d09646af0758d7419d57e22)
