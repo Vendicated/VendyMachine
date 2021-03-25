@@ -1,3 +1,20 @@
+/** This file is part of Emotely, a Discord Bot providing all sorts of emote related commands.
+ * Copyright (C) 2021 Vendicated
+ *
+ * Emotely is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Emotely is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 import path from "path";
 import "reflect-metadata"; // global.Reflect polyfill for typeorm decorators
 import { Connection, createConnection, EntityTarget } from "typeorm";
@@ -17,7 +34,7 @@ export class Database {
 			username: process.env.POSTGRES_USER,
 			password: process.env.POSTGRES_PASSWORD,
 			port: parseInt(process.env.POSTGRES_PORT),
-			entities: [path.join(__dirname, "Entities", "*.js")],
+			entities: [path.join(__dirname, "Entities", "*.[jt]s")],
 			synchronize: true,
 			logging: false,
 			cache: true
@@ -48,11 +65,9 @@ export class Database {
 
 	public async getPrefixes(msg: IMessage) {
 		const userPrefixes = (await this.getById(UserSettings, msg.author.id).then(s => s?.prefixes)) ?? [];
-		const guildPrefixes = (msg.guild ? await this.getById(GuildSettings, msg.guild.id).then(s => s?.prefixes) : null) ?? [];
+		const guildPrefixes = (msg.guild ? await this.getById(GuildSettings, msg.guild.id).then(s => s?.prefixes) : null) ?? [process.env.DEFAULT_PREFIX];
 
 		const all = userPrefixes.concat(guildPrefixes);
-
-		if (!all.length) all.push(process.env.DEFAULT_PREFIX);
 
 		return { all, guild: guildPrefixes, user: userPrefixes };
 	}

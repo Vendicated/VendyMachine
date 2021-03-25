@@ -1,3 +1,20 @@
+/** This file is part of Emotely, a Discord Bot providing all sorts of emote related commands.
+ * Copyright (C) 2021 Vendicated
+ *
+ * Emotely is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Emotely is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 import { boolParser, channelParser } from "@util/parsers";
 import { Channel, Message, Role, User } from "discord.js";
 import validator from "validator";
@@ -9,16 +26,16 @@ export async function parseArgs(command: ICommand, ctx: CommandContext) {
 
 	const args = Object.entries(command.args);
 
-	const requiredArgs = args.filter(arg => !hasFlag(arg[1], ArgumentFlags.Optional)).length;
+	const requiredArgs = args.filter(([, arg]) => typeof arg === "string" || !arg.optional).length;
 	if (ctx.rawArgs.length < requiredArgs) throw new ArgumentError(`Too little arguments. Expected ${requiredArgs} but only received ${ctx.rawArgs.length}.`);
 
 	for (let i = 0; i < args.length; ++i) {
 		const [key, arg] = args[i];
-		const { type, choices, explanation } = arg as Argument;
+		const { type, choices, description, optional, remainder } = arg as Argument;
 
 		let raw: string;
 
-		if (i === args.length - 1 && hasFlag(arg, ArgumentFlags.Remainder)) {
+		if (i === args.length - 1 && remainder) {
 			raw = ctx.rawArgs.slice(i).join(" ");
 		} else {
 			raw = ctx.rawArgs[i];
@@ -27,7 +44,7 @@ export async function parseArgs(command: ICommand, ctx: CommandContext) {
 		const add = async (parser: (str: string) => Arg | null | Promise<Arg | null>) => {
 			try {
 				if (raw === null || raw === undefined || raw === "") {
-					if (!hasFlag(arg, ArgumentFlags.Optional)) throw new ArgumentError(`Too little args. Please provide a ${type}`);
+					if (!optional) throw new ArgumentError(`Too little args. Please provide a ${type}`);
 					else return (arg as Argument).default ?? null;
 				}
 
@@ -46,7 +63,7 @@ export async function parseArgs(command: ICommand, ctx: CommandContext) {
 			} catch (err: unknown) {
 				if (err instanceof ArgumentError) throw err;
 
-				throw new ArgumentError(`Wrong argument \`${raw}\`. Expected ${explanation || type}.`);
+				throw new ArgumentError(`Wrong argument \`${raw}\`. Expected ${description || type}.`);
 			}
 		};
 
@@ -96,16 +113,12 @@ export enum ArgumentTypes {
 	Url = "url"
 }
 
-export enum ArgumentFlags {
-	Remainder = 0b00000001,
-	Optional = 0b00000010
-}
-
 export interface Argument<T = unknown> {
 	default?: T;
-	explanation?: string;
+	description?: string;
 	type: ArgumentTypes;
-	flags?: number;
+	optional?: boolean;
+	remainder?: boolean;
 	choices?: T[];
 }
 
@@ -119,9 +132,4 @@ export class ArgumentError extends Error {
 		super(message);
 		this.name = "ArgumentError";
 	}
-}
-
-function hasFlag(arg: Argument | Argument["type"], flag: ArgumentFlags) {
-	if (typeof arg === "string") return false;
-	return typeof arg.flags === "number" && Boolean(arg.flags & flag);
 }

@@ -1,5 +1,25 @@
+/** This file is part of Emotely, a Discord Bot providing all sorts of emote related commands.
+ * Copyright (C) 2021 Vendicated
+ *
+ * Emotely is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Emotely is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 import { Client, Guild, TextChannel } from "discord.js";
-import { mentionRegex, roleRegex, snowflakeRegex } from "./regex";
+import emojiUnicode from "emoji-unicode";
+import { emojiMap } from "./constants";
+import { emojiRegex, emoteRegex, mentionRegex, roleRegex, snowflakeRegex } from "./regex";
+import { ParsedEmoji, ParsedEmote } from "./types";
 
 export function boolParser(str: string) {
 	if (["yes", "y", "true", "1", "on", "enable"].includes(str)) return true;
@@ -49,4 +69,49 @@ export async function roleParser(guild: Guild, str: string) {
 	} catch {
 		return null;
 	}
+}
+
+export function emoteParser(str: string) {
+	const regex = emoteRegex();
+	const result: ParsedEmote[] = [];
+	let match: RegExpExecArray | null = null;
+
+	while ((match = regex.exec(str)) !== null) {
+		const emoji = {
+			animated: Boolean(match[1]),
+			name: match[2],
+			id: match[3],
+			url: function () {
+				return `https://cdn.discordapp.com/emojis/${this.id}.${this.animated ? "gif" : "png"}`;
+			}
+		};
+		result.push(emoji);
+	}
+	return result;
+}
+
+export function emojiParser(str: string): ParsedEmoji[] {
+	const regex = emojiRegex();
+	const result: ParsedEmoji[] = [];
+	let match: RegExpExecArray | null = null;
+
+	while ((match = regex.exec(str)) !== null) {
+		const [raw] = match;
+		const definition = emojiMap[raw as keyof typeof emojiMap] as typeof emojiMap["\uD83D\uDE00"];
+		if (!definition) continue;
+
+		const { a: assetName, b: name } = definition;
+		const emoji = {
+			raw,
+			name,
+			url() {
+				return `https://discord.com/assets/${assetName}.svg`;
+			},
+			unicode() {
+				return `\\u${emojiUnicode(this.raw).toUpperCase()}`;
+			}
+		};
+		result.push(emoji);
+	}
+	return result;
 }

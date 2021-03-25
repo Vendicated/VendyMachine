@@ -8,7 +8,7 @@ import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
 export class Command implements IBaseCommand {
-	public description = "";
+	public description = "Find out more about me";
 	public aliases = [];
 	public ownerOnly = false;
 	public guildOnly = false;

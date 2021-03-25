@@ -1,7 +1,7 @@
 import { toTitleCase } from "@util/stringHelpers";
 import { PermissionString } from "discord.js";
 import { Embed } from "../../Embed";
-import { ArgumentFlags, Arguments, ArgumentTypes } from "../CommandArguments";
+import { Arguments, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -12,21 +12,21 @@ export class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: Arguments = { name: { type: ArgumentTypes.String, explanation: "command / command category", flags: ArgumentFlags.Optional } };
+	public args: Arguments = { name: { type: ArgumentTypes.String, description: "command / command category", optional: true } };
 
-	public async callback(ctx: CommandContext, { name }: Args): Promise<void> {
+	public async callback(ctx: CommandContext, { name }: Args): Promise<unknown> {
 		const { client, prefix } = ctx;
 
 		const isOwner = client.isOwner(ctx);
 		if (!name) return await this.mainMenu(ctx, isOwner);
 
 		const commandEmbed = client.commands.formatHelpEmbed(name, prefix, isOwner);
-		if (commandEmbed) return void (await ctx.reply(undefined, commandEmbed));
+		if (commandEmbed) return ctx.reply(undefined, commandEmbed);
 
 		if (client.commands.some(cmd => cmd.category === name.toLowerCase() && (isOwner ? true : cmd.ownerOnly === false)))
 			return await this.categoryHelp(ctx, name);
 
-		return void ctx.reply(`Sorry, no command or category with name ${name} found.`);
+		return ctx.reply(`Sorry, no command or category with name ${name} found.`);
 	}
 
 	public async mainMenu(ctx: CommandContext, isOwner: boolean) {

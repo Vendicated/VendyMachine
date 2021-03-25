@@ -4,7 +4,7 @@ import * as regex from "@util/regex";
 import * as stringHelpers from "@util/stringHelpers";
 import { MessageOptions } from "discord.js";
 import { Embed } from "../../Embed";
-import { ArgumentFlags, Arguments, ArgumentTypes } from "../CommandArguments";
+import { Arguments, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -17,7 +17,7 @@ while (false) {
 
 export class Command implements IBaseCommand {
 	public description = "Evaluate js code";
-	public args: Arguments = { script: { type: ArgumentTypes.String, flags: ArgumentFlags.Remainder } };
+	public args: Arguments = { script: { type: ArgumentTypes.String, remainder: true } };
 	public aliases = [];
 	public ownerOnly = true;
 	public guildOnly = false;
@@ -55,12 +55,12 @@ export class Command implements IBaseCommand {
 
 		const messageOptions: MessageOptions = { disableMentions: "all", files: [] };
 
-		const consoleOutput = await stringHelpers.formatOutput(console._formatLines(), 1000, messageOptions, "EvalConsoleOutput.txt");
+		const consoleOutput = await stringHelpers.formatOutput(console._formatLines(), 1000, "js", messageOptions, "EvalConsoleOutput.txt");
 
 		messageOptions.embed = new Embed(success ? "SUCCESS" : "ERROR")
 			.setAuthor("Eval", client.user.displayAvatarURL())
-			.addField("Result", await stringHelpers.formatOutput(script, 1000, messageOptions, "EvalInput.txt"))
-			.addField("Result", await stringHelpers.formatOutput(result, 1000, messageOptions, "EvalOutput.txt"))
+			.addField("Result", await stringHelpers.formatOutput(script, 1000, "js", messageOptions, "EvalInput.txt"))
+			.addField("Result", await stringHelpers.formatOutput(result, 1000, "js", messageOptions, "EvalOutput.txt"))
 			.setFooter(timeString);
 
 		if (consoleOutput) messageOptions.embed.addField("Console", consoleOutput);

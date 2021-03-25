@@ -1,10 +1,27 @@
+/** This file is part of Emotely, a Discord Bot providing all sorts of emote related commands.
+ * Copyright (C) 2021 Vendicated
+ *
+ * Emotely is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Emotely is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 import { Stopwatch } from "@klasa/stopwatch";
 import { Channel, GuildChannel, GuildMember, MessageEmbed, PermissionString } from "discord.js";
 import nodeFetch, { RequestInfo, RequestInit } from "node-fetch";
 import { CommandContext } from "../commands/CommandContext";
 import { InlineEmbed } from "../Embed";
 import { Emojis, hastebinMirror } from "./constants";
-import { codeblock, printBox, trim } from "./stringHelpers";
+import { codeblock, printBoxErr, removeTokens, trim } from "./stringHelpers";
 import { JsonObject, LogCategory } from "./types";
 
 /**
@@ -12,14 +29,11 @@ import { JsonObject, LogCategory } from "./types";
  * Will automatically detect content-type and return Image Buffer, Json Object or Plain Text
  * @param {string} url The url to fetch
  * @param {object} [options] Request Options
- * @param {number} [timeout=5] Request timeout, in seconds.
  */
-export async function fetch(url: RequestInfo, options?: RequestInit, timeout = 5) {
+export function fetch(url: RequestInfo, options?: RequestInit) {
 	return new Promise((resolve, reject) => {
-		setTimeout(() => reject(`Request took too long (${timeout}s)`), timeout * 1000);
-
 		nodeFetch(url, options)
-			.then(async res => {
+			.then(res => {
 				if (res.status > 299 || res.status < 200) reject(`${res.status.toString() as string}: ${res.statusText as string}`);
 
 				const contentType = res.headers.get("content-type") || "application/json";
@@ -36,18 +50,25 @@ export async function fetch(url: RequestInfo, options?: RequestInit, timeout = 5
 	});
 }
 
+export function fetchJson(url: RequestInfo, options?: RequestInit) {
+	return fetch(url, {
+		...options,
+		headers: {
+			...options?.headers,
+			"content-type": "application/json",
+			accept: "application/json"
+		}
+	}) as Promise<JsonObject>;
+}
+
 /**
  * @see fetch
  */
-export async function post(url: RequestInfo, options?: RequestInit, timeout = 5) {
-	return fetch(
-		url,
-		{
-			...options,
-			method: "post"
-		},
-		timeout
-	);
+export function post(url: RequestInfo, options?: RequestInit) {
+	return fetch(url, {
+		...options,
+		method: "post"
+	});
 }
 
 /**
@@ -56,19 +77,14 @@ export async function post(url: RequestInfo, options?: RequestInit, timeout = 5)
  * @param {string} url The url to fetch
  * @param {object} json The JSON data
  * @param {object} [options] Request Options
- * @param {number} [timeout=5] Request timeout, in seconds.
  */
-export async function postJson(url: RequestInfo, json: JsonObject, options?: RequestInit, timeout = 5): Promise<JsonObject> {
-	return fetch(
-		url,
-		{
-			...options,
-			method: "post",
-			body: JSON.stringify(json),
-			headers: { ...options?.headers, "content-type": "application/json", accept: "application/json" }
-		},
-		timeout
-	) as Promise<JsonObject>;
+export function postJson(url: RequestInfo, json: JsonObject, options?: RequestInit): Promise<JsonObject> {
+	return fetch(url, {
+		...options,
+		method: "post",
+		body: JSON.stringify(json),
+		headers: { ...options?.headers, "content-type": "application/json", accept: "application/json" }
+	}) as Promise<JsonObject>;
 }
 
 export async function haste(content: string) {
@@ -79,20 +95,28 @@ export async function haste(content: string) {
 	return `${hastebinMirror}/${key}`;
 }
 
-export function errorToEmbed(error: Error, { msg, commandName, rawArgs, guild }: CommandContext) {
-	const errorText = trim((error as Error).stack || error.name || "Unknown error", 2000);
+export function errorToEmbed(error: unknown, ctx: unknown) {
+	const errorString = typeof error === "string" ? error : (error as Error).stack || (error as Error).name || "Unknown error";
+	const errorText = trim(removeTokens(errorString), 2000);
 
-	return new InlineEmbed("ERROR")
+	const embed = new InlineEmbed("ERROR")
 		.setTitle("Oops!")
 		.setDescription(
-			`I'm sorry, an error occurred while executing this command. You can find the details below.\n\nPlease react with ${Emojis.CHECK_MARK} if it is okay for me to automatically report this to my Owner.`
-		)
-		.addField("Command", commandName)
-		.addField("User", `${msg.author.tag} (${msg.author.id})`)
-		.addField("Server", guild ? `${guild.name} (${guild.id})` : "-")
-		.addField("Message ID", msg.id)
-		.addField("Arguments", rawArgs.join(" ") || "-", false)
-		.addField("Error", codeblock(errorText, "js"), false);
+			`I'm sorry, an error occurred while executing this command. You may find the details below.\n\nPlease react with ${Emojis.CHECK_MARK} if it is okay for me to automatically report this to my Owner.`
+		);
+
+	if (ctx instanceof CommandContext) {
+		const { commandName, msg, guild, rawArgs } = ctx;
+		embed
+			.addField("Command", commandName)
+			.addField("User", `${msg.author.tag} (${msg.author.id})`)
+			.addField("Server", guild ? `${guild.name} (${guild.id})` : "-")
+			.addField("Message ID", msg.id)
+			.addField("Arguments", rawArgs.join(" ") || "-", false);
+	}
+	embed.addField("Error", codeblock(removeTokens(errorText), "js"), false);
+
+	return embed;
 }
 
 export function postInfo(embeds: MessageEmbed | MessageEmbed[]) {
@@ -102,7 +126,7 @@ export function postInfo(embeds: MessageEmbed | MessageEmbed[]) {
 export function postError(embeds: MessageEmbed | MessageEmbed[]) {
 	if (!Array.isArray(embeds)) embeds = [embeds.setDescription("")];
 	for (const embed of embeds) {
-		printBox("Error", ...embed.fields.map(field => `${field.name !== "Error" ? `${field.name}: ` : ""}${field.value.replace(/```[^\n]*/g, "")}`));
+		printBoxErr(...embed.fields.map(field => `${field.name !== "Error" ? `${field.name}: ` : ""}${field.value.replace(/```[^\n]*/g, "")}`));
 	}
 
 	return executeWebhook("ERROR", null, embeds);

@@ -14,22 +14,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
-// Use require as otherwise vscode auto sorts imports and puts @util import over this statement
-require("tsconfig-paths/register");
-
-import { errorToEmbed, postError } from "@util/helpers";
-import { Client } from "./Client";
-
-const client = new Client();
-
-void client.registerCommands().registerDefaultHandlers().connect();
-
-process.on("uncaughtException", err => {
-	const embed = errorToEmbed(err, null);
-	void postError(embed);
-});
-
-process.on("unhandledRejection", rej => {
-	const embed = errorToEmbed(rej, null);
-	void postError(embed);
-});
+declare namespace NodeJS {
+	interface ProcessEnv {
+		DEFAULT_PREFIX: string;
+		TOKEN: string;
+		NODE_ENV: "production" | "development";
+		ERROR_WEBHOOK: string;
+		INFO_WEBHOOK: string;
+		POSTGRES_USER: string;
+		POSTGRES_PASSWORD: string;
+		POSTGRES_DB: string;
+		POSTGRES_PORT: string;
+		POSTGRES_HOST: string;
+	}
+}

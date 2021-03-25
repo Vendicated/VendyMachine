@@ -2,7 +2,7 @@
 	"compileOnSave": true,
 	"compilerOptions": {
 		"allowSyntheticDefaultImports": true,
-		"baseUrl": "./src",
+		"baseUrl": ".",
 		"declaration": false,
 		"emitDecoratorMetadata": true,
 		"esModuleInterop": true,
@@ -16,14 +16,16 @@
 		"moduleResolution": "node",
 		"noEmitOnError": true,
 		"outDir": "dist",
+		"rootDirs": ["src", "scripts", "types"],
 		"resolveJsonModule": true,
-		"rootDir": "src",
 		"skipLibCheck": true,
 		"strict": true,
 		"strictPropertyInitialization": false, // typeorm fields are not initialised, so disable this rule
 		"target": "ESNEXT",
 		"paths": {
-			"@util/*": ["util/*"]
-		}
+			"@util/*": ["src/util/*"],
+			"@assets/*": ["assets/*"]
+		},
+		"typeRoots": ["types"]
 	}
 }

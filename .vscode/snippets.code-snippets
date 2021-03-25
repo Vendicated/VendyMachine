@@ -32,7 +32,7 @@
 			"\tpublic clientPermissions: PermissionString[] = [];",
 			"\tpublic args: Arguments = {};",
 			"",
-			"\tpublic async callback(ctx: CommandContext, {}: Args): Promise<void> {}",
+			"\tpublic async callback(ctx: CommandContext, {}: Args): Promise<unknown> {}",
 			"}",
 			"",
 			"interface Args {",

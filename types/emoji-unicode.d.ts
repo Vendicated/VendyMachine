@@ -1,4 +1,5 @@
-/** This file is part of Emotely, a Discord Bot providing all sorts of emote related commands.
+/**
+ * This file is part of Emotely, a Discord Bot providing all sorts of emote related commands.
  * Copyright (C) 2021 Vendicated
  *
  * Emotely is free software: you can redistribute it and/or modify
@@ -14,22 +15,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
-// Use require as otherwise vscode auto sorts imports and puts @util import over this statement
-require("tsconfig-paths/register");
-
-import { errorToEmbed, postError } from "@util/helpers";
-import { Client } from "./Client";
-
-const client = new Client();
-
-void client.registerCommands().registerDefaultHandlers().connect();
-
-process.on("uncaughtException", err => {
-	const embed = errorToEmbed(err, null);
-	void postError(embed);
-});
-
-process.on("unhandledRejection", rej => {
-	const embed = errorToEmbed(rej, null);
-	void postError(embed);
-});
+declare module "emoji-unicode" {
+	/**
+	 * Get the unicode code of an emoji in base 16.
+	 */
+	export default function (input: string): string;
+	/**
+	 * Get the unicode code points of an emoji in base 16.
+	 */
+	export function raw(input: string): string;
+}

@@ -2,7 +2,7 @@ import { timeExecution } from "@util/helpers";
 import { codeblock, formatOutput, removePrefix } from "@util/stringHelpers";
 import { MessageOptions, PermissionString } from "discord.js";
 import { Embed } from "../../Embed";
-import { ArgumentFlags, Arguments, ArgumentTypes } from "../CommandArguments";
+import { Arguments, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -14,7 +14,7 @@ export class Command implements IBaseCommand {
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
 	public args: Arguments = {
-		query: { type: ArgumentTypes.String, flags: ArgumentFlags.Remainder }
+		query: { type: ArgumentTypes.String, remainder: true }
 	};
 
 	public async callback(ctx: CommandContext, { query }: Args): Promise<void> {
@@ -30,13 +30,13 @@ export class Command implements IBaseCommand {
 
 		const messageOptions: MessageOptions = { disableMentions: "all", files: [] };
 
-		const embed = new Embed(success ? "SUCCESS" : "ERROR")
+		messageOptions.embed = new Embed(success ? "SUCCESS" : "ERROR")
 			.setAuthor("Query", ctx.client.user.displayAvatarURL())
-			.addField("Input", await formatOutput(query, 1000, messageOptions, "QueryInput.txt"))
-			.addField("Result", await formatOutput(result, 1000, messageOptions, "QueryOutput.txt"))
+			.addField("Input", await formatOutput(query, 1000, "sql", messageOptions, "QueryInput.txt"))
+			.addField("Result", await formatOutput(result, 1000, "js", messageOptions, "QueryOutput.txt"))
 			.addField("Time", codeblock(timeString));
 
-		await ctx.reply(undefined, embed);
+		await ctx.reply(undefined, messageOptions);
 	}
 }
 

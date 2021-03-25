@@ -1,5 +1,24 @@
+/** This file is part of Emotely, a Discord Bot providing all sorts of emote related commands.
+ * Copyright (C) 2021 Vendicated
+ *
+ * Emotely is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Emotely is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 import { MessageOptions, Util } from "discord.js";
+import ordinal from "ordinal";
 import { inspect } from "util";
+import { monthsShort } from "./constants";
 import { haste } from "./helpers";
 
 export function codeblock(content: string, language?: string) {
@@ -87,29 +106,31 @@ export function removeSuffix(str: string, prefix: string | string[]) {
  * @param {object} messageOptions MessageOptions object to append files to
  * @param {string} altFilename Filename that should be given to this file
  */
-export async function formatOutput(rawContent: unknown, limit: number, messageOptions?: MessageOptions, altFilename?: string) {
-	if (!rawContent) return null;
+export async function formatOutput(rawContent: unknown, limit: number, codeLang: string | null, messageOptions?: MessageOptions, altFilename?: string) {
+	if (!rawContent) return "-";
 
 	if (typeof rawContent !== "string") {
-		rawContent = inspect(rawContent);
+		rawContent = inspect(rawContent, { getters: true, compact: false });
 	}
+	if (codeLang) limit -= 8 + codeLang.length;
 
 	let content = removeTokens(rawContent as string);
 
 	if (content.length > limit) {
 		try {
-			content = await haste(content);
+			content = `That was too long for discord, so I uploaded it to hastebin instead\n${await haste(content)}`;
 		} catch {
 			if (messageOptions && altFilename) {
 				const attachment = Buffer.from(content, "utf-8");
-				messageOptions.files!.push({ name: altFilename, attachment });
-				content = "Failed to create haste, so I attached the output as file instead.";
+				messageOptions.files ||= [];
+				messageOptions.files.push({ name: altFilename, attachment });
+				content = "That was too long for discord, so I attached the output as file instead.";
 			} else {
-				content = "Content was too long and I failed to create a haste";
+				content = "That was too long for discord and I was unable to upload it to hastebin. Sorry :(";
 			}
 		}
-	} else {
-		content = `\`\`\`js\n${content}\n\`\`\``;
+	} else if (codeLang) {
+		content = codeblock(content, codeLang);
 	}
 
 	return content;
@@ -122,4 +143,17 @@ export async function formatOutput(rawContent: unknown, limit: number, messageOp
 export function printBox(...lines: string[]) {
 	const divider = "-".repeat(longestLineLength(...lines));
 	for (const line of [divider, ...lines, divider]) console.log(line);
+}
+
+/**
+ * Prints to console with a nice box
+ * @param lines
+ */
+export function printBoxErr(...lines: string[]) {
+	const divider = "-".repeat(longestLineLength(...lines));
+	for (const line of [divider, ...lines, divider]) console.error(line);
+}
+
+export function formatDate(date: Date) {
+	return `${monthsShort[date.getMonth()]} ${ordinal(date.getDate())} ${date.getFullYear()}`;
 }

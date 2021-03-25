@@ -1,3 +1,20 @@
+/** This file is part of Emotely, a Discord Bot providing all sorts of emote related commands.
+ * Copyright (C) 2021 Vendicated
+ *
+ * Emotely is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Emotely is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 import { Emojis } from "@util/constants";
 import { errorToEmbed, postError } from "@util/helpers";
 import { codeblock, toTitleCase } from "@util/stringHelpers";
@@ -6,7 +23,7 @@ import { Collection, MessageReaction, User } from "discord.js";
 import fs from "fs/promises";
 import path from "path";
 import { Embed } from "../Embed";
-import { Argument, ArgumentError, ArgumentFlags, parseArgs } from "./CommandArguments";
+import { Argument, ArgumentError, parseArgs } from "./CommandArguments";
 import { CommandContext } from "./CommandContext";
 import { ICommand } from "./ICommand";
 
@@ -16,10 +33,13 @@ export class CommandManager extends Collection<string, ICommand> {
 
 		const command: ICommand = new commandImport.Command();
 
-		command.name = path.basename(filePath).replace(".js", "").toLowerCase();
+		command.name = path
+			.basename(filePath)
+			.replace(/\.[jt]s/, "")
+			.toLowerCase();
 		command.category = path.dirname(filePath).split(path.sep).pop()!.toLowerCase();
 
-		if (command.category === "development" && !command.ownerOnly) throw new Error(`Development category command ${command.name} not dev only!`);
+		if (command.category === "owner" && !command.ownerOnly) throw new Error(`Owner category command ${command.name} not dev only!`);
 
 		[command.name, ...command.aliases].forEach(name => {
 			if (this.get(name)) throw new Error(`Duplicate command name or alias ${name} in file ${filePath}`);
@@ -76,7 +96,7 @@ export class CommandManager extends Collection<string, ICommand> {
 			.setTitle(name)
 			.setDescription(info)
 			.addField("Description", description)
-			.addField("Usage", codeblock(this.formatUsage(command, prefix), "html"));
+			.addField("Usage", codeblock(this.formatUsage(command, prefix)));
 
 		if (argString) embed.addField("Arguments", argString);
 
@@ -87,7 +107,7 @@ export class CommandManager extends Collection<string, ICommand> {
 		const args = Object.keys(cmd.args).map(key => {
 			const arg = cmd.args[key] as Argument;
 
-			return arg.flags && arg.flags & ArgumentFlags.Optional ? `[${key}]` : `<${key}>`;
+			return arg.optional ? `[${key}]` : `<${key}>`;
 		});
 
 		return `${prefix}${cmd.name} ${args.join(" ")}`;
@@ -98,14 +118,14 @@ export class CommandManager extends Collection<string, ICommand> {
 			if (typeof arg === "string") {
 				prev[key] = arg;
 			} else {
-				let explanation = arg.explanation ?? "";
+				let description = arg.description ?? "";
 				if (arg.choices) {
 					const text = `One of ${arg.choices.join("|")}`;
-					explanation += explanation.length ? ` (${text})` : text;
+					description += description.length ? ` (${text})` : text;
 				}
-				if (!explanation.length) explanation = arg.type;
+				if (!description.length) description = arg.type;
 
-				prev[key] = explanation;
+				prev[key] = description;
 			}
 			return prev;
 		}, {} as Record<string, string>);
