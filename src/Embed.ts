@@ -23,7 +23,7 @@ export class Embed extends MessageEmbed {
 		this.setLevel(level);
 	}
 
-	setLevel(level: "SUCCESS" | "ERROR" | "INFO") {
+	public setLevel(level: "SUCCESS" | "ERROR" | "INFO") {
 		const color = level === "SUCCESS" ? Colours.GREEN : level === "ERROR" ? Colours.RED : Colours.BLUE;
 		this.setColor(color);
 	}

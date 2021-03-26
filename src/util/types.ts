@@ -32,3 +32,5 @@ export interface ParsedEmoji {
 	url(): string;
 	unicode(): string;
 }
+
+export type ImageFormat = "png" | "jpeg" | "webp";
