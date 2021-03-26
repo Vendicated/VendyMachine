@@ -53,10 +53,10 @@ export default async function messageListener(client: Client, msg: IMessage) {
 		const { clientPermissions, userPermissions } = command;
 		if (clientPermissions) {
 			if (!hasPermission(clientPermissions, ctx.me, ctx.channel)) {
-				throw new ClientPermissionError(clientPermissions);
+				return ctx.channel.send(new ClientPermissionError(clientPermissions).message);
 			}
 			if (!hasPermission(userPermissions, ctx.member, ctx.channel)) {
-				throw new UserPermissionError(userPermissions);
+				return ctx.channel.send(new UserPermissionError(userPermissions).message);
 			}
 		}
 	} else if (command.guildOnly) {
