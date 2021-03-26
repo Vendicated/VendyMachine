@@ -1,4 +1,5 @@
 #!/usr/bin/bash
+shopt -s globstar
 
 for file in {src,scripts,types}/**/*.ts
 do
