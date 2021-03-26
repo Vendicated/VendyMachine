@@ -4,8 +4,9 @@ import { MessageOptions, PermissionString } from "discord.js";
 import { Arguments, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
+import { ArgumentError } from '../CommandErrors';
 
-export class Command implements IBaseCommand {
+export default class Command implements IBaseCommand {
 	public description = "Get the url of one or more custom emotes";
 	public aliases = ["emote", "e"];
 	public ownerOnly = false;
@@ -18,7 +19,7 @@ export class Command implements IBaseCommand {
 		const emotes = emoteParser(input);
 
 		if (!emotes.length) {
-			await ctx.reply("No custom emotes provided.");
+			throw new ArgumentError("No custom emotes provided.");
 		} else if (emotes.length === 1) {
 			await ctx.reply(emotes[0].url());
 		} else {

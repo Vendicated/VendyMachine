@@ -15,7 +15,7 @@ while (false) {
 	regex;
 }
 
-export class Command implements IBaseCommand {
+export default class Command implements IBaseCommand {
 	public description = "Evaluate js code";
 	public args: Arguments = { script: { type: ArgumentTypes.String, remainder: true } };
 	public aliases = [];

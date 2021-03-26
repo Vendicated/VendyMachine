@@ -120,10 +120,14 @@ export function errorToEmbed(error: unknown, ctx: unknown) {
 }
 
 export function postInfo(embeds: MessageEmbed | MessageEmbed[]) {
+	if (process.env.NODE_ENV !== "production") return;
+
 	return executeWebhook("INFO", null, embeds);
 }
 
 export function postError(embeds: MessageEmbed | MessageEmbed[]) {
+	if (process.env.NODE_ENV !== "production") return;
+
 	if (!Array.isArray(embeds)) embeds = [embeds.setDescription("")];
 	for (const embed of embeds) {
 		printBoxErr(...embed.fields.map(field => `${field.name !== "Error" ? `${field.name}: ` : ""}${field.value.replace(/```[^\n]*/g, "")}`));

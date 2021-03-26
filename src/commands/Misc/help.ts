@@ -3,9 +3,10 @@ import { PermissionString } from "discord.js";
 import { Embed } from "../../Embed";
 import { Arguments, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
+import { CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
 
-export class Command implements IBaseCommand {
+export default class Command implements IBaseCommand {
 	public description = "Get help on command usage";
 	public aliases = ["h", "command"];
 	public ownerOnly = false;
@@ -26,7 +27,7 @@ export class Command implements IBaseCommand {
 		if (client.commands.some(cmd => cmd.category === name.toLowerCase() && (isOwner ? true : cmd.ownerOnly === false)))
 			return await this.categoryHelp(ctx, name);
 
-		return ctx.reply(`Sorry, no command or category with name ${name} found.`);
+		throw new CommandError(`Sorry, no command or category with name \`${name}\` found.`);
 	}
 
 	public async mainMenu(ctx: CommandContext, isOwner: boolean) {

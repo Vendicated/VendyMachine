@@ -6,9 +6,10 @@ import { emojiParser, emoteParser } from "../../util/parsers";
 import { ParsedEmoji } from "../../util/types";
 import { Arguments, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
+import { ArgumentError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
 
-export class Command implements IBaseCommand {
+export default class Command implements IBaseCommand {
 	public description = "Export emotes as zip";
 	public aliases = ["export"];
 	public ownerOnly = false;
@@ -28,10 +29,11 @@ export class Command implements IBaseCommand {
 	}
 
 	public async handleGuildInvoke(ctx: CommandContext) {
-		if (!ctx.isGuild()) return ctx.reply("Please specify some emotes to download or run this command on a server!");
+		if (!ctx.isGuild()) throw new ArgumentError("Please specify some emotes to download or run this command on a server!");
 	}
 
 	public async handleEmoteInvoke(ctx: CommandContext, emotes: string) {
+		// TODO
 		const emojis = emojiParser(emotes);
 		const customEmotes = emoteParser(emotes);
 	}
@@ -41,6 +43,7 @@ export class Command implements IBaseCommand {
 		await mkdirp(dir, { mode: 755 });
 
 		for (const emoji of emojis) {
+			// TODO
 			const outpath = path.join(dir, `${emoji.name}`);
 			const buffer = (await fetch(emoji.url())) as Buffer;
 		}

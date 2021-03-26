@@ -5,7 +5,7 @@ import { Arguments } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
-export class Command implements IBaseCommand {
+export default class Command implements IBaseCommand {
 	public description = "Get a list of available prefixes";
 	public aliases = ["prefix", "p"];
 	public ownerOnly = false;

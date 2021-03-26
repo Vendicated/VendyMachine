@@ -23,15 +23,16 @@ import { Collection, MessageReaction, User } from "discord.js";
 import fs from "fs/promises";
 import path from "path";
 import { Embed } from "../Embed";
-import { Argument, ArgumentError, parseArgs } from "./CommandArguments";
+import { Argument, parseArgs } from "./CommandArguments";
 import { CommandContext } from "./CommandContext";
+import { CommandError } from "./CommandErrors";
 import { ICommand } from "./ICommand";
 
 export class CommandManager extends Collection<string, ICommand> {
 	private async register(filePath: string) {
 		const commandImport = await import(filePath);
 
-		const command: ICommand = new commandImport.Command();
+		const command: ICommand = new (commandImport.default ?? commandImport.Command)();
 
 		command.name = path
 			.basename(filePath)
@@ -42,7 +43,7 @@ export class CommandManager extends Collection<string, ICommand> {
 		if (command.category === "owner" && !command.ownerOnly) throw new Error(`Owner category command ${command.name} not dev only!`);
 
 		[command.name, ...command.aliases].forEach(name => {
-			if (this.get(name)) throw new Error(`Duplicate command name or alias ${name} in file ${filePath}`);
+			if (this.findCommand(name)) throw new Error(`Duplicate command name or alias ${name} in file ${filePath}`);
 		});
 
 		this.set(command.name, command);
@@ -52,7 +53,7 @@ export class CommandManager extends Collection<string, ICommand> {
 	}
 
 	public async registerAll(directory = __dirname, ignoreFiles = true) {
-		for await (const filename of await fs.readdir(directory)) {
+		for (const filename of await fs.readdir(directory)) {
 			const filepath = path.join(directory, filename);
 			const stats = await fs.stat(filepath);
 			if (stats.isDirectory()) {
@@ -138,26 +139,30 @@ export class CommandManager extends Collection<string, ICommand> {
 			const args = await parseArgs(command, ctx);
 			await command.callback(ctx, args);
 		} catch (error) {
-			if (error instanceof ArgumentError) {
-				await ctx.reply(error.message);
-			} else {
-				const embed = errorToEmbed(error, ctx);
+			await this.handleCommandError(ctx, error);
+		}
+	}
 
-				const m = await ctx.reply(undefined, embed);
-				await m.react(Emojis.CHECK_MARK);
-				const consented = await m
-					.awaitReactions((r: MessageReaction, u: User) => r.emoji.name === Emojis.CHECK_MARK && u.id === ctx.author.id, {
-						max: 1,
-						time: 1000 * 60
-					})
-					.then(r => Boolean(r.size));
+	private async handleCommandError(ctx: CommandContext, error: unknown) {
+		if (error instanceof CommandError) {
+			await ctx.reply(error.message);
+		} else {
+			const embed = errorToEmbed(error, ctx);
 
-				if (consented) {
-					await postError(embed);
-					await ctx
-						.reply("Thank you! I might send you a private message at some point to ask for more info, so please keep them open <3")
-						.then(r => setTimeout(() => r.deletable && r.delete().catch(() => void 0), 1000 * 10));
-				}
+			const m = await ctx.reply(undefined, embed);
+			await m.react(Emojis.CHECK_MARK);
+			const consented = await m
+				.awaitReactions((r: MessageReaction, u: User) => r.emoji.name === Emojis.CHECK_MARK && u.id === ctx.author.id, {
+					max: 1,
+					time: 1000 * 60
+				})
+				.then(r => Boolean(r.size));
+
+			if (consented) {
+				await postError(embed);
+				await ctx
+					.reply("Thank you! I might send you a private message at some point to ask for more info, so please keep them open <3")
+					.then(r => setTimeout(() => r.deletable && r.delete().catch(() => void 0), 1000 * 10));
 			}
 		}
 	}

@@ -6,7 +6,7 @@ import { Arguments, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
-export class Command implements IBaseCommand {
+export default class Command implements IBaseCommand {
 	public description = "Execute a SQL query. Dangerous";
 	public aliases = [];
 	public ownerOnly = true;

@@ -23,7 +23,7 @@
 			"import { PermissionString } from \"discord.js\";",
 			"import { Arguments, ArgumentTypes, ArgumentFlags } from \"../CommandArguments\";",
 			"",
-			"export class Command implements IBaseCommand {",
+			"export default class Command implements IBaseCommand {",
 			"\tpublic description = \"\";",
 			"\tpublic aliases = [];",
 			"\tpublic ownerOnly = false;",

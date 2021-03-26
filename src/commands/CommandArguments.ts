@@ -19,6 +19,7 @@ import { boolParser, channelParser } from "@util/parsers";
 import { Channel, Message, Role, User } from "discord.js";
 import validator from "validator";
 import { CommandContext } from "./CommandContext";
+import { ArgumentError } from "./CommandErrors";
 import { ICommand } from "./ICommand";
 
 export async function parseArgs(command: ICommand, ctx: CommandContext) {
@@ -126,10 +127,3 @@ export type Arguments = Record<string, Argument | Argument["type"]>;
 
 type Arg = string | number | boolean | Channel | Message | User | Role;
 export type CommandArgs = Record<string, Arg>;
-
-export class ArgumentError extends Error {
-	constructor(message: string) {
-		super(message);
-		this.name = "ArgumentError";
-	}
-}

@@ -7,9 +7,10 @@ import { InlineEmbed } from "../../Embed";
 import { ParsedEmoji } from "../../util/types";
 import { Arguments, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
+import { ArgumentError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
 
-export class Command implements IBaseCommand {
+export default class Command implements IBaseCommand {
 	public description = "Get Info on an emoji/emote";
 	public aliases = ["emoteinfo", "ei"];
 	public ownerOnly = false;
@@ -22,10 +23,10 @@ export class Command implements IBaseCommand {
 		return Object.prototype.hasOwnProperty.call(emoji, "animated");
 	}
 
-	public async callback(ctx: CommandContext, { input }: Args): Promise<unknown> {
+	public async callback(ctx: CommandContext, { input }: Args): Promise<void> {
 		const emoji = this.getEmoji(input);
 
-		if (!emoji) return ctx.reply("Please specify an emoji or a custom emote.");
+		if (!emoji) throw new ArgumentError("Please specify an emoji or a custom emote.");
 		const embed = new InlineEmbed("INFO");
 
 		if (this.isCustom(emoji)) {

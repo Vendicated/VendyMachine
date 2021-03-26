@@ -26,3 +26,8 @@ export const mentionRegex = () => /<@!?(\d{17,19})>/;
 export const channelRegex = () => /<#(\d{17,19})>/;
 export const roleRegex = () => /<@&(\d{17,19})>/;
 export const snowflakeRegex = () => /\d{17,19}/;
+/**
+ * Matches byte sizes, such as 20mb or 17kb.
+ * First group is the number as float, second group is one of mb, kb or b
+ */
+export const bytesRegex = () => /(\d+\.?\d*)\s*([km]?b)/i;

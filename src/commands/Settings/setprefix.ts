@@ -4,16 +4,17 @@ import { GuildSettings } from "../../db/Entities/GuildSettings";
 import { UserSettings } from "../../db/Entities/User";
 import { Arguments, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
+import { ArgumentError, CommandError, UserPermissionError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
 
-export class Command implements IBaseCommand {
-	description = "Change prefix";
-	aliases = ["setp"];
-	ownerOnly = false;
-	guildOnly = false;
-	userPermissions: PermissionString[] = [];
-	clientPermissions = [];
-	args: Arguments = {
+export default class Command implements IBaseCommand {
+	public description = "Change prefix";
+	public aliases = ["setp"];
+	public ownerOnly = false;
+	public guildOnly = false;
+	public userPermissions: PermissionString[] = [];
+	public clientPermissions = [];
+	public args: Arguments = {
 		scope: {
 			type: ArgumentTypes.String,
 			choices: ["server", "user"],
@@ -26,12 +27,15 @@ export class Command implements IBaseCommand {
 		prefix: { type: ArgumentTypes.String, default: process.env.DEFAULT_PREFIX, description: "the new prefix" }
 	};
 
-	async callback(ctx: CommandContext, args: Args): Promise<unknown> {
+	public async callback(ctx: CommandContext, args: Args): Promise<void> {
 		args.prefix = args.prefix.toLowerCase();
 		if (args.scope === "server") {
-			if (!ctx.isGuild()) return ctx.reply(`This command can only be used on a server. Perhaps you meant \`${ctx.prefix}${ctx.commandName} user\`?`);
+			if (!ctx.isGuild())
+				throw new CommandError(
+					`This command can only be used on a server. Perhaps you meant \`${ctx.prefix}${ctx.commandName} user ${args.action} ${args.prefix}\`?`
+				);
 
-			if (!hasPermission("MANAGE_GUILD", ctx)) return ctx.reply("You are not allowed to do this.");
+			if (!hasPermission("MANAGE_GUILD", ctx)) throw new UserPermissionError(["MANAGE_GUILD"]);
 
 			await this.updatePrefix(GuildSettings, ctx, args, ctx.guild.id);
 		} else {
@@ -39,7 +43,7 @@ export class Command implements IBaseCommand {
 		}
 	}
 
-	async updatePrefix(target: typeof GuildSettings | typeof UserSettings, ctx: CommandContext, { action, scope, prefix }: Args, id: string) {
+	private async updatePrefix(target: typeof GuildSettings | typeof UserSettings, ctx: CommandContext, { action, scope, prefix }: Args, id: string) {
 		const settings = (await ctx.db.getById(target, id)) ?? new target();
 		settings.id ||= id;
 		settings.prefixes ||= [process.env.DEFAULT_PREFIX];
@@ -48,11 +52,11 @@ export class Command implements IBaseCommand {
 
 		switch (action) {
 			case "add":
-				if (settings.prefixes.includes(prefix)) return ctx.reply("This prefix already exists");
+				if (settings.prefixes.includes(prefix)) throw new ArgumentError("This prefix already exists");
 				settings.prefixes.push(prefix);
 				break;
 			case "remove":
-				if (!settings.prefixes.includes(prefix)) return ctx.reply("This prefix does not exist");
+				if (!settings.prefixes.includes(prefix)) throw new ArgumentError("This prefix does not exist");
 				settings.prefixes.splice(settings.prefixes.indexOf(prefix), 1);
 				if (!settings.prefixes.length) {
 					reset = true;

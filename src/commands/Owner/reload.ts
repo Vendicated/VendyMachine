@@ -1,24 +1,25 @@
 import { codeblock } from "@util/stringHelpers";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
+import { CommandError } from '../CommandErrors';
 
-export class Command implements IBaseCommand {
-	description = "Reload all commands";
-	aliases = [];
-	ownerOnly = true;
-	guildOnly = false;
-	userPermissions = [];
-	clientPermissions = [];
-	args = {};
+export default class Command implements IBaseCommand {
+	public description = "Reload all commands";
+	public aliases = [];
+	public ownerOnly = true;
+	public guildOnly = false;
+	public userPermissions = [];
+	public clientPermissions = [];
+	public args = {};
 
-	async callback(ctx: CommandContext): Promise<void> {
+	public async callback(ctx: CommandContext): Promise<void> {
 		await ctx.client.commands
 			.reload()
 			.then(() => {
 				void ctx.reply(`Successfully reloaded all commands! (${ctx.client.commands.size} commands loaded)`);
 			})
 			.catch(err => {
-				void ctx.reply(`Failed to reload commands:\n${(codeblock(err), "js")}`);
+				throw new CommandError(`Failed to reload commands:\n${(codeblock(err), "js")}`);
 			});
 	}
 }

@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 // Use require as otherwise vscode auto sorts imports and puts @util import over this statement
 require("tsconfig-paths/register");
 
@@ -22,7 +23,7 @@ import { Client } from "./Client";
 
 const client = new Client();
 
-void client.registerCommands().registerDefaultHandlers().connect();
+void client.registerCommands().registerHandlers().connect();
 
 process.on("uncaughtException", err => {
 	const embed = errorToEmbed(err, null);

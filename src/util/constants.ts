@@ -34,6 +34,10 @@ export const Emojis = {
 	INFO: "ℹ️"
 };
 
+export const Emotes = {
+	CIRNO_WAVE: "<:cirnoWave:824835204672782366>"
+};
+
 export const ZWSP = "​";
 
 export const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
