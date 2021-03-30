@@ -18,10 +18,10 @@
 import { emoteParser } from "@util/parsers";
 import { formatOutput } from "@util/stringHelpers";
 import { MessageOptions, PermissionString } from "discord.js";
-import { Arguments, ArgumentTypes } from "../CommandArguments";
+import { ICommandArgs, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
-import { IBaseCommand } from "../ICommand";
 import { ArgumentError } from "../CommandErrors";
+import { IBaseCommand } from "../ICommand";
 
 export default class Command implements IBaseCommand {
 	public description = "Get the url of one or more custom emotes";
@@ -30,7 +30,7 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: Arguments = { input: { type: ArgumentTypes.String, remainder: true, description: "One or more custom emotes" } };
+	public args: ICommandArgs = { input: { type: ArgumentTypes.String, remainder: true, description: "One or more custom emotes" } };
 
 	public async callback(ctx: CommandContext, { input }: Args) {
 		const emotes = emoteParser(input);
@@ -41,7 +41,7 @@ export default class Command implements IBaseCommand {
 			await ctx.reply(emotes[0].url());
 		} else {
 			let urls = emotes.map(e => e.url());
-			const shouldSuppress = urls.reduce((prev, curr) => prev + curr.length, 0) + emotes.length * 2 < 2000;
+			const shouldSuppress = urls.reduce((acc, curr) => acc + curr.length, 0) + emotes.length * 2 < 2000;
 			if (shouldSuppress) urls = urls.map(u => `<${u}>`);
 
 			const options: MessageOptions = {};

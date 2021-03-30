@@ -30,10 +30,10 @@ export function trim(text: string, max: number) {
 }
 
 export function longestLineLength(...lines: string[]): number {
-	return lines.reduce((prev, curr) => {
+	return lines.reduce((acc, curr) => {
 		const individualLines = curr.split("\n");
 		const lineLength = individualLines.length > 1 ? longestLineLength(...individualLines) : curr.length;
-		return prev > lineLength ? prev : lineLength;
+		return acc > lineLength ? acc : lineLength;
 	}, 0);
 }
 

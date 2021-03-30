@@ -19,9 +19,18 @@
 require("tsconfig-paths/register");
 
 import { errorToEmbed, postError } from "@util/helpers";
+import { Intents } from "discord.js";
 import { Client } from "./Client";
 
-const client = new Client();
+const client = new Client({
+	// Enable channel partials to get DM events
+	partials: ["CHANNEL"],
+	// No Mentions!!!!!
+	allowedMentions: { repliedUser: false, parse: [] },
+	// Do not cache messages, no need
+	messageCacheMaxSize: 0,
+	intents: Intents.NON_PRIVILEGED
+});
 
 void client.registerCommands().registerHandlers().connect();
 

@@ -70,10 +70,12 @@ export async function reduceSize(input: Buffer, targetSize: number, startAt512 =
 	return { originalSize, newSize: size!, buffer, format };
 }
 
-export async function getFormat(input: Buffer) {
-	const meta = await sharp(input).metadata();
-	return meta.format;
+export async function convertImage(input: Buffer, format: ImageFormat, width?: number, isSvg?: boolean) {
+	const options = isSvg ? { density: 1000 } : undefined;
+	const buf = sharp(input, options)[format]();
+	return width ? buf.resize(width).toBuffer() : buf.toBuffer();
 }
-export async function convertImage(input: Buffer, format: ImageFormat) {
-	return sharp(input)[format]().toBuffer();
+
+export async function getMetadata(input: Buffer) {
+	return sharp(input).metadata();
 }

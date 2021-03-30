@@ -18,7 +18,7 @@
 import { toTitleCase } from "@util/stringHelpers";
 import { PermissionString } from "discord.js";
 import { Embed } from "../../Embed";
-import { Arguments, ArgumentTypes } from "../CommandArguments";
+import { ICommandArgs, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
@@ -30,7 +30,7 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: Arguments = { name: { type: ArgumentTypes.String, description: "command / command category", optional: true } };
+	public args: ICommandArgs = { name: { type: ArgumentTypes.String, description: "command / command category", optional: true } };
 
 	public async callback(ctx: CommandContext, { name }: Args): Promise<unknown> {
 		const { client, prefix } = ctx;
@@ -50,12 +50,12 @@ export default class Command implements IBaseCommand {
 	public async mainMenu(ctx: CommandContext, isOwner: boolean) {
 		const { client, commandName, prefix } = ctx;
 
-		const commandList = client.commands.reduce((prev, curr) => {
-			if (curr.ownerOnly && !isOwner) return prev;
+		const commandList = client.commands.reduce((acc, curr) => {
+			if (curr.ownerOnly && !isOwner) return acc;
 
-			prev[curr.category] ||= [];
-			prev[curr.category].push(curr.name);
-			return prev;
+			acc[curr.category] ||= [];
+			acc[curr.category].push(curr.name);
+			return acc;
 		}, {} as Record<string, string[]>);
 
 		const fields = Object.entries(commandList).map(([name, value]) => ({ name, value: `\`${value.join("`,`")}\`` }));
@@ -73,9 +73,9 @@ export default class Command implements IBaseCommand {
 
 		const commandList = client.commands
 			.filter(cmd => cmd.category === name.toLowerCase())
-			.reduce((prev, curr) => {
-				prev[curr.name] = curr.description;
-				return prev;
+			.reduce((acc, curr) => {
+				acc[curr.name] = curr.description;
+				return acc;
 			}, {} as Record<string, string>);
 
 		const description = Object.entries(commandList)

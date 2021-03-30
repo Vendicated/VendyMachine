@@ -15,23 +15,11 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { PermissionString } from "discord.js";
-import { ICommandArgs } from "./CommandArguments";
-import { CommandContext } from "./CommandContext";
+import { constants as FsConstants } from "fs";
+import { access } from "fs/promises";
 
-export interface IBaseCommand {
-	description: string;
-	aliases: string[];
-	ownerOnly: boolean;
-	guildOnly: boolean;
-	userPermissions: PermissionString[];
-	clientPermissions: PermissionString[];
-	args: ICommandArgs;
-	flags?: Record<string, string>;
-	callback(ctx: CommandContext, args: Record<string, any>): Promise<unknown>;
-}
-
-export interface ICommand extends IBaseCommand {
-	name: string;
-	category: string;
+export async function fileExists(fp: string) {
+	return access(fp, FsConstants.F_OK)
+		.then(() => true)
+		.catch(() => false);
 }

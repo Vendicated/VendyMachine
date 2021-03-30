@@ -18,8 +18,8 @@
 import { hasPermission } from "@util/helpers";
 import { PermissionString } from "discord.js";
 import { GuildSettings } from "../../db/Entities/GuildSettings";
-import { UserSettings } from "../../db/Entities/User";
-import { Arguments, ArgumentTypes } from "../CommandArguments";
+import { UserSettings } from "../../db/Entities/UserSettings";
+import { ICommandArgs, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { ArgumentError, CommandError, UserPermissionError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
@@ -31,7 +31,7 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions = [];
-	public args: Arguments = {
+	public args: ICommandArgs = {
 		scope: {
 			type: ArgumentTypes.String,
 			choices: ["server", "user"],
@@ -61,7 +61,7 @@ export default class Command implements IBaseCommand {
 	}
 
 	private async updatePrefix(target: typeof GuildSettings | typeof UserSettings, ctx: CommandContext, { action, scope, prefix }: Args, id: string) {
-		const settings = (await ctx.db.getById(target, id)) ?? new target();
+		const settings = (target instanceof GuildSettings ? ctx.settings.guild : ctx.settings.user) ?? new target();
 		settings.id ||= id;
 		settings.prefixes ||= [process.env.DEFAULT_PREFIX];
 

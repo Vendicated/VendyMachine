@@ -17,6 +17,8 @@
 
 import { Guild, GuildMember, MessageOptions, User } from "discord.js";
 import { Client } from "../Client";
+import { GuildSettings } from "../db/Entities/GuildSettings";
+import { UserSettings } from "../db/Entities/UserSettings";
 import { IGuildMessage, IMessage } from "../IMessage";
 
 export class CommandContext {
@@ -31,6 +33,7 @@ export class CommandContext {
 	public readonly channel: IMessage["channel"];
 	public readonly client: Client;
 	public readonly db: Client["db"];
+	public readonly settings: { user?: UserSettings; guild?: GuildSettings };
 	/**
 	 * The prefix this command was invoked with
 	 */
@@ -48,7 +51,7 @@ export class CommandContext {
 	 */
 	public readonly rawArgs: string[];
 
-	public constructor(msg: IMessage, prefix: string, prefixes: CommandContext["prefixes"], commandName: string, args: string[]) {
+	public constructor(msg: IMessage, prefix: string, commandName: string, args: string[], userSettings?: UserSettings, guildSettings?: GuildSettings) {
 		this.msg = msg;
 		this.guild = msg.guild;
 		this.member = msg.member;
@@ -58,9 +61,9 @@ export class CommandContext {
 		this.client = msg.client;
 		this.db = msg.client.db;
 		this.prefix = prefix;
-		this.prefixes = prefixes;
 		this.commandName = commandName;
 		this.rawArgs = args;
+		this.settings = { user: userSettings, guild: guildSettings };
 	}
 
 	/**
@@ -69,8 +72,13 @@ export class CommandContext {
 	 * @returns {CommandContext|null} context
 	 */
 	public static async fromMessage(msg: IMessage) {
-		const prefixes = await msg.client.db.getPrefixes(msg);
-		const regex = new RegExp(`^(<@!?${msg.client.user.id}>|${prefixes.all.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\s*`);
+		const userSettings = await msg.client.db.getById(UserSettings, msg.author.id);
+		const guildSettings = msg.guild ? await msg.client.db.getById(GuildSettings, msg.guild.id) : undefined;
+
+		const prefixes = (userSettings?.prefixes ?? []).concat(guildSettings?.prefixes ?? []);
+		if (!prefixes.length) prefixes.push(process.env.DEFAULT_PREFIX);
+
+		const regex = new RegExp(`^(<@!?${msg.client.user.id}>|${prefixes.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\s*`);
 
 		let prefix = regex.exec(msg.content)?.[0];
 		if (prefix === undefined) {
@@ -84,7 +92,7 @@ export class CommandContext {
 		const commandName = args.shift();
 		if (!commandName) return null;
 
-		return new this(msg, prefix, prefixes, commandName, args);
+		return new CommandContext(msg, prefix, commandName, args, userSettings, guildSettings);
 	}
 
 	/**
@@ -104,11 +112,8 @@ export class CommandContext {
 	 * @param content
 	 * @param options
 	 */
-	public async reply(content: string, options?: MessageOptions): Promise<IMessage>;
-	public async reply(content: undefined, options: MessageOptions): Promise<IMessage>;
-	public async reply(content?: string, options?: MessageOptions): Promise<IMessage> {
-		// TODO
-		return (this.channel.send(content, options!) as unknown) as Promise<IMessage>;
+	public async reply(content: any, options?: MessageOptions): Promise<IMessage> {
+		return (this.msg.reply(content, options ?? {}) as unknown) as Promise<IMessage>;
 	}
 
 	/**

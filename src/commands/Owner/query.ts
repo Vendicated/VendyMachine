@@ -19,7 +19,7 @@ import { timeExecution } from "@util/helpers";
 import { codeblock, formatOutput, removePrefix } from "@util/stringHelpers";
 import { MessageOptions, PermissionString } from "discord.js";
 import { Embed } from "../../Embed";
-import { Arguments, ArgumentTypes } from "../CommandArguments";
+import { ICommandArgs, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -30,7 +30,7 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: Arguments = {
+	public args: ICommandArgs = {
 		query: { type: ArgumentTypes.String, remainder: true }
 	};
 
@@ -45,7 +45,7 @@ export default class Command implements IBaseCommand {
 		const func = () => ctx.db.connection.query(query);
 		const { result, timeString, success } = await timeExecution(func);
 
-		const messageOptions: MessageOptions = { disableMentions: "all", files: [] };
+		const messageOptions: MessageOptions = { files: [] };
 
 		messageOptions.embed = new Embed(success ? "SUCCESS" : "ERROR")
 			.setAuthor("Query", ctx.client.user.displayAvatarURL())

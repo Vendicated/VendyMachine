@@ -15,7 +15,7 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Emojis } from "@util/constants";
+import { Emojis, Emotes } from "@util/constants";
 import { errorToEmbed, postError } from "@util/helpers";
 import { codeblock, toTitleCase } from "@util/stringHelpers";
 import { stripIndents } from "common-tags";
@@ -25,7 +25,7 @@ import path from "path";
 import { Embed } from "../Embed";
 import { Argument, parseArgs } from "./CommandArguments";
 import { CommandContext } from "./CommandContext";
-import { CommandError } from "./CommandErrors";
+import { ArgumentError, CommandError } from "./CommandErrors";
 import { ICommand } from "./ICommand";
 
 export class CommandManager extends Collection<string, ICommand> {
@@ -115,9 +115,9 @@ export class CommandManager extends Collection<string, ICommand> {
 	}
 
 	public getArgList(cmd: ICommand) {
-		const list = Object.entries(cmd.args).reduce((prev, [key, arg]) => {
+		const list = Object.entries(cmd.args).reduce((acc, [key, arg]) => {
 			if (typeof arg === "string") {
-				prev[key] = arg;
+				acc[key] = arg;
 			} else {
 				let description = arg.description ?? "";
 				if (arg.choices) {
@@ -126,9 +126,9 @@ export class CommandManager extends Collection<string, ICommand> {
 				}
 				if (!description.length) description = arg.type;
 
-				prev[key] = description;
+				acc[key] = description;
 			}
-			return prev;
+			return acc;
 		}, {} as Record<string, string>);
 
 		return list;
@@ -144,8 +144,10 @@ export class CommandManager extends Collection<string, ICommand> {
 	}
 
 	private async handleCommandError(ctx: CommandContext, error: unknown) {
-		if (error instanceof CommandError) {
+		if (error instanceof ArgumentError) {
 			await ctx.reply(error.message);
+		} else if (error instanceof CommandError) {
+			await ctx.reply(`${Emotes.ERROR} ${error.message}`);
 		} else {
 			const embed = errorToEmbed(error, ctx);
 

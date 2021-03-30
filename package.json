@@ -41,8 +41,9 @@
 	"dependencies": {
 		"@klasa/stopwatch": "^0.0.1",
 		"common-tags": "^1.8.0",
-		"discord.js": "^12.5.1",
+		"discord.js": "discordjs/discord.js",
 		"emoji-unicode": "^2.0.1",
+		"jszip": "^3.6.0",
 		"mkdirp": "^1.0.4",
 		"node-fetch": "^2.6.1",
 		"ordinal": "^1.0.3",
@@ -70,5 +71,8 @@
 		"precise-commits": "^1.0.2",
 		"prettier": "^2.2.1",
 		"typescript": "^4.2.3"
+	},
+	"engines": {
+		"node": ">=15.0.0"
 	}
 }

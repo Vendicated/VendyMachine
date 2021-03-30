@@ -20,7 +20,7 @@ import { msToHumanReadable } from "@util/stringHelpers";
 import { stripIndents } from "common-tags";
 import { PermissionString, User, version } from "discord.js";
 import { InlineEmbed } from "../../Embed";
-import { Arguments } from "../CommandArguments";
+import { ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -31,7 +31,7 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: Arguments = {};
+	public args: ICommandArgs = {};
 
 	public async callback(ctx: CommandContext): Promise<void> {
 		const { client } = ctx;
@@ -57,7 +57,7 @@ export default class Command implements IBaseCommand {
 			.addField("Channel Count", client.channels.cache.size)
 			.addField(
 				"Estimated User Count",
-				client.guilds.cache.reduce((prev, curr) => prev + curr.memberCount, 0)
+				client.guilds.cache.reduce((acc, curr) => acc + curr.memberCount, 0)
 			)
 			.addField("Language", `NodeJS ${process.version}`)
 			.addField("Library", `discord.js v${version}`)

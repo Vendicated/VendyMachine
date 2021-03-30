@@ -15,58 +15,132 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { Emotes } from "@util/constants";
+import { fileExists } from "@util/fsUtils";
 import { fetch } from "@util/helpers";
-import { Guild, PermissionString } from "discord.js";
+import { convertImage } from "@util/sharpUtils";
+import { removeTokens } from "@util/stringHelpers";
+import { GuildEmoji, Message, PermissionString } from "discord.js";
+import { writeFile } from "fs/promises";
+import JSZip from "jszip";
 import mkdirp from "mkdirp";
-import path from "path";
+import path, { sep } from "path";
+import { UserSettings } from "../../db/Entities/UserSettings";
+import { IMessage } from "../../IMessage";
+import { removeDuplicates } from "../../util/arrayUtilts";
 import { emojiParser, emoteParser } from "../../util/parsers";
-import { ParsedEmoji } from "../../util/types";
-import { Arguments, ArgumentTypes } from "../CommandArguments";
+import { ParsedEmoji, ParsedEmote } from "../../util/types";
+import { ArgumentTypes, ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
-import { ArgumentError } from "../CommandErrors";
+import { ArgumentError, CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
 
 export default class Command implements IBaseCommand {
-	public description = "Export emotes as zip";
+	public description = "Export emotes as zip. Supports default emojis or custom emotes";
 	public aliases = ["export"];
 	public ownerOnly = false;
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = ["ATTACH_FILES"];
-	public args: Arguments = {
+	public args: ICommandArgs = {
 		emotes: { type: ArgumentTypes.String, remainder: true, optional: true, description: "One or more emotes to download. Defaults to all server emotes" }
 	};
+	public flags = { force: "Skip cache and force redownload" };
 
-	public async callback(ctx: CommandContext, { emotes }: Args): Promise<void> {
-		if (!emotes) {
-			await this.handleGuildInvoke(ctx);
-		} else {
-			await this.handleEmoteInvoke(ctx, emotes);
-		}
+	public constructor() {
+		void mkdirp(path.join(__dirname, "../../..", ".cache"));
 	}
 
-	public async handleGuildInvoke(ctx: CommandContext) {
-		if (!ctx.isGuild()) throw new ArgumentError("Please specify some emotes to download or run this command on a server!");
+	public async callback(ctx: CommandContext, { emotes, force }: Args): Promise<IMessage> {
+		const { cached, zipPath, name } = emotes ? await this.handleEmoteInvoke(ctx, emotes, force) : await this.handleGuildInvoke(ctx, force);
+
+		const content = cached ? "I found this zip in my cache. Run the command with the `--force` flag in case this zip is outdated." : null;
+		return ctx.reply(content, { files: [{ attachment: zipPath, name }] });
 	}
 
-	public async handleEmoteInvoke(ctx: CommandContext, emotes: string) {
-		// TODO
-		const emojis = emojiParser(emotes);
-		const customEmotes = emoteParser(emotes);
+	public async handleGuildInvoke(ctx: CommandContext, noCache?: boolean) {
+		if (!ctx.isGuild()) throw new ArgumentError("Please specify some emotes to download or run this command on a server.");
+
+		if (!ctx.guild.emojis.cache.size) throw new CommandError("This server does not have any emotes.");
+
+		const emotes = ctx.guild.emojis.cache.array();
+		return this.downloadEmotes(ctx, `Emotes-${ctx.guild.id}`, emotes, noCache, true);
 	}
 
-	public async downloadEmojis(guild: Guild, emojis: ParsedEmoji[]) {
-		const dir = path.join(__dirname, "../../..", ".cache", guild.id);
-		await mkdirp(dir, { mode: 755 });
+	public async handleEmoteInvoke(ctx: CommandContext, emotes: string, noCache?: boolean) {
+		const emojis: Array<ParsedEmoji | ParsedEmote> = emojiParser(emotes).concat(emoteParser(emotes) as any);
 
-		for (const emoji of emojis) {
-			// TODO
-			const outpath = path.join(dir, `${emoji.name}`);
-			const buffer = (await fetch(emoji.url())) as Buffer;
+		if (!emojis.length)
+			throw new ArgumentError(
+				`Please specify some emotes to download or run this command ${
+					ctx.isGuild() ? "without arguments to download all emotes of this server" : "on a server"
+				}.`
+			);
+		return this.downloadEmotes(ctx, `Emotes-${ctx.author.id}`, emojis, noCache);
+	}
+
+	public async downloadEmotes(
+		ctx: CommandContext,
+		zipName: string,
+		emojis: Array<ParsedEmote | ParsedEmoji | GuildEmoji>,
+		noCache?: boolean,
+		guildInvoke = false
+	) {
+		const zipPath = path.join(__dirname, "../../..", ".cache", `${zipName}.zip`);
+
+		if (!noCache && (await fileExists(zipPath))) return { cached: true, zipPath };
+
+		const settings = await ctx.db.getById(UserSettings, ctx.author.id);
+		const extension = settings?.imageFormat ?? "webp";
+
+		emojis = removeDuplicates(emojis, e => (e as ParsedEmote).id ?? e.name);
+
+		let msg = (await ctx.reply(`${Emotes.DOWNLOADING} Downloading ${emojis.length} emotes...`)) as Message;
+		try {
+			const buffers = [] as Buffer[];
+			for (const emoji of emojis) {
+				const url = typeof emoji.url === "string" ? emoji.url : emoji.url();
+				let buffer = (await fetch(url)) as Buffer;
+
+				if (url.endsWith("svg")) buffer = await convertImage(buffer, extension, 512, true);
+
+				buffers.push(buffer);
+			}
+			if (extension !== "png") {
+				msg = await msg.edit(`${Emotes.SUCCESS} Downloaded emotes\n${Emotes.LOADING} Converting to \`${extension}\`...`);
+				for (const [idx, buf] of buffers.entries()) {
+					if ((emojis[idx] as ParsedEmote).animated) continue;
+					buffers[idx] = await convertImage(buf, extension);
+				}
+				msg = await msg.edit(`${Emotes.SUCCESS} Downloaded emotes\n${Emotes.SUCCESS} Converted to \`${extension}\``);
+			}
+
+			const { content } = msg;
+			await msg.edit(`${content}\n${Emotes.LOADING} Compressing...`);
+			const zipFile = new JSZip();
+
+			for (const [idx, buf] of buffers.entries()) {
+				const emoji = emojis[idx];
+				const ext = (emoji as ParsedEmote).animated ? "gif" : extension;
+				const fileName = zipFile.file(`${emoji.name}.${ext}`) ? `${emoji.name}-${(emoji as ParsedEmote).id || Date.now().toString(16)}` : emoji.name;
+				zipFile.file(`${fileName}.${ext}`, buf);
+			}
+
+			void msg.edit(`${content}\n${Emotes.SUCCESS} Compressed`);
+			if (guildInvoke) {
+				await zipFile.generateAsync({ type: "uint8array" }).then(blob => writeFile(zipPath, blob, "binary"));
+				return { cached: false, zipPath };
+			} else {
+				return { cached: false, zipPath: await zipFile.generateAsync({ type: "nodebuffer" }), name: zipPath.split(sep).pop() };
+			}
+		} catch (error) {
+			const msg = error?.message || error || "shrug";
+			throw new CommandError(`Sorry, something went wrong while downloading emotes: \`${removeTokens(msg)}\``);
 		}
 	}
 }
 
 interface Args {
 	emotes?: string;
+	force?: true;
 }

@@ -30,7 +30,7 @@ export class ClientPermissionError extends CommandError {
 	public constructor(permissions: PermissionString[]) {
 		super();
 		this.name = "ClientPermissionError";
-		this.message = `Sorry, I can't do that. Needed permissions: \`${permissions.map(p => toTitleCase(p)).join("`, `")}\``;
+		this.message = `Sorry, I can't do that. Needed permissions: \`${toTitleCase(permissions).join("`, `")}\``;
 	}
 }
 
@@ -38,6 +38,6 @@ export class UserPermissionError extends CommandError {
 	public constructor(permissions: PermissionString[]) {
 		super();
 		this.name = "UserPermissionError";
-		this.message = `You are not allowed to do this. Required permissions: \`${permissions.map(p => toTitleCase(p)).join("`, `")}\``;
+		this.message = `You are not allowed to do this. Required permissions: \`${toTitleCase(permissions).join("`, `")}\``;
 	}
 }

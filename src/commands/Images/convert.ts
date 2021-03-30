@@ -15,32 +15,44 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { fetch } from "@util/helpers";
+import { bytesToHumanReadable, convertImage, getMetadata } from "@util/sharpUtils";
 import { PermissionString } from "discord.js";
 import { NitroTiers } from "../../util/constants";
-import { bytesToHumanReadable, parseBytes, reduceSize } from "../../util/sharpUtils";
-import { ArgumentTypes, ICommandArgs } from "../CommandArguments";
+import { fetch } from "../../util/helpers";
+import { removeTokens } from "../../util/stringHelpers";
+import { ImageFormat } from "../../util/types";
+import { ICommandArgs, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { ArgumentError, CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
 
 export default class Command implements IBaseCommand {
-	public description = "Downscale images until they are below a certain size";
-	public aliases = ["downscale", "reduce"];
+	public description = "Convert images between formats. Supports svg, png, jpeg, webp and a bunch more, just try it out lol";
+	public aliases = [];
 	public ownerOnly = false;
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = ["ATTACH_FILES"];
 	public args: ICommandArgs = {
-		size: { type: ArgumentTypes.String, default: "256KB", description: "Size to resize to. Format: 100B/10.7KB/2MB" },
-		url: { type: ArgumentTypes.Url, description: "Url of image to resize", optional: true }
+		outputFormat: {
+			type: ArgumentTypes.String,
+			optional: true,
+			choices: ["png", "jpeg", "webp"],
+			description: "The image format to convert to. Defaults to the one specified in your settings"
+		},
+		url: {
+			type: ArgumentTypes.Url,
+			optional: true,
+			description: "Url of image to convert"
+		},
+		width: {
+			type: ArgumentTypes.Int,
+			optional: true,
+			description: "Width that image should be scaled to. (Height is automatically calculated)"
+		}
 	};
-	public flags: { maxRes: "Start with original image width instead of 512px. Slower" };
 
-	public async callback(ctx: CommandContext, { size, url, maxRes }: Args): Promise<unknown> {
-		const bytes = parseBytes(size);
-		if (!bytes) return ctx.reply(`Invalid size \`${size}\``);
-
+	public async callback(ctx: CommandContext, { outputFormat, url, width }: Args): Promise<unknown> {
 		let name;
 		if (!url) {
 			const attachment = ctx.msg.attachments.first();
@@ -54,28 +66,33 @@ export default class Command implements IBaseCommand {
 		if (!buffer) throw new CommandError("I was unable to fetch that file, sorry.");
 
 		try {
-			const { originalSize, newSize, format, buffer: attachment } = await reduceSize(buffer, bytes, !maxRes);
+			const attachment = await convertImage(buffer, outputFormat, width, url.endsWith("svg"));
 
-			if (!newSize) {
-				return ctx.reply(`File is already smaller than ${bytesToHumanReadable(bytes)} (${bytesToHumanReadable(originalSize)})`);
-			} else {
-				const nitroLevel = ctx.guild?.premiumTier.toString() ?? "0";
-				const limit = NitroTiers[nitroLevel as keyof typeof NitroTiers];
-				if (newSize > limit.uploadSizeLimit) return ctx.reply(`That file is too large (${bytesToHumanReadable(newSize)}), sorry :(\n\nTry a smaller size`);
+			name ||= `CONVERTED-${Date.now().toString(16)}.${outputFormat}`;
+			if (!name.endsWith(`.${outputFormat}`)) {
+				const extIndex = name.lastIndexOf(".");
+				name = extIndex === -1 ? `${name}.${outputFormat}` : `${name.slice(0, extIndex)}.${outputFormat}`;
 			}
 
-			name ||= `RESIZED-${Date.now().toString(16)}.${format}`;
+			const { size } = await getMetadata(attachment);
+			if (size) {
+				const nitroLevel = ctx.guild?.premiumTier.toString() ?? "0";
+				const limit = NitroTiers[nitroLevel as keyof typeof NitroTiers];
+				if (size > limit.uploadSizeLimit)
+					return ctx.reply(`That file is too large (${bytesToHumanReadable(size)}), sorry :(\n\nTry a different format or use the resize command`);
+			}
 
-			return ctx.reply(`Resized from ${bytesToHumanReadable(originalSize)} to ${bytesToHumanReadable(newSize)}`, { files: [{ attachment, name }] });
+			await ctx.reply(undefined, { files: [{ attachment, name }] });
 		} catch (err) {
-			if (err?.message?.startsWith("Input")) throw new CommandError(err.message);
-			else throw err;
+			const msg = `Something went wrong while processing your image: \`${err?.message ?? err ?? "shrug"}\``;
+			// Just to make sure
+			await ctx.reply(removeTokens(msg));
 		}
 	}
 }
 
 interface Args {
-	size: string;
+	outputFormat: ImageFormat;
 	url?: string;
-	maxRes?: boolean;
+	width?: number;
 }

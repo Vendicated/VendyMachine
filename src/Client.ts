@@ -44,7 +44,7 @@ export class Client extends BaseClient {
 	}
 
 	private async _registerHandlers() {
-		const listenerDir = path.join(__dirname, "listeners");
+		const listenerDir = path.join(__dirname, "events");
 		for (const name of await fs.readdir(listenerDir)) {
 			const listenerPath = path.join(listenerDir, name);
 			const listener = await import(listenerPath);

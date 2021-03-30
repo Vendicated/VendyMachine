@@ -17,7 +17,7 @@
 
 import { Random } from "@util/random";
 import { PermissionString } from "discord.js";
-import { Arguments } from "../CommandArguments";
+import { ICommandArgs } from "../CommandArguments";
 import { GuildCommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -28,7 +28,7 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: Arguments = {};
+	public args: ICommandArgs = {};
 
 	private responses = [
 		"Created emotes",
@@ -46,7 +46,7 @@ export default class Command implements IBaseCommand {
 	}
 
 	public async callback(ctx: GuildCommandContext): Promise<void> {
-		const msg = await ctx.channel.send("Pinging...");
+		const msg = await ctx.reply("Pinging...");
 		const ping = msg.createdTimestamp - (ctx.msg.editedTimestamp || ctx.msg.createdTimestamp);
 		await msg.edit(this.randomResponse(ping));
 	}

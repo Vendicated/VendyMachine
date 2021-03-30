@@ -17,6 +17,7 @@
 
 import { Emotes } from "@util/constants";
 import { stripIndents } from "common-tags";
+import type { PartialDMChannel } from "discord.js";
 import { Client } from "../Client";
 import { CommandContext } from "../commands/CommandContext";
 import { ClientPermissionError, UserPermissionError } from "../commands/CommandErrors";
@@ -25,6 +26,9 @@ import { hasPermission } from "../util/helpers";
 
 export default async function messageListener(client: Client, msg: IMessage) {
 	if (msg.author.bot) return;
+
+	if (((msg.channel as unknown) as PartialDMChannel).partial) await msg.channel.fetch();
+
 	// Quit if we do not have sufficient permissions
 	if (msg.guild && !hasPermission(["VIEW_CHANNEL", "SEND_MESSAGES", "EMBED_LINKS"], msg.guild.me!, msg.channel)) return;
 

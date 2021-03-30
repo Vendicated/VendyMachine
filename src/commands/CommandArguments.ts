@@ -23,12 +23,31 @@ import { ArgumentError } from "./CommandErrors";
 import { ICommand } from "./ICommand";
 
 export async function parseArgs(command: ICommand, ctx: CommandContext) {
-	const output: CommandArgs = {};
+	const output: ICommandInvokeArgs = {};
 
 	const args = Object.entries(command.args);
 
+	let rawArgs = [] as string[];
+
+	if (command.flags) {
+		for (const arg of ctx.rawArgs) {
+			if (arg.startsWith("--")) {
+				let flag = arg.slice(2).toLowerCase();
+				let dividerIndex: number;
+				// Remove - and convert following character to uppercase, so --no-cache becomes noCache
+				while ((dividerIndex = flag.indexOf("-")) !== -1) {
+					flag = flag.slice(0, dividerIndex) + flag.charAt(dividerIndex + 1).toUpperCase() + flag.slice(dividerIndex + 2);
+				}
+
+				if (Object.hasOwnProperty.call(command.flags, flag)) output[flag] = true;
+				else rawArgs.push(arg);
+			} else rawArgs.push(arg);
+		}
+	} else ({ rawArgs } = ctx);
+
 	const requiredArgs = args.filter(([, arg]) => typeof arg === "string" || !arg.optional).length;
-	if (ctx.rawArgs.length < requiredArgs) throw new ArgumentError(`Too little arguments. Expected ${requiredArgs} but only received ${ctx.rawArgs.length}.`);
+
+	if (rawArgs.length < requiredArgs) throw new ArgumentError(`Too little arguments. Expected ${requiredArgs} but only received ${rawArgs.length}.`);
 
 	for (let i = 0; i < args.length; ++i) {
 		const [key, arg] = args[i];
@@ -37,12 +56,12 @@ export async function parseArgs(command: ICommand, ctx: CommandContext) {
 		let raw: string;
 
 		if (i === args.length - 1 && remainder) {
-			raw = ctx.rawArgs.slice(i).join(" ");
+			raw = rawArgs.slice(i).join(" ");
 		} else {
-			raw = ctx.rawArgs[i];
+			raw = rawArgs[i];
 		}
 
-		const add = async (parser: (str: string) => Arg | null | Promise<Arg | null>) => {
+		const add = async (parser: (str: string) => ICommandInvokeArg | null | Promise<ICommandInvokeArg | null>) => {
 			try {
 				if (raw === null || raw === undefined || raw === "") {
 					if (!optional) throw new ArgumentError(`Too little args. Please provide a ${type}`);
@@ -123,7 +142,7 @@ export interface Argument<T = unknown> {
 	choices?: T[];
 }
 
-export type Arguments = Record<string, Argument | Argument["type"]>;
+export type ICommandArgs = Record<string, Argument | Argument["type"]>;
 
-type Arg = string | number | boolean | Channel | Message | User | Role;
-export type CommandArgs = Record<string, Arg>;
+type ICommandInvokeArg = string | number | boolean | Channel | Message | User | Role;
+export type ICommandInvokeArgs = Record<string, ICommandInvokeArg>;

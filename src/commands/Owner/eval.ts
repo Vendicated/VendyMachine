@@ -21,7 +21,7 @@ import * as regex from "@util/regex";
 import * as stringHelpers from "@util/stringHelpers";
 import { MessageOptions } from "discord.js";
 import { Embed } from "../../Embed";
-import { Arguments, ArgumentTypes } from "../CommandArguments";
+import { ICommandArgs, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -34,7 +34,7 @@ while (false) {
 
 export default class Command implements IBaseCommand {
 	public description = "Evaluate js code";
-	public args: Arguments = { script: { type: ArgumentTypes.String, remainder: true } };
+	public args: ICommandArgs = { script: { type: ArgumentTypes.String, remainder: true } };
 	public aliases = [];
 	public ownerOnly = true;
 	public guildOnly = false;
@@ -70,7 +70,7 @@ export default class Command implements IBaseCommand {
 
 		const { result, timeString, success } = await helpers.timeExecution(func);
 
-		const messageOptions: MessageOptions = { disableMentions: "all", files: [] };
+		const messageOptions: MessageOptions = { files: [] };
 
 		const consoleOutput = await stringHelpers.formatOutput(console._formatLines(), 1000, "js", messageOptions, "EvalConsoleOutput.txt");
 

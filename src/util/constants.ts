@@ -1,3 +1,4 @@
+import { Bytes } from "./sharpUtils";
 /** This file is part of Emotely, a Discord Bot providing all sorts of emote related commands.
  * Copyright (C) 2021 Vendicated
  *
@@ -35,9 +36,32 @@ export const Emojis = {
 };
 
 export const Emotes = {
-	CIRNO_WAVE: "<:cirnoWave:824835204672782366>"
+	CIRNO_WAVE: "<:cirnoWave:824835204672782366>",
+	DOWNLOADING: "<a:downloading:825221439288377424>",
+	LOADING: "<a:loading:825221441648721940>",
+	SUCCESS: "<:check:825221440479559720>",
+	ERROR: "<:cross:825221437349953588>"
 };
 
 export const ZWSP = "​";
 
 export const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+export const NitroTiers: Record<"0" | "1" | "2" | "3", Record<"emojiSlots" | "uploadSizeLimit", number>> = {
+	"0": {
+		emojiSlots: 50,
+		uploadSizeLimit: 8 * Bytes.MEGA
+	},
+	"1": {
+		emojiSlots: 100,
+		uploadSizeLimit: 8 * Bytes.MEGA
+	},
+	"2": {
+		emojiSlots: 150,
+		uploadSizeLimit: 50 * Bytes.MEGA
+	},
+	"3": {
+		emojiSlots: 250,
+		uploadSizeLimit: 100 * Bytes.MEGA
+	}
+};

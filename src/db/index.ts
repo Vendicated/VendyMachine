@@ -21,7 +21,7 @@ import { Connection, createConnection, EntityTarget } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 import { IMessage } from "../IMessage";
 import { GuildSettings } from "./Entities/GuildSettings";
-import { UserSettings } from "./Entities/User";
+import { UserSettings } from "./Entities/UserSettings";
 
 export class Database {
 	public connection: Connection;

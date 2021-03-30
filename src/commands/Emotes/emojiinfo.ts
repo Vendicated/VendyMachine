@@ -22,7 +22,7 @@ import { ParsedEmote } from "@util/types";
 import { MessageEmbed, PermissionString } from "discord.js";
 import { InlineEmbed } from "../../Embed";
 import { ParsedEmoji } from "../../util/types";
-import { Arguments, ArgumentTypes } from "../CommandArguments";
+import { ICommandArgs, ArgumentTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { ArgumentError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
@@ -34,7 +34,7 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: Arguments = { input: { type: ArgumentTypes.String, remainder: true, description: "An emoji or custom emote" } };
+	public args: ICommandArgs = { input: { type: ArgumentTypes.String, remainder: true, description: "An emoji or custom emote" } };
 
 	private isCustom(emoji: ParsedEmoji | ParsedEmote): emoji is ParsedEmote {
 		return Object.prototype.hasOwnProperty.call(emoji, "animated");

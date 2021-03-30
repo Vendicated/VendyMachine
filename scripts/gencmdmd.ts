@@ -41,12 +41,12 @@ void (async () => {
 	const manager = new CommandManager();
 	await manager.registerAll();
 
-	const categories = manager.reduce((prev, curr) => {
-		if (curr.ownerOnly) return prev;
+	const categories = manager.reduce((acc, curr) => {
+		if (curr.ownerOnly) return acc;
 		const category = toTitleCase(curr.category);
-		prev[category] ||= [];
-		prev[category].push(curr);
-		return prev;
+		acc[category] ||= [];
+		acc[category].push(curr);
+		return acc;
 	}, {} as Record<string, ICommand[]>);
 
 	let markdown = "# EmoteBot Command List\n\nYou can find a list of all commands below. For more info, simply click on the desired command!\n\n";
