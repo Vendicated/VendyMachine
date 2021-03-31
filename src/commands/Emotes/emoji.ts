@@ -19,6 +19,7 @@ import { emoteParser } from "@util/parsers";
 import { formatOutput } from "@util/stringHelpers";
 import { MessageOptions, PermissionString } from "discord.js";
 import { removeDuplicates } from "../../util/arrayUtilts";
+import { defaultFormat } from "../../util/constants";
 import { emojiParser } from "../../util/parsers";
 import { convertSvg } from "../../util/sharpUtils";
 import { ParsedEmoji, ParsedEmote } from "../../util/types";
@@ -49,7 +50,7 @@ export default class Command implements IBaseCommand {
 			const url = e.url();
 			// Convert svgs
 			if (e.type === "default") {
-				const format = ctx.settings.user?.imageFormat ?? "webp";
+				const format = ctx.settings.user?.imageFormat ?? defaultFormat;
 				const attachment = await convertSvg(url, format);
 				await ctx.reply(url, { files: [{ attachment, name: `${e.name}.${format}` }] });
 			} else {

@@ -26,6 +26,7 @@ import JSZip from "jszip";
 import mkdirp from "mkdirp";
 import path, { sep } from "path";
 import { IMessage } from "../../IMessage";
+import { defaultFormat } from "../../util/constants";
 import { parseUniqueEmojis } from "../../util/parsers";
 import { ParsedEmoji, ParsedEmote } from "../../util/types";
 import { ArgTypes, ICommandArgs } from "../CommandArguments";
@@ -88,7 +89,7 @@ export default class Command implements IBaseCommand {
 
 		if (!noCache && (await fileExists(zipPath))) return { cached: true, zipPath };
 
-		const extension = ctx.settings.user?.imageFormat ?? "webp";
+		const extension = ctx.settings.user?.imageFormat ?? defaultFormat;
 
 		let msg = (await ctx.reply(`${Emotes.DOWNLOADING} Downloading ${emojis.length} emotes...`)) as Message;
 		try {

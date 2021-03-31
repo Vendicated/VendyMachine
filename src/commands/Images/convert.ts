@@ -17,7 +17,7 @@
 
 import { bytesToHumanReadable, convertImage, getMetadata } from "@util/sharpUtils";
 import { PermissionString } from "discord.js";
-import { NitroTiers } from "../../util/constants";
+import { defaultFormat, NitroTiers } from "../../util/constants";
 import { fetch } from "../../util/helpers";
 import { removeTokens } from "../../util/stringHelpers";
 import { ImageFormat } from "../../util/types";
@@ -54,7 +54,7 @@ export default class Command implements IBaseCommand {
 
 	public async callback(ctx: CommandContext, { outputFormat, url, width }: Args) {
 		// TODO Change to ??= once typescript properly supports this
-		if (!outputFormat) outputFormat = ctx.settings.user?.imageFormat ?? "webp";
+		if (!outputFormat) outputFormat = ctx.settings.user?.imageFormat ?? defaultFormat;
 
 		let name;
 		if (!url) {

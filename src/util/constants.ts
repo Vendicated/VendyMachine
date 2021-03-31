@@ -22,6 +22,8 @@ export * as emojiMap from "../../assets/emojiMap.json";
 export * as PACKAGE_JSON from "../../package.json";
 
 export const hastebinMirror = process.env.HASTEBIN_MIRROR || "https://hb.vendicated.dev";
+export const ownerFallback = "Vendicated#0001";
+export const defaultFormat = "webp";
 
 export const Colours = {
 	RED: 0xff403c,
@@ -43,6 +45,7 @@ export const Emotes = {
 	ERROR: "<:cross:825221437349953588>"
 };
 
+// Zero Width Space
 export const ZWSP = "​";
 
 export const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];

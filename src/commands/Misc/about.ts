@@ -20,6 +20,7 @@ import { msToHumanReadable } from "@util/stringHelpers";
 import { stripIndents } from "common-tags";
 import { PermissionString, User, version } from "discord.js";
 import { InlineEmbed } from "../../Embed";
+import { ownerFallback } from "../../util/constants";
 import { ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
@@ -50,7 +51,7 @@ export default class Command implements IBaseCommand {
                 If you have any feedback or questions or would just like to chat, feel free to send my owner a friend request!
             `
 			)
-			.addField("Owner", owner?.tag)
+			.addField("Owner", owner?.tag || ownerFallback)
 			.addField("Client ID", client.user.id)
 			.addField("Uptime", msToHumanReadable(process.uptime() * 1000, true))
 			.addField("Server Count", client.guilds.cache.size)
