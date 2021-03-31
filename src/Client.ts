@@ -32,11 +32,11 @@ interface ClientEvents extends BaseClientEvents {
 export class Client extends BaseClient {
 	// Type user as not null for convenience
 	public user!: ClientUser;
+	public application!: ClientApplication;
 	// Add typing for own Events
 	public readonly on!: <Event extends keyof ClientEvents>(event: Event, listener: (...args: ClientEvents[Event]) => void) => this;
 	public readonly emit!: <Event extends keyof ClientEvents>(event: Event, ...args: ClientEvents[Event]) => boolean;
 
-	private _application: ClientApplication;
 	public db = new Database();
 	public commands = new CommandManager();
 	public owners = new Collection<string, User>();
@@ -84,14 +84,10 @@ export class Client extends BaseClient {
 		else this.owners.set(owner.id, owner);
 	}
 
-	public async fetchApplication() {
-		this._application ||= await super.fetchApplication();
-
-		return this._application;
-	}
-
 	public async fetchOwners() {
-		let { owner } = await this.fetchApplication();
+		if (!this.application) throw new Error("Client is not ready");
+
+		let { owner } = this.application.partial ? await this.application.fetch() : this.application;
 		owner ||= await this.users.fetch(process.env.OWNER_ID!).catch(() => null);
 		if (!owner) throw new Error("I was not able to get data about my owners from Discord. Please set an enviroment variable OWNER_ID");
 		await this.addOwner(owner);

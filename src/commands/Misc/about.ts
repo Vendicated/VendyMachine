@@ -16,7 +16,7 @@
  */
 
 import { stripIndents } from "common-tags";
-import { PermissionString, User, version } from "discord.js";
+import { PermissionString, version } from "discord.js";
 import { InlineEmbed } from "../../Embed";
 import { PACKAGE_JSON } from "../../util//constants";
 import { msToHumanReadable } from "../../util//stringHelpers";
@@ -36,8 +36,7 @@ export default class Command implements IBaseCommand {
 
 	public async callback(ctx: CommandContext) {
 		const { client } = ctx;
-		const app = await client.fetchApplication();
-		const owner = client.owners.size === 1 ? client.owners.first() : app.owner instanceof User ? app.owner : app.owner?.owner.user;
+		const owner = client.owners.size === 1 ? client.owners.first()?.tag : client.owners.map(o => o.tag).join(", ");
 
 		const url = PACKAGE_JSON.repository.url.replace(".git", "").replace("git+", "");
 		const embed = new InlineEmbed("INFO")
@@ -51,7 +50,7 @@ export default class Command implements IBaseCommand {
                 If you have any feedback or questions or would just like to chat, feel free to send my owner a friend request!
             `
 			)
-			.addField("Owner", owner?.tag || ownerFallback)
+			.addField("Owner", owner || ownerFallback)
 			.addField("Client ID", client.user.id)
 			.addField("Uptime", msToHumanReadable(process.uptime() * 1000, true))
 			.addField("Server Count", client.guilds.cache.size)
@@ -60,8 +59,8 @@ export default class Command implements IBaseCommand {
 				"Estimated User Count",
 				client.guilds.cache.reduce((acc, curr) => acc + curr.memberCount, 0)
 			)
-			.addField("Language", `NodeJS ${process.version}`)
-			.addField("Library", `discord.js v${version}`)
+			.addField("Powered By", `NodeJS ${process.version}`)
+			.addField("Discord API Library", `discord.js v${version}`)
 			.addField("License", PACKAGE_JSON.license)
 			.addField("Source Code", url, false);
 
