@@ -21,7 +21,7 @@ import { NitroTiers } from "../../util/constants";
 import { fetch } from "../../util/helpers";
 import { removeTokens } from "../../util/stringHelpers";
 import { ImageFormat } from "../../util/types";
-import { ICommandArgs, ArgumentTypes } from "../CommandArguments";
+import { ArgTypes, ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { ArgumentError, CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
@@ -35,24 +35,27 @@ export default class Command implements IBaseCommand {
 	public clientPermissions: PermissionString[] = ["ATTACH_FILES"];
 	public args: ICommandArgs = {
 		outputFormat: {
-			type: ArgumentTypes.String,
+			type: ArgTypes.String,
 			optional: true,
 			choices: ["png", "jpeg", "webp"],
 			description: "The image format to convert to. Defaults to the one specified in your settings"
 		},
 		url: {
-			type: ArgumentTypes.Url,
+			type: ArgTypes.Url,
 			optional: true,
 			description: "Url of image to convert"
 		},
 		width: {
-			type: ArgumentTypes.Int,
+			type: ArgTypes.Int,
 			optional: true,
 			description: "Width that image should be scaled to. (Height is automatically calculated)"
 		}
 	};
 
-	public async callback(ctx: CommandContext, { outputFormat, url, width }: Args): Promise<unknown> {
+	public async callback(ctx: CommandContext, { outputFormat, url, width }: Args) {
+		// TODO Change to ??= once typescript properly supports this
+		if (!outputFormat) outputFormat = ctx.settings.user?.imageFormat ?? "webp";
+
 		let name;
 		if (!url) {
 			const attachment = ctx.msg.attachments.first();
@@ -92,7 +95,7 @@ export default class Command implements IBaseCommand {
 }
 
 interface Args {
-	outputFormat: ImageFormat;
+	outputFormat?: ImageFormat;
 	url?: string;
 	width?: number;
 }

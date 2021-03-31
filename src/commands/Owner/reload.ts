@@ -17,8 +17,8 @@
 
 import { codeblock } from "@util/stringHelpers";
 import { CommandContext } from "../CommandContext";
-import { IBaseCommand } from "../ICommand";
 import { CommandError } from "../CommandErrors";
+import { IBaseCommand } from "../ICommand";
 
 export default class Command implements IBaseCommand {
 	public description = "Reload all commands";
@@ -29,7 +29,7 @@ export default class Command implements IBaseCommand {
 	public clientPermissions = [];
 	public args = {};
 
-	public async callback(ctx: CommandContext): Promise<void> {
+	public async callback(ctx: CommandContext) {
 		await ctx.client.commands
 			.reload()
 			.then(() => {

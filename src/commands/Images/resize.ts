@@ -19,7 +19,7 @@ import { fetch } from "@util/helpers";
 import { PermissionString } from "discord.js";
 import { NitroTiers } from "../../util/constants";
 import { bytesToHumanReadable, parseBytes, reduceSize } from "../../util/sharpUtils";
-import { ArgumentTypes, ICommandArgs } from "../CommandArguments";
+import { ArgTypes, ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { ArgumentError, CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
@@ -32,12 +32,12 @@ export default class Command implements IBaseCommand {
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = ["ATTACH_FILES"];
 	public args: ICommandArgs = {
-		size: { type: ArgumentTypes.String, default: "256KB", description: "Size to resize to. Format: 100B/10.7KB/2MB" },
-		url: { type: ArgumentTypes.Url, description: "Url of image to resize", optional: true }
+		size: { type: ArgTypes.String, default: "256KB", description: "Size to resize to. Format: 100B/10.7KB/2MB" },
+		url: { type: ArgTypes.Url, description: "Url of image to resize", optional: true }
 	};
 	public flags: { maxRes: "Start with original image width instead of 512px. Slower" };
 
-	public async callback(ctx: CommandContext, { size, url, maxRes }: Args): Promise<unknown> {
+	public async callback(ctx: CommandContext, { size, url, maxRes }: Args) {
 		const bytes = parseBytes(size);
 		if (!bytes) return ctx.reply(`Invalid size \`${size}\``);
 

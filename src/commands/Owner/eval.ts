@@ -21,7 +21,7 @@ import * as regex from "@util/regex";
 import * as stringHelpers from "@util/stringHelpers";
 import { MessageOptions } from "discord.js";
 import { Embed } from "../../Embed";
-import { ICommandArgs, ArgumentTypes } from "../CommandArguments";
+import { ICommandArgs, ArgTypes } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -34,7 +34,7 @@ while (false) {
 
 export default class Command implements IBaseCommand {
 	public description = "Evaluate js code";
-	public args: ICommandArgs = { script: { type: ArgumentTypes.String, remainder: true } };
+	public args: ICommandArgs = { script: { type: ArgTypes.String, remainder: true } };
 	public aliases = [];
 	public ownerOnly = true;
 	public guildOnly = false;

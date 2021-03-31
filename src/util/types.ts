@@ -20,6 +20,7 @@ export type JsonObject<T = unknown> = Record<string, T>;
 export type LogCategory = "INFO" | "ERROR";
 
 export interface ParsedEmote {
+	type: "custom";
 	animated: boolean;
 	name: string;
 	id: string;
@@ -27,6 +28,7 @@ export interface ParsedEmote {
 }
 
 export interface ParsedEmoji {
+	type: "default";
 	raw: string;
 	name: string;
 	url(): string;

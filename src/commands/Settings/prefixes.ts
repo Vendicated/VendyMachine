@@ -31,7 +31,7 @@ export default class Command implements IBaseCommand {
 	public clientPermissions: PermissionString[] = [];
 	public args: ICommandArgs = {};
 
-	public async callback(ctx: CommandContext): Promise<void> {
+	public async callback(ctx: CommandContext) {
 		if (ctx.rawArgs.length === 3) {
 			// Let's redirect them to setprefix :)
 			const { client } = ctx;
@@ -59,7 +59,7 @@ export default class Command implements IBaseCommand {
 		await ctx.reply(undefined, embed);
 	}
 
-	public formatPrefixes(prefixes: string[]) {
+	private formatPrefixes(prefixes: string[]) {
 		return `\`${prefixes.map(prefix => Util.escapeInlineCode(prefix)).join("`\n`")}\``;
 	}
 }

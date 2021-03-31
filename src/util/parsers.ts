@@ -17,6 +17,7 @@
 
 import { Client, Guild, TextChannel } from "discord.js";
 import emojiUnicode from "emoji-unicode";
+import { removeDuplicates } from "./arrayUtilts";
 import { emojiMap } from "./constants";
 import { emojiRegex, emoteRegex, mentionRegex, roleRegex, snowflakeRegex } from "./regex";
 import { ParsedEmoji, ParsedEmote } from "./types";
@@ -77,7 +78,8 @@ export function emoteParser(str: string) {
 	let match: RegExpExecArray | null = null;
 
 	while ((match = regex.exec(str)) !== null) {
-		const emoji = {
+		const emoji: ParsedEmote = {
+			type: "custom",
 			animated: Boolean(match[1]),
 			name: match[2],
 			id: match[3],
@@ -101,7 +103,8 @@ export function emojiParser(str: string): ParsedEmoji[] {
 		if (!definition) continue;
 
 		const { a: assetName, b: name } = definition;
-		const emoji = {
+		const emoji: ParsedEmoji = {
+			type: "default",
 			raw,
 			name,
 			url() {
@@ -114,4 +117,9 @@ export function emojiParser(str: string): ParsedEmoji[] {
 		result.push(emoji);
 	}
 	return result;
+}
+
+export function parseUniqueEmojis(str: string): Array<ParsedEmoji | ParsedEmote> {
+	const matches = emoteParser(str).concat((emojiParser(str) as unknown) as Array<ParsedEmote>);
+	return removeDuplicates(matches, e => e.id ?? e.name);
 }

@@ -33,7 +33,7 @@ export default class Command implements IBaseCommand {
 	public clientPermissions: PermissionString[] = [];
 	public args: ICommandArgs = {};
 
-	public async callback(ctx: CommandContext): Promise<void> {
+	public async callback(ctx: CommandContext) {
 		const { client } = ctx;
 		const app = await client.fetchApplication();
 		const owner = client.owners.size === 1 ? client.owners.first() : app.owner instanceof User ? app.owner : app.owner?.owner.user;

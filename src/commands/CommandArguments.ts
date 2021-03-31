@@ -71,7 +71,7 @@ export async function parseArgs(command: ICommand, ctx: CommandContext) {
 				let result = await parser(raw);
 				if (result === null || result === undefined || (typeof result === "number" && isNaN(result))) throw void 0;
 
-				if (type === ArgumentTypes.String && result === "") throw new ArgumentError(`This command requires text input!`);
+				if (type === ArgTypes.String && result === "") throw new ArgumentError(`This command requires text input!`);
 
 				if (choices?.length) {
 					if (typeof result === "string") result = result.toLowerCase();
@@ -88,31 +88,31 @@ export async function parseArgs(command: ICommand, ctx: CommandContext) {
 		};
 
 		switch (type) {
-			case ArgumentTypes.String:
+			case ArgTypes.String:
 				await add(str => str);
 				break;
-			case ArgumentTypes.Bool:
+			case ArgTypes.Bool:
 				await add(boolParser);
 				break;
-			case ArgumentTypes.Int:
+			case ArgTypes.Int:
 				await add(validator.toInt);
 				break;
-			case ArgumentTypes.Float:
+			case ArgTypes.Float:
 				await add(validator.toFloat);
 				break;
-			case ArgumentTypes.Url:
+			case ArgTypes.Url:
 				await add(str => (validator.isURL(str) ? str : null));
 				break;
-			case ArgumentTypes.Channel:
+			case ArgTypes.Channel:
 				await add((str: string) => channelParser(ctx.client, str));
 				break;
-			case ArgumentTypes.Message:
+			case ArgTypes.Message:
 				await add((str: string) => channelParser(ctx.client, str));
 				break;
-			case ArgumentTypes.User:
+			case ArgTypes.User:
 				await add((str: string) => channelParser(ctx.client, str));
 				break;
-			case ArgumentTypes.Role:
+			case ArgTypes.Role:
 				await add((str: string) => channelParser(ctx.client, str));
 				break;
 		}
@@ -121,7 +121,7 @@ export async function parseArgs(command: ICommand, ctx: CommandContext) {
 	return output;
 }
 
-export enum ArgumentTypes {
+export enum ArgTypes {
 	String = "text",
 	Bool = "boolean",
 	Int = "number",
@@ -136,7 +136,7 @@ export enum ArgumentTypes {
 export interface Argument<T = unknown> {
 	default?: T;
 	description?: string;
-	type: ArgumentTypes;
+	type: ArgTypes;
 	optional?: boolean;
 	remainder?: boolean;
 	choices?: T[];

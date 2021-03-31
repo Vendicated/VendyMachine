@@ -16,6 +16,7 @@
  */
 
 import sharp from "sharp";
+import { fetch } from "./helpers";
 import { bytesRegex } from "./regex";
 import { ImageFormat } from "./types";
 
@@ -78,4 +79,8 @@ export async function convertImage(input: Buffer, format: ImageFormat, width?: n
 
 export async function getMetadata(input: Buffer) {
 	return sharp(input).metadata();
+}
+
+export function convertSvg(url: string, format: ImageFormat) {
+	return fetch(url).then(buf => convertImage(buf as Buffer, format, 512, true));
 }

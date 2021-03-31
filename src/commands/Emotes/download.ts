@@ -25,12 +25,10 @@ import { writeFile } from "fs/promises";
 import JSZip from "jszip";
 import mkdirp from "mkdirp";
 import path, { sep } from "path";
-import { UserSettings } from "../../db/Entities/UserSettings";
 import { IMessage } from "../../IMessage";
-import { removeDuplicates } from "../../util/arrayUtilts";
-import { emojiParser, emoteParser } from "../../util/parsers";
+import { parseUniqueEmojis } from "../../util/parsers";
 import { ParsedEmoji, ParsedEmote } from "../../util/types";
-import { ArgumentTypes, ICommandArgs } from "../CommandArguments";
+import { ArgTypes, ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { ArgumentError, CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
@@ -43,7 +41,7 @@ export default class Command implements IBaseCommand {
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = ["ATTACH_FILES"];
 	public args: ICommandArgs = {
-		emotes: { type: ArgumentTypes.String, remainder: true, optional: true, description: "One or more emotes to download. Defaults to all server emotes" }
+		emotes: { type: ArgTypes.String, remainder: true, optional: true, description: "One or more emotes to download. Defaults to all server emotes" }
 	};
 	public flags = { force: "Skip cache and force redownload" };
 
@@ -68,7 +66,7 @@ export default class Command implements IBaseCommand {
 	}
 
 	public async handleEmoteInvoke(ctx: CommandContext, emotes: string, noCache?: boolean) {
-		const emojis: Array<ParsedEmoji | ParsedEmote> = emojiParser(emotes).concat(emoteParser(emotes) as any);
+		const emojis = parseUniqueEmojis(emotes);
 
 		if (!emojis.length)
 			throw new ArgumentError(
@@ -90,10 +88,7 @@ export default class Command implements IBaseCommand {
 
 		if (!noCache && (await fileExists(zipPath))) return { cached: true, zipPath };
 
-		const settings = await ctx.db.getById(UserSettings, ctx.author.id);
-		const extension = settings?.imageFormat ?? "webp";
-
-		emojis = removeDuplicates(emojis, e => (e as ParsedEmote).id ?? e.name);
+		const extension = ctx.settings.user?.imageFormat ?? "webp";
 
 		let msg = (await ctx.reply(`${Emotes.DOWNLOADING} Downloading ${emojis.length} emotes...`)) as Message;
 		try {

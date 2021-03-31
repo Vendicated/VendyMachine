@@ -31,3 +31,21 @@ export function removeDuplicates(arr: any[], mapper?: (val: any) => string) {
 		return Object.prototype.hasOwnProperty.call(seen, key) ? false : (seen[key] = true);
 	});
 }
+
+/**
+ * Partitions the array into two array where the first array contains the items that passed and the second contains the items that failed.
+ * @param arr The array to partition
+ * @param test Function used to test (should return a boolean)
+ * @returns
+ */
+export function partition<T>(arr: T[], test: (item: T) => boolean): [T[], T[]] {
+	const passed = [] as T[];
+	const failed = [] as T[];
+
+	for (const item of arr) {
+		if (test(item)) passed.push(item);
+		else failed.push(item);
+	}
+
+	return [passed, failed];
+}

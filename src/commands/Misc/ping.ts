@@ -45,7 +45,7 @@ export default class Command implements IBaseCommand {
 		return `${Random.choice(this.responses)} in \`${ping}ms\``;
 	}
 
-	public async callback(ctx: GuildCommandContext): Promise<void> {
+	public async callback(ctx: GuildCommandContext) {
 		const msg = await ctx.reply("Pinging...");
 		const ping = msg.createdTimestamp - (ctx.msg.editedTimestamp || ctx.msg.createdTimestamp);
 		await msg.edit(this.randomResponse(ping));

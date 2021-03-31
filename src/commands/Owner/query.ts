@@ -19,7 +19,7 @@ import { timeExecution } from "@util/helpers";
 import { codeblock, formatOutput, removePrefix } from "@util/stringHelpers";
 import { MessageOptions, PermissionString } from "discord.js";
 import { Embed } from "../../Embed";
-import { ICommandArgs, ArgumentTypes } from "../CommandArguments";
+import { ArgTypes, ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -31,10 +31,10 @@ export default class Command implements IBaseCommand {
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
 	public args: ICommandArgs = {
-		query: { type: ArgumentTypes.String, remainder: true }
+		query: { type: ArgTypes.String, remainder: true }
 	};
 
-	public async callback(ctx: CommandContext, { query }: Args): Promise<void> {
+	public async callback(ctx: CommandContext, { query }: Args) {
 		query = query.trim();
 
 		// Remove codeblocks
