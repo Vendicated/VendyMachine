@@ -22,6 +22,7 @@ import { UserSettings } from "../db/Entities/UserSettings";
 import { IGuildMessage, IMessage } from "../IMessage";
 
 export class CommandContext {
+	private _msg: IMessage;
 	public readonly msg: IMessage;
 	public readonly guild: Guild | null;
 	public readonly member: GuildMember | null;
@@ -113,7 +114,13 @@ export class CommandContext {
 	 * @param options
 	 */
 	public async reply(content: any, options?: MessageOptions): Promise<IMessage> {
-		return (this.msg.reply(content, options ?? {}) as unknown) as Promise<IMessage>;
+		this._msg = (await (this.msg.reply(content, options ?? {}) as unknown)) as IMessage;
+		return this._msg;
+	}
+
+	public async edit(content: any, options?: MessageOptions): Promise<IMessage> {
+		if (this._msg && this._msg.editable) return this._msg.edit(content, options ?? {}).catch(() => this.reply(content, options)) as Promise<IMessage>;
+		else return this.reply(content, options);
 	}
 
 	/**
