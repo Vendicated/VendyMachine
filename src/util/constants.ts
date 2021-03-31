@@ -24,6 +24,8 @@ export * as PACKAGE_JSON from "../../package.json";
 export const hastebinMirror = process.env.HASTEBIN_MIRROR || "https://hb.vendicated.dev";
 export const ownerFallback = "Vendicated#0001";
 export const defaultFormat = "webp";
+export const baseInvite = "https://discord.com/api/oauth2/authorize?scope=bot";
+export const permissions = "1074121792";
 
 export const Colours = {
 	RED: 0xff403c,

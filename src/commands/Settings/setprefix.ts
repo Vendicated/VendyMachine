@@ -15,10 +15,10 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { hasPermission } from "@util/helpers";
 import { PermissionString, Util } from "discord.js";
 import { GuildSettings } from "../../db/Entities/GuildSettings";
 import { UserSettings } from "../../db/Entities/UserSettings";
+import { hasPermission } from "../../util//helpers";
 import { ArgTypes, ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { ArgumentError, CommandError, UserPermissionError } from "../CommandErrors";

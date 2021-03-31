@@ -16,7 +16,7 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// Use require as otherwise vscode auto sorts imports and puts @util import over this statement
+// Use require as otherwise vscode auto sorts imports and puts ../../util/ import over this statement
 require("tsconfig-paths/register");
 import { execSync } from "child_process";
 import fs from "fs";

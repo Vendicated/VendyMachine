@@ -15,13 +15,13 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Emotes } from "@util/constants";
 import { stripIndents } from "common-tags";
 import type { PartialDMChannel } from "discord.js";
 import { Client } from "../Client";
 import { CommandContext } from "../commands/CommandContext";
 import { ClientPermissionError, UserPermissionError } from "../commands/CommandErrors";
 import { IMessage } from "../IMessage";
+import { Emotes } from "../util//constants";
 import { hasPermission } from "../util/helpers";
 
 export default async function messageListener(client: Client, msg: IMessage) {

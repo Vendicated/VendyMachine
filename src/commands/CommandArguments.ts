@@ -15,9 +15,9 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { boolParser, channelParser } from "@util/parsers";
 import { Channel, Message, Role, User } from "discord.js";
 import validator from "validator";
+import { boolParser, channelParser } from "../util//parsers";
 import { CommandContext } from "./CommandContext";
 import { ArgumentError } from "./CommandErrors";
 import { ICommand } from "./ICommand";

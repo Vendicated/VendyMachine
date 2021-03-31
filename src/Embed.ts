@@ -14,8 +14,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
-import { Colours } from "@util/constants";
 import { MessageEmbed } from "discord.js";
+import { Colours } from "./util//constants";
 
 export class Embed extends MessageEmbed {
 	public constructor(level: "SUCCESS" | "ERROR" | "INFO") {

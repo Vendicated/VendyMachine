@@ -15,14 +15,14 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Emojis, Emotes } from "@util/constants";
-import { errorToEmbed, postError } from "@util/helpers";
-import { codeblock, toTitleCase } from "@util/stringHelpers";
 import { stripIndents } from "common-tags";
-import { Collection, MessageReaction, User } from "discord.js";
+import { Collection } from "discord.js";
 import fs from "fs/promises";
 import path from "path";
 import { Embed } from "../Embed";
+import { Emojis, Emotes } from "../util/constants";
+import { errorToEmbed, postError } from "../util/helpers";
+import { codeblock, toTitleCase } from "../util/stringHelpers";
 import { Argument, parseArgs } from "./CommandArguments";
 import { CommandContext } from "./CommandContext";
 import { ArgumentError, CommandError } from "./CommandErrors";
@@ -149,23 +149,8 @@ export class CommandManager extends Collection<string, ICommand> {
 		} else if (error instanceof CommandError) {
 			await ctx.reply(`${Emotes.ERROR} ${error.message}`);
 		} else {
-			const embed = errorToEmbed(error, ctx);
-
-			const m = await ctx.reply(undefined, embed);
-			await m.react(Emojis.CHECK_MARK);
-			const consented = await m
-				.awaitReactions((r: MessageReaction, u: User) => r.emoji.name === Emojis.CHECK_MARK && u.id === ctx.author.id, {
-					max: 1,
-					time: 1000 * 60
-				})
-				.then(r => Boolean(r.size));
-
-			if (consented) {
-				await postError(embed);
-				await ctx
-					.reply("Thank you! I might send you a private message at some point to ask for more info, so please keep them open <3")
-					.then(r => setTimeout(() => r.deletable && r.delete().catch(() => void 0), 1000 * 10));
-			}
+			await ctx.reply(errorToEmbed(error, null));
+			await postError(errorToEmbed(error, ctx));
 		}
 	}
 }

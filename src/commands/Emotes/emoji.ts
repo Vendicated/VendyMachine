@@ -15,9 +15,9 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { emoteParser } from "@util/parsers";
-import { formatOutput } from "@util/stringHelpers";
 import { MessageOptions, PermissionString } from "discord.js";
+import { emoteParser } from "../../util//parsers";
+import { formatOutput } from "../../util//stringHelpers";
 import { removeDuplicates } from "../../util/arrayUtilts";
 import { defaultFormat } from "../../util/constants";
 import { emojiParser } from "../../util/parsers";
@@ -66,8 +66,8 @@ export default class Command implements IBaseCommand {
 			if (characterCount < 2000) urls = urls.map(u => `<${u}>`);
 
 			const options: MessageOptions = {};
-			options.content = await formatOutput(info + urls.join("\n"), 2000, null, options, "EmojiUrls.txt");
-			await ctx.reply(undefined, options);
+			options.content = (await formatOutput(info + urls.join("\n"), 2000, null, options, "EmojiUrls.txt")) || "Sorry, something went wrong";
+			await ctx.reply(options);
 		}
 	}
 }

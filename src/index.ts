@@ -15,12 +15,9 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// Use require as otherwise vscode auto sorts imports and puts @util import over this statement
-require("tsconfig-paths/register");
-
-import { errorToEmbed, postError } from "@util/helpers";
 import { Intents } from "discord.js";
 import { Client } from "./Client";
+import { errorToEmbed, postError } from "./util/helpers";
 
 const client = new Client({
 	// Enable channel partials to get DM events

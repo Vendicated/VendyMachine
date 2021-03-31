@@ -15,9 +15,9 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { toTitleCase } from "@util/stringHelpers";
 import { PermissionString } from "discord.js";
 import { Embed } from "../../Embed";
+import { toTitleCase } from "../../util//stringHelpers";
 import { ArgTypes, ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { CommandError } from "../CommandErrors";
@@ -39,7 +39,7 @@ export default class Command implements IBaseCommand {
 		if (!name) return await this.mainMenu(ctx, isOwner);
 
 		const commandEmbed = client.commands.formatHelpEmbed(name, prefix, isOwner);
-		if (commandEmbed) return ctx.reply(undefined, commandEmbed);
+		if (commandEmbed) return ctx.reply(commandEmbed);
 
 		if (client.commands.some(cmd => cmd.category === name.toLowerCase() && (isOwner ? true : cmd.ownerOnly === false)))
 			return await this.categoryHelp(ctx, name);
@@ -65,7 +65,7 @@ export default class Command implements IBaseCommand {
 			.setDescription(`Use \`${prefix}${commandName} command / category\` for more info on a command or category`)
 			.addFields(fields);
 
-		await ctx.reply(undefined, embed);
+		await ctx.reply(embed);
 	}
 
 	public async categoryHelp(ctx: CommandContext, name: string) {
@@ -86,7 +86,7 @@ export default class Command implements IBaseCommand {
 			.setTitle(toTitleCase(`${name} Help`))
 			.setDescription(`Use \`${prefix}${commandName} command\` for more info on a command\n\n${description}`);
 
-		await ctx.reply(undefined, embed);
+		await ctx.reply(embed);
 	}
 }
 

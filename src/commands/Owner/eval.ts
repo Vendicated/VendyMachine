@@ -15,13 +15,13 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import * as constants from "@util/constants";
-import * as helpers from "@util/helpers";
-import * as regex from "@util/regex";
-import * as stringHelpers from "@util/stringHelpers";
+import { Stopwatch } from "@klasa/stopwatch";
 import { MessageOptions } from "discord.js";
 import { Embed } from "../../Embed";
-import { ICommandArgs, ArgTypes } from "../CommandArguments";
+import * as constants from "../../util//constants";
+import * as regex from "../../util//regex";
+import * as stringHelpers from "../../util//stringHelpers";
+import { ArgTypes, ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -66,22 +66,55 @@ export default class Command implements IBaseCommand {
 		};
 		console.log = console.error = console.warn = console.info = console._logger.bind(console);
 
-		const func = () => eval(script);
+		const stopwatch = new Stopwatch();
+		const messageOptions: MessageOptions = {};
 
-		const { result, timeString, success } = await helpers.timeExecution(func);
+		let result,
+			syncTime,
+			asyncTime,
+			isPromise,
+			success = true;
 
-		const messageOptions: MessageOptions = { files: [] };
+		try {
+			result = eval(script);
+			syncTime = stopwatch.toString();
 
+			// Is promise?
+			if (result instanceof Promise) {
+				const content = (await stringHelpers.formatOutput(result, 1900, "js")) || "-";
+				await ctx.reply(`${content}\n${stringHelpers.codeblock(`⏱ ${syncTime}`)}`);
+
+				isPromise = true;
+				stopwatch.restart();
+				result = await result;
+				asyncTime = stopwatch.toString();
+			}
+		} catch (err) {
+			if (!syncTime) syncTime = stopwatch.toString();
+			if (isPromise && !asyncTime) asyncTime = stopwatch.toString();
+			result = err;
+
+			success = false;
+		}
+
+		stopwatch.stop();
+
+		const successStr = success ? "SUCCESS" : "ERROR";
+		const timeString = asyncTime ? `⏱ ${asyncTime}<${syncTime}>` : `⏱ ${syncTime}`;
 		const consoleOutput = await stringHelpers.formatOutput(console._formatLines(), 1000, "js", messageOptions, "EvalConsoleOutput.txt");
 
-		messageOptions.embed = new Embed(success ? "SUCCESS" : "ERROR")
-			.setAuthor("Eval", client.user.displayAvatarURL())
-			.addField("Result", await stringHelpers.formatOutput(script, 1000, "js", messageOptions, "EvalInput.txt"))
-			.addField("Result", await stringHelpers.formatOutput(result, 1000, "js", messageOptions, "EvalOutput.txt"))
-			.setFooter(timeString);
+		if (consoleOutput) {
+			messageOptions.embed = new Embed(successStr)
+				.setAuthor("Eval", client.user.displayAvatarURL())
+				.addField("Result", (await stringHelpers.formatOutput(result, 1000, "js", messageOptions, "EvalOutput.txt")) || "-")
+				.addField("Console", await stringHelpers.formatOutput(consoleOutput, 1000, "js" || "-", messageOptions, "EvalConsole.txt"))
+				.setFooter(timeString);
+		} else {
+			messageOptions.content = `${success ? "" : `${constants.Emotes.ERROR} Oops! That didn't work :(\n`}${
+				(await stringHelpers.formatOutput(result, 1900, "js")) || "-"
+			}\n${stringHelpers.codeblock(timeString)}`;
+		}
 
-		if (consoleOutput) messageOptions.embed.addField("Console", consoleOutput);
-
-		await ctx.reply(void 0, messageOptions);
+		await ctx.edit(messageOptions);
 	}
 }

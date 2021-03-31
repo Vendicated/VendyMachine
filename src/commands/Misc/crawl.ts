@@ -15,11 +15,11 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Emotes } from "@util/constants";
-import { removeSuffix } from "@util/stringHelpers";
 import AbortController from "abort-controller";
 import { PermissionString } from "discord.js";
 import fetch from "node-fetch";
+import { Emotes } from "../../util//constants";
+import { removeSuffix } from "../../util//stringHelpers";
 import { ArgTypes, ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";

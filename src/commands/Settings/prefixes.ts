@@ -15,9 +15,9 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Emojis } from "@util/constants";
 import { PermissionString, Util } from "discord.js";
 import { Embed } from "../../Embed";
+import { Emojis } from "../../util/constants";
 import { ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
@@ -56,7 +56,7 @@ export default class Command implements IBaseCommand {
 
 		if (!embed.fields.length) embed.addField("Default", `\`${process.env.DEFAULT_PREFIX}\``);
 
-		await ctx.reply(undefined, embed);
+		await ctx.reply(embed);
 	}
 
 	private formatPrefixes(prefixes: string[]) {

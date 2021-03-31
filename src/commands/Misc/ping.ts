@@ -15,8 +15,8 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Random } from "@util/random";
 import { PermissionString } from "discord.js";
+import { Random } from "../../util//random";
 import { ICommandArgs } from "../CommandArguments";
 import { GuildCommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";

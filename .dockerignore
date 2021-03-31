@@ -10,4 +10,4 @@ node_modules
 Dockerfile
 .dockerignore
 
-LICENSE
+scripts

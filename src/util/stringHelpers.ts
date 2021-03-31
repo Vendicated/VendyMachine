@@ -107,7 +107,7 @@ export function removeSuffix(str: string, prefix: string | string[]) {
  * @param {string} altFilename Filename that should be given to this file
  */
 export async function formatOutput(rawContent: unknown, limit: number, codeLang: string | null, messageOptions?: MessageOptions, altFilename?: string) {
-	if (!rawContent) return "-";
+	if (!rawContent) return null;
 
 	if (typeof rawContent !== "string") {
 		rawContent = inspect(rawContent, { getters: true, compact: false });
@@ -141,8 +141,8 @@ export async function formatOutput(rawContent: unknown, limit: number, codeLang:
  * @param lines
  */
 export function printBox(...lines: string[]) {
-	const divider = "-".repeat(longestLineLength(...lines));
-	for (const line of [divider, ...lines, divider]) console.log(line);
+	const divider = "-".repeat(Math.min(80, longestLineLength(...lines)));
+	for (const line of [divider, ...lines.filter(Boolean), divider]) console.log(line);
 }
 
 /**

@@ -16,6 +16,7 @@
  */
 
 import { PermissionString } from "discord.js";
+import { baseInvite } from "../../util/constants";
 import { snowflakeRegex } from "../../util/regex";
 import { ArgTypes, ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
@@ -32,12 +33,8 @@ export default class Command implements IBaseCommand {
 		id: { type: ArgTypes.String, description: "Alternatively, you may specify the user ID of a bot you wish to invite", optional: true }
 	};
 
-	private readonly baseInvite = "https://discord.com/api/oauth2/authorize?scope=bot";
-	private readonly permissions = "&permissions=1074121792";
 	public async callback(ctx: CommandContext, { id }: Args) {
-		if (id && !snowflakeRegex().test(id)) id = undefined;
-
-		const invite = `${this.baseInvite}&client_id=${id || ctx.client.user.id}${id ? "" : this.permissions}`;
+		const invite = id && snowflakeRegex().test(id) ? `${baseInvite}&client_id=${id}` : ctx.client.invite;
 
 		await ctx.reply(invite);
 	}

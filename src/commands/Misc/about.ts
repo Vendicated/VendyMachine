@@ -15,11 +15,11 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { PACKAGE_JSON } from "@util/constants";
-import { msToHumanReadable } from "@util/stringHelpers";
 import { stripIndents } from "common-tags";
 import { PermissionString, User, version } from "discord.js";
 import { InlineEmbed } from "../../Embed";
+import { PACKAGE_JSON } from "../../util//constants";
+import { msToHumanReadable } from "../../util//stringHelpers";
 import { ownerFallback } from "../../util/constants";
 import { ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
@@ -65,6 +65,6 @@ export default class Command implements IBaseCommand {
 			.addField("License", PACKAGE_JSON.license)
 			.addField("Source Code", url, false);
 
-		await ctx.reply(undefined, embed);
+		await ctx.reply(embed);
 	}
 }

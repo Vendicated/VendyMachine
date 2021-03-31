@@ -23,6 +23,7 @@ import { IGuildMessage, IMessage } from "../IMessage";
 
 export class CommandContext {
 	private _msg: IMessage;
+	private readonly _prefix: string;
 	public readonly msg: IMessage;
 	public readonly guild: Guild | null;
 	public readonly member: GuildMember | null;
@@ -35,10 +36,6 @@ export class CommandContext {
 	public readonly client: Client;
 	public readonly db: Client["db"];
 	public readonly settings: { user?: UserSettings; guild?: GuildSettings };
-	/**
-	 * The prefix this command was invoked with
-	 */
-	public readonly prefix: string;
 	/**
 	 * A list of valid prefixes for this context
 	 */
@@ -61,7 +58,7 @@ export class CommandContext {
 		this.channel = msg.channel;
 		this.client = msg.client;
 		this.db = msg.client.db;
-		this.prefix = prefix;
+		this._prefix = prefix;
 		this.commandName = commandName;
 		this.rawArgs = args;
 		this.settings = { user: userSettings, guild: guildSettings };
@@ -104,6 +101,13 @@ export class CommandContext {
 		return Boolean(this.guild);
 	}
 
+	/**
+	 * The prefix this command was invoked with
+	 */
+	public get prefix() {
+		return this._prefix.replace(this.client.mentionRegex, `@${this.client.user.tag}`);
+	}
+
 	private get filter() {
 		return (msg: IMessage) => msg.author.id === this.msg.author.id;
 	}
@@ -114,13 +118,19 @@ export class CommandContext {
 	 * @param options
 	 */
 	public async reply(content: any, options?: MessageOptions): Promise<IMessage> {
-		this._msg = (await (this.msg.reply(content, options ?? {}) as unknown)) as IMessage;
+		this._msg = (await (this.msg.reply(content, options as MessageOptions) as unknown)) as IMessage;
 		return this._msg;
 	}
 
 	public async edit(content: any, options?: MessageOptions): Promise<IMessage> {
-		if (this._msg && this._msg.editable) return this._msg.edit(content, options ?? {}).catch(() => this.reply(content, options)) as Promise<IMessage>;
-		else return this.reply(content, options);
+		if (options?.files?.length || content?.files?.length) {
+			if (this._msg.deletable) await this._msg.delete().catch(() => void 0);
+			return this.reply(content, options);
+		}
+		if (this._msg && this._msg.editable)
+			return this._msg.edit(content, options as MessageOptions).catch(() => this.reply(content, options)) as Promise<IMessage>;
+
+		return this.reply(content, options);
 	}
 
 	/**

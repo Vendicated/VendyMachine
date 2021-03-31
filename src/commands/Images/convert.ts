@@ -15,8 +15,8 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { bytesToHumanReadable, convertImage, getMetadata } from "@util/sharpUtils";
 import { PermissionString } from "discord.js";
+import { bytesToHumanReadable, convertImage, getMetadata } from "../../util//sharpUtils";
 import { defaultFormat, NitroTiers } from "../../util/constants";
 import { fetch } from "../../util/helpers";
 import { removeTokens } from "../../util/stringHelpers";
@@ -85,7 +85,7 @@ export default class Command implements IBaseCommand {
 					return ctx.reply(`That file is too large (${bytesToHumanReadable(size)}), sorry :(\n\nTry a different format or use the resize command`);
 			}
 
-			await ctx.reply(undefined, { files: [{ attachment, name }] });
+			await ctx.reply({ files: [{ attachment, name }] });
 		} catch (err) {
 			const msg = `Something went wrong while processing your image: \`${err?.message ?? err ?? "shrug"}\``;
 			// Just to make sure

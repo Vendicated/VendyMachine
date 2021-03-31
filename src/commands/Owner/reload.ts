@@ -15,7 +15,7 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { codeblock } from "@util/stringHelpers";
+import { codeblock } from "../../util//stringHelpers";
 import { CommandContext } from "../CommandContext";
 import { CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";

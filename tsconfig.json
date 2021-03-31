@@ -22,10 +22,6 @@
 		"strict": true,
 		"strictPropertyInitialization": false, // typeorm fields are not initialised, so disable this rule
 		"target": "ESNEXT",
-		"paths": {
-			"@util/*": ["src/util/*"],
-			"@assets/*": ["assets/*"]
-		},
 		"typeRoots": ["types"]
 	}
 }

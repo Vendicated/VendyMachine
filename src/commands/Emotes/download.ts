@@ -15,17 +15,17 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Emotes } from "@util/constants";
-import { fileExists } from "@util/fsUtils";
-import { fetch } from "@util/helpers";
-import { convertImage } from "@util/sharpUtils";
-import { removeTokens } from "@util/stringHelpers";
 import { GuildEmoji, Message, PermissionString } from "discord.js";
 import { writeFile } from "fs/promises";
 import JSZip from "jszip";
 import mkdirp from "mkdirp";
 import path, { sep } from "path";
 import { IMessage } from "../../IMessage";
+import { Emotes } from "../../util//constants";
+import { fileExists } from "../../util//fsUtils";
+import { fetch } from "../../util//helpers";
+import { convertImage } from "../../util//sharpUtils";
+import { removeTokens } from "../../util//stringHelpers";
 import { defaultFormat } from "../../util/constants";
 import { parseUniqueEmojis } from "../../util/parsers";
 import { ParsedEmoji, ParsedEmote } from "../../util/types";

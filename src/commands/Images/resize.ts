@@ -15,8 +15,8 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { fetch } from "@util/helpers";
 import { PermissionString } from "discord.js";
+import { fetch } from "../../util//helpers";
 import { NitroTiers } from "../../util/constants";
 import { bytesToHumanReadable, parseBytes, reduceSize } from "../../util/sharpUtils";
 import { ArgTypes, ICommandArgs } from "../CommandArguments";

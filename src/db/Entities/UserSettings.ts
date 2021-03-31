@@ -16,7 +16,6 @@
  */
 
 import { Column, Entity, PrimaryColumn } from "typeorm";
-import { defaultFormat } from "../../util/constants";
 import { ImageFormat } from "../../util/types";
 
 @Entity()
@@ -30,9 +29,6 @@ export class UserSettings {
 	})
 	public prefixes: string[];
 
-	@Column("enum", { enum: ["png", "jpeg", "webp"], default: defaultFormat })
+	@Column("enum", { enum: ["png", "jpeg", "webp"], default: "webp" })
 	public imageFormat: ImageFormat;
-
-	@Column("bool", { default: false })
-	public overrideExisting: boolean;
 }

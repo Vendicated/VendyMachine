@@ -21,6 +21,8 @@ import { CommandContext } from "./commands/CommandContext";
 import { CommandManager } from "./commands/CommandManager";
 import { Database } from "./db";
 import { IMessage } from "./IMessage";
+import { baseInvite, permissions } from "./util/constants";
+import { mentionRegex } from "./util/regex";
 
 interface ClientEvents extends BaseClientEvents {
 	message: [IMessage];
@@ -40,7 +42,11 @@ export class Client extends BaseClient {
 	public owners = new Collection<string, User>();
 
 	public get invite() {
-		return `https://discord.com/oauth2/authorize?client_id=${this.user.id}&scope=bot&permissions=1074121792`;
+		return `${baseInvite}&client_id=${this.user.id}&permissions=${permissions}`;
+	}
+
+	public get mentionRegex() {
+		return mentionRegex(this.user.id);
 	}
 
 	private async _registerHandlers() {

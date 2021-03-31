@@ -15,12 +15,12 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ZWSP } from "@util/constants";
-import { emojiParser, emoteParser } from "@util/parsers";
-import { formatDate } from "@util/stringHelpers";
-import { ParsedEmote } from "@util/types";
 import { MessageEmbed, PermissionString } from "discord.js";
 import { InlineEmbed } from "../../Embed";
+import { ZWSP } from "../../util//constants";
+import { emojiParser, emoteParser } from "../../util//parsers";
+import { formatDate } from "../../util//stringHelpers";
+import { ParsedEmote } from "../../util//types";
 import { ParsedEmoji } from "../../util/types";
 import { ArgTypes, ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
@@ -52,7 +52,7 @@ export default class Command implements IBaseCommand {
 			this.handleDefaultEmoji(emoji, embed);
 		}
 
-		await ctx.reply(undefined, embed);
+		await ctx.reply(embed);
 	}
 
 	public getEmoji(str: string) {

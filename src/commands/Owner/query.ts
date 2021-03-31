@@ -15,10 +15,8 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { timeExecution } from "@util/helpers";
-import { codeblock, formatOutput, removePrefix } from "@util/stringHelpers";
 import { MessageOptions, PermissionString } from "discord.js";
-import { Embed } from "../../Embed";
+import { formatOutput, removePrefix } from "../../util/stringHelpers";
 import { ArgTypes, ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
@@ -42,18 +40,15 @@ export default class Command implements IBaseCommand {
 			query = removePrefix(query.substring(3, query.length - 3), ["sql", "postgres", "postgresql"]);
 		}
 
-		const func = () => ctx.db.connection.query(query);
-		const { result, timeString, success } = await timeExecution(func);
-
 		const messageOptions: MessageOptions = { files: [] };
+		try {
+			const result = await ctx.db.connection.query(query);
+			messageOptions.content = (await formatOutput(result, 2000, "js", messageOptions, "QueryResult.txt")) || "-";
+		} catch (err) {
+			messageOptions.content = (await formatOutput(err, 2000, "js", messageOptions, "QueryError.txt")) || "-";
+		}
 
-		messageOptions.embed = new Embed(success ? "SUCCESS" : "ERROR")
-			.setAuthor("Query", ctx.client.user.displayAvatarURL())
-			.addField("Input", await formatOutput(query, 1000, "sql", messageOptions, "QueryInput.txt"))
-			.addField("Result", await formatOutput(result, 1000, "js", messageOptions, "QueryOutput.txt"))
-			.addField("Time", codeblock(timeString));
-
-		await ctx.reply(undefined, messageOptions);
+		await ctx.reply(messageOptions);
 	}
 }
 

@@ -15,12 +15,11 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Stopwatch } from "@klasa/stopwatch";
 import { Channel, GuildChannel, GuildMember, MessageEmbed, PermissionString } from "discord.js";
 import nodeFetch, { RequestInfo, RequestInit } from "node-fetch";
 import { CommandContext } from "../commands/CommandContext";
 import { InlineEmbed } from "../Embed";
-import { Emojis, hastebinMirror } from "./constants";
+import { hastebinMirror } from "./constants";
 import { codeblock, printBoxErr, removeTokens, trim } from "./stringHelpers";
 import { JsonObject, LogCategory } from "./types";
 
@@ -99,11 +98,7 @@ export function errorToEmbed(error: unknown, ctx: unknown) {
 	const errorString = typeof error === "string" ? error : (error as Error).stack || (error as Error).name || "Unknown error";
 	const errorText = trim(removeTokens(errorString), 2000);
 
-	const embed = new InlineEmbed("ERROR")
-		.setTitle("Oops!")
-		.setDescription(
-			`I'm sorry, an error occurred while executing this command. You may find the details below.\n\nPlease react with ${Emojis.CHECK_MARK} if it is okay for me to automatically report this to my Owner.`
-		);
+	const embed = new InlineEmbed("ERROR").setTitle("Oops!").setDescription("I'm sorry, an error occurred while executing this command.");
 
 	if (ctx instanceof CommandContext) {
 		const { commandName, msg, guild, rawArgs } = ctx;
@@ -114,7 +109,7 @@ export function errorToEmbed(error: unknown, ctx: unknown) {
 			.addField("Message ID", msg.id)
 			.addField("Arguments", rawArgs.join(" ") || "-", false);
 	}
-	embed.addField("Error", codeblock(removeTokens(errorText), "js"), false);
+	embed.addField("Error", codeblock(errorText, "js"), false);
 
 	return embed;
 }
@@ -127,6 +122,7 @@ export function postInfo(embeds: MessageEmbed | MessageEmbed[]) {
 
 export function postError(embeds: MessageEmbed | MessageEmbed[]) {
 	if (!Array.isArray(embeds)) embeds = [embeds.setDescription("")];
+
 	for (const embed of embeds) {
 		printBoxErr(...embed.fields.map(field => `${field.name !== "Error" ? `${field.name}: ` : ""}${field.value.replace(/```[^\n]*/g, "")}`));
 	}
@@ -164,43 +160,4 @@ export function hasPermission(permissions: PermissionString | PermissionString[]
 	if (!perms) return false;
 
 	return permissions.every(perm => perms.has(perm));
-}
-
-export async function timeExecution(code: () => Promise<any>) {
-	const stopwatch = new Stopwatch();
-
-	let result,
-		syncTime,
-		asyncTime,
-		isPromise,
-		success = true;
-
-	try {
-		result = code();
-		syncTime = stopwatch.toString();
-
-		// Is promise?
-		if (result instanceof Promise || (result && typeof (result as Promise<unknown>).then === "function")) {
-			isPromise = true;
-			stopwatch.restart();
-			result = await result;
-			asyncTime = stopwatch.toString();
-		}
-	} catch (err) {
-		if (!syncTime) syncTime = stopwatch.toString();
-		if (isPromise && !asyncTime) asyncTime = stopwatch.toString();
-		result = err;
-
-		success = false;
-	}
-
-	stopwatch.stop();
-
-	return {
-		result,
-		success,
-		syncTime,
-		asyncTime,
-		timeString: asyncTime ? `⏱ ${asyncTime}<${syncTime}>` : `⏱ ${syncTime}`
-	};
 }
