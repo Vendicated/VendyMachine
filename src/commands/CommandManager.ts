@@ -20,6 +20,7 @@ import { Collection } from "discord.js";
 import fs from "fs/promises";
 import path from "path";
 import { Embed } from "../Embed";
+import { logger } from "../Logger";
 import { Emojis, Emotes } from "../util/constants";
 import { errorToEmbed, postError } from "../util/helpers";
 import { codeblock, toTitleCase } from "../util/stringHelpers";
@@ -30,6 +31,7 @@ import { ICommand } from "./ICommand";
 
 export class CommandManager extends Collection<string, ICommand> {
 	private async register(filePath: string) {
+		logger.debug(`Registering command at ${filePath}...`);
 		const commandImport = await import(filePath);
 
 		const command: ICommand = new (commandImport.default ?? commandImport.Command)();
@@ -48,6 +50,7 @@ export class CommandManager extends Collection<string, ICommand> {
 
 		this.set(command.name, command);
 
+		logger.debug(`Command initialised as ${command.name}`);
 		// Delete require cache since import statement transpiles to require statement
 		delete require.cache[filePath];
 	}

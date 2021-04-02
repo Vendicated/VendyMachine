@@ -21,6 +21,7 @@ import { Client } from "../Client";
 import { CommandContext } from "../commands/CommandContext";
 import { ClientPermissionError, UserPermissionError } from "../commands/CommandErrors";
 import { IMessage } from "../IMessage";
+import { logger } from "../Logger";
 import { Emotes } from "../util//constants";
 import { hasPermission } from "../util/helpers";
 
@@ -53,6 +54,7 @@ export default async function messageListener(client: Client, msg: IMessage) {
 
 	if (!command || (command.ownerOnly && !client.isOwner(ctx))) return;
 
+	logger.debug(`Received command ${command.name} by ${ctx.author.tag}`);
 	if (ctx.isGuild()) {
 		const { clientPermissions, userPermissions } = command;
 		if (clientPermissions) {

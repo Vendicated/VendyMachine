@@ -26,6 +26,7 @@
 	"scripts": {
 		"build": "tsc",
 		"clean": "rm -rf dist",
+		"debug": "export NODE_ENV=debug && yarn tsnode",
 		"dev": "export NODE_ENV=development && yarn tsnode",
 		"dev:watch": "export NODE_ENV=development && nodemon --exec ts-node --files src/index.ts ",
 		"format": "precise-commits",
@@ -33,6 +34,7 @@
 		"lint": "eslint src --ext ts",
 		"lint:fix": "yarn lint --fix",
 		"prepare": "husky install",
+		"prunelogs": "rm -rf logs",
 		"start": "export NODE_ENV=production && yarn build && node .",
 		"test": "tsc -p tsconfig.test.json && yarn lint",
 		"tsnode": "ts-node --files src/index.ts",
@@ -41,6 +43,7 @@
 	"dependencies": {
 		"@klasa/stopwatch": "^0.0.1",
 		"abort-controller": "^3.0.0",
+		"chalk": "^4.1.0",
 		"common-tags": "^1.8.0",
 		"discord.js": "discordjs/discord.js",
 		"emoji-unicode": "^2.0.1",
@@ -52,7 +55,8 @@
 		"reflect-metadata": "^0.1.13",
 		"sharp": "^0.28.0",
 		"typeorm": "^0.2.31",
-		"validator": "^13.5.2"
+		"validator": "^13.5.2",
+		"winston": "^3.3.3"
 	},
 	"devDependencies": {
 		"@types/common-tags": "^1.8.0",

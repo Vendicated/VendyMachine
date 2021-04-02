@@ -17,7 +17,9 @@
 
 import { Stopwatch } from "@klasa/stopwatch";
 import { MessageOptions } from "discord.js";
+import { inspect } from "util";
 import { Embed } from "../../Embed";
+import { logger } from "../../Logger";
 import * as constants from "../../util//constants";
 import * as regex from "../../util//regex";
 import * as stringHelpers from "../../util//stringHelpers";
@@ -55,16 +57,19 @@ export default class Command implements IBaseCommand {
 
 		// Create a dummy console for use in eval command
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const console: any = {
-			_lines: [],
-			_logger(...things: string[]) {
-				this._lines.push(...things.join(" ").split("\n"));
-			},
-			_formatLines() {
-				return this._lines.join("\n");
+		const console = {
+			_lines: [] as string[],
+			_log(...things: string[]) {
+				this._lines.push(
+					...things
+						.map(x => inspect(x, { getters: true }))
+						.join(" ")
+						.split("\n")
+				);
 			}
 		};
-		console.log = console.error = console.warn = console.info = console._logger.bind(console);
+		// @ts-ignore
+		console.log = console.error = console.warn = console.info = console._log.bind(console);
 
 		const stopwatch = new Stopwatch();
 		const messageOptions: MessageOptions = {};
@@ -101,9 +106,13 @@ export default class Command implements IBaseCommand {
 
 		const successStr = success ? "SUCCESS" : "ERROR";
 		const timeString = asyncTime ? `⏱ ${asyncTime}<${syncTime}>` : `⏱ ${syncTime}`;
-		const consoleOutput = await stringHelpers.formatOutput(console._formatLines(), 1000, "js", messageOptions, "EvalConsoleOutput.txt");
+		const consoleOutput = console._lines.join("\n");
+
+		logger.debug(`Evaluated ${script}`);
+		logger.debug(`Result: ${result}`);
 
 		if (consoleOutput) {
+			logger.debug(`Console Output: ${consoleOutput}`);
 			messageOptions.embed = new Embed(successStr)
 				.setAuthor("Eval", client.user.displayAvatarURL())
 				.addField("Result", (await stringHelpers.formatOutput(result, 1000, "js", messageOptions, "EvalOutput.txt")) || "-")

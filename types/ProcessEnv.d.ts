@@ -18,7 +18,7 @@ declare namespace NodeJS {
 	interface ProcessEnv {
 		DEFAULT_PREFIX: string;
 		TOKEN: string;
-		NODE_ENV: "production" | "development";
+		NODE_ENV: "production" | "development" | "debug";
 		ERROR_WEBHOOK: string;
 		INFO_WEBHOOK: string;
 		POSTGRES_USER: string;

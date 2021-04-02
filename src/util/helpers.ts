@@ -19,8 +19,9 @@ import { Channel, GuildChannel, GuildMember, MessageEmbed, PermissionString } fr
 import nodeFetch, { RequestInfo, RequestInit } from "node-fetch";
 import { CommandContext } from "../commands/CommandContext";
 import { InlineEmbed } from "../Embed";
+import { logger } from "../Logger";
 import { hastebinMirror } from "./constants";
-import { codeblock, printBoxErr, removeTokens, trim } from "./stringHelpers";
+import { codeblock, removeTokens, trim } from "./stringHelpers";
 import { JsonObject, LogCategory } from "./types";
 
 /**
@@ -124,7 +125,7 @@ export function postError(embeds: MessageEmbed | MessageEmbed[]) {
 	if (!Array.isArray(embeds)) embeds = [embeds.setDescription("")];
 
 	for (const embed of embeds) {
-		printBoxErr(...embed.fields.map(field => `${field.name !== "Error" ? `${field.name}: ` : ""}${field.value.replace(/```[^\n]*/g, "")}`));
+		embed.fields.map(field => `${field.name !== "Error" ? `${field.name}: ` : ""}${field.value.replace(/```[^\n]*/g, "")}`).forEach(logger.error);
 	}
 
 	if (process.env.NODE_ENV !== "production") return;

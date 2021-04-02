@@ -17,8 +17,8 @@
 
 import { Client } from "../Client";
 import { InlineEmbed } from "../Embed";
+import { logger } from "../Logger";
 import { postInfo } from "../util/helpers";
-import { printBox } from "../util/stringHelpers";
 
 export default function listener({ user, guilds, channels, commands }: Client) {
 	void user.setActivity({ type: "LISTENING", name: `@${user.tag}` });
@@ -36,5 +36,6 @@ export default function listener({ user, guilds, channels, commands }: Client) {
 		.addField("Commands loaded", commands.size);
 
 	void postInfo(embed);
-	printBox(embed.title!, ...embed.fields.map(field => `${field.name}: ${field.value}`));
+	logger.info(embed.title);
+	embed.fields.map(field => `${field.name}: ${field.value}`).forEach(logger.info);
 }

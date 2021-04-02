@@ -16,9 +16,7 @@
  */
 
 import { MessageOptions, Util } from "discord.js";
-import ordinal from "ordinal";
 import { inspect } from "util";
-import { monthsShort } from "./constants";
 import { haste } from "./helpers";
 
 export function codeblock(content: string, language?: string) {
@@ -46,17 +44,6 @@ export function toTitleCase(text: string | string[]): string[] | string {
 		.split(/_ +/)
 		.map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
 		.join(" ");
-}
-
-export function msToHumanReadable(ms: number, short = false) {
-	const seconds = Math.floor((ms / 1000) % 60),
-		minutes = Math.floor((ms / (1000 * 60)) % 60),
-		hours = Math.floor((ms / (1000 * 60 * 60)) % 24),
-		days = Math.floor(ms / (1000 * 60 * 60 * 24));
-
-	if (short) return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-
-	return `${pluralise(days, "day")}, ${pluralise(hours, "hour")}, ${pluralise(minutes, "minute")} and ${pluralise(seconds, "second")}`;
 }
 
 export function pluralise(i: number, name: string) {
@@ -110,7 +97,7 @@ export async function formatOutput(rawContent: unknown, limit: number, codeLang:
 	if (!rawContent) return null;
 
 	if (typeof rawContent !== "string") {
-		rawContent = inspect(rawContent, { getters: true, compact: false });
+		rawContent = inspect(rawContent, { getters: true });
 	}
 	if (codeLang) limit -= 8 + codeLang.length;
 
@@ -134,26 +121,4 @@ export async function formatOutput(rawContent: unknown, limit: number, codeLang:
 	}
 
 	return content;
-}
-
-/**
- * Prints to console with a nice box
- * @param lines
- */
-export function printBox(...lines: string[]) {
-	const divider = "-".repeat(Math.min(80, longestLineLength(...lines)));
-	for (const line of [divider, ...lines.filter(Boolean), divider]) console.log(line);
-}
-
-/**
- * Prints to console with a nice box
- * @param lines
- */
-export function printBoxErr(...lines: string[]) {
-	const divider = "-".repeat(longestLineLength(...lines));
-	for (const line of [divider, ...lines, divider]) console.error(line);
-}
-
-export function formatDate(date: Date) {
-	return `${monthsShort[date.getMonth()]} ${ordinal(date.getDate())} ${date.getFullYear()}`;
 }

@@ -17,6 +17,7 @@
 
 import { Intents } from "discord.js";
 import { Client } from "./Client";
+import { logger } from "./Logger";
 import { errorToEmbed, postError } from "./util/helpers";
 
 const client = new Client({
@@ -40,3 +41,7 @@ process.on("unhandledRejection", rej => {
 	const embed = errorToEmbed(rej, null);
 	void postError(embed);
 });
+
+client.on("debug", msg => logger.debug(msg));
+
+process.on("warning", warning => logger.warn(warning));

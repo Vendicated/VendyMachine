@@ -20,6 +20,7 @@ import "reflect-metadata"; // global.Reflect polyfill for typeorm decorators
 import { Connection, createConnection, EntityTarget } from "typeorm";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 import { IMessage } from "../IMessage";
+import { logger } from "../Logger";
 import { GuildSettings } from "./Entities/GuildSettings";
 import { UserSettings } from "./Entities/UserSettings";
 
@@ -27,6 +28,7 @@ export class Database {
 	public connection: Connection;
 
 	public async init() {
+		logger.debug("Creating database connection...");
 		this.connection = await createConnection({
 			type: "postgres",
 			host: process.env.POSTGRES_HOST,

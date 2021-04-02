@@ -21,6 +21,7 @@ import { CommandContext } from "./commands/CommandContext";
 import { CommandManager } from "./commands/CommandManager";
 import { Database } from "./db";
 import { IMessage } from "./IMessage";
+import { logger } from "./Logger";
 import { baseInvite, permissions } from "./util/constants";
 import { mentionRegex } from "./util/regex";
 
@@ -61,11 +62,13 @@ export class Client extends BaseClient {
 	}
 
 	public registerHandlers() {
+		logger.debug("Registering all handlers...");
 		void this._registerHandlers();
 		return this;
 	}
 
 	public registerCommands() {
+		logger.debug("Registering all commands...");
 		void this.commands.registerAll();
 		return this;
 	}
@@ -94,6 +97,7 @@ export class Client extends BaseClient {
 	}
 
 	public async connect() {
+		logger.debug("Connecting to Discord...");
 		await this.initDb()
 			.then(() => this.login(process.env.TOKEN))
 			.then(() => this.fetchOwners());
