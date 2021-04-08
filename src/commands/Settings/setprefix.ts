@@ -35,13 +35,13 @@ export default class Command implements IBaseCommand {
 		scope: {
 			type: ArgTypes.String,
 			choices: ["server", "user"],
-			description: "whether this prefix should be set on a server or only for yourself"
+			description: "prefix scope"
 		},
 		action: {
 			type: ArgTypes.String,
 			choices: ["add", "remove", "set"]
 		},
-		prefix: { type: ArgTypes.String, default: process.env.DEFAULT_PREFIX, description: "the new prefix" }
+		prefix: { type: ArgTypes.String, default: process.env.DEFAULT_PREFIX, description: "new prefix" }
 	};
 
 	public async callback(ctx: CommandContext, args: Args) {

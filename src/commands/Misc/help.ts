@@ -30,7 +30,7 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: ICommandArgs = { name: { type: ArgTypes.String, description: "command / command category", optional: true } };
+	public args: ICommandArgs = { name: { type: ArgTypes.String, description: "command name / category", optional: true } };
 
 	public async callback(ctx: CommandContext, { name }: Args) {
 		const { client, prefix } = ctx;

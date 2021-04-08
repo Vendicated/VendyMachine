@@ -32,10 +32,10 @@ export default class Command implements IBaseCommand {
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = ["ATTACH_FILES"];
 	public args: ICommandArgs = {
-		size: { type: ArgTypes.String, default: "256KB", description: "Size to resize to. Format: 100B/10.7KB/2MB" },
-		url: { type: ArgTypes.Url, description: "Url of image to resize", optional: true }
+		size: { type: ArgTypes.String, default: "256KB", description: "size e.g. one of 100B/10.7KB/2MB" },
+		url: { type: ArgTypes.Url, description: "image url", optional: true }
 	};
-	public flags: { maxRes: "Start with original image width instead of 512px. Slower" };
+	public flags: { maxRes: "start with original image width instead of 512px. slower" };
 
 	public async callback(ctx: CommandContext, { size, url, maxRes }: Args) {
 		const bytes = parseBytes(size);

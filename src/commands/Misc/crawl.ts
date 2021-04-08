@@ -32,7 +32,7 @@ export default class Command implements IBaseCommand {
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
 	public args: ICommandArgs = {
-		url: { type: ArgTypes.Url, description: "The url to trace" }
+		url: ArgTypes.Url
 	};
 
 	public async callback(ctx: CommandContext, { url }: Args) {

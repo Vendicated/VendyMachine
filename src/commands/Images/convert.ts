@@ -38,17 +38,17 @@ export default class Command implements IBaseCommand {
 			type: ArgTypes.String,
 			optional: true,
 			choices: ["png", "jpeg", "webp"],
-			description: "The image format to convert to. Defaults to the one specified in your settings"
+			description: "image format"
 		},
 		url: {
 			type: ArgTypes.Url,
 			optional: true,
-			description: "Url of image to convert"
+			description: "image url"
 		},
 		width: {
 			type: ArgTypes.Int,
 			optional: true,
-			description: "Width that image should be scaled to. (Height is automatically calculated)"
+			description: "width in px"
 		}
 	};
 

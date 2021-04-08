@@ -15,9 +15,11 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Channel, Message, Role, User } from "discord.js";
+import { Channel, GuildEmoji, Message, Role, User } from "discord.js";
 import validator from "validator";
 import { boolParser, channelParser } from "../util//parsers";
+import { parseEmoji, parseEmojiOrEmote, parseEmojis, parseEmojisOrEmotes, parseEmote, parseEmotes } from "../util/parsers";
+import { ParsedEmoji, ParsedEmote } from "../util/types";
 import { CommandContext } from "./CommandContext";
 import { ArgumentError } from "./CommandErrors";
 import { ICommand } from "./ICommand";
@@ -51,15 +53,9 @@ export async function parseArgs(command: ICommand, ctx: CommandContext) {
 
 	for (let i = 0; i < args.length; ++i) {
 		const [key, arg] = args[i];
-		const { type, choices, description, optional, remainder } = arg as Argument;
+		const { type, choices, description, optional, remainder } = typeof arg === "string" ? ({ type: arg } as Argument) : arg;
 
-		let raw: string;
-
-		if (i === args.length - 1 && remainder) {
-			raw = rawArgs.slice(i).join(" ");
-		} else {
-			raw = rawArgs[i];
-		}
+		const raw = remainder && i === args.length - 1 ? rawArgs.slice(i).join("") : rawArgs[i];
 
 		const add = async (parser: (str: string) => ICommandInvokeArg | null | Promise<ICommandInvokeArg | null>) => {
 			try {
@@ -72,6 +68,7 @@ export async function parseArgs(command: ICommand, ctx: CommandContext) {
 				if (result === null || result === undefined || (typeof result === "number" && isNaN(result))) throw void 0;
 
 				if (type === ArgTypes.String && result === "") throw new ArgumentError(`This command requires text input!`);
+				if (Array.isArray(result) && !result.length) throw void 0;
 
 				if (choices?.length) {
 					if (typeof result === "string") result = result.toLowerCase();
@@ -83,7 +80,7 @@ export async function parseArgs(command: ICommand, ctx: CommandContext) {
 			} catch (err: unknown) {
 				if (err instanceof ArgumentError) throw err;
 
-				throw new ArgumentError(`Wrong argument \`${raw}\`. Expected ${description || type}.`);
+				throw new ArgumentError(`Wrong argument \`${raw}\`. Expected ${remainder ? "one or more arguments of type " : ""}${description || type}.`);
 			}
 		};
 
@@ -115,6 +112,31 @@ export async function parseArgs(command: ICommand, ctx: CommandContext) {
 			case ArgTypes.Role:
 				await add((str: string) => channelParser(ctx.client, str));
 				break;
+			case ArgTypes.GuildEmoji: {
+				let fn: (str: string) => ICommandInvokeArg | null = () => null;
+				if (ctx.isGuild()) {
+					if (remainder)
+						fn = (str: string) =>
+							parseEmotes(str)
+								.map(e => ctx.guild.emojis.cache.get(e.id))
+								.filter(Boolean) as GuildEmoji[];
+					else
+						fn = (str: string) => {
+							const parsed = parseEmote(str);
+							return parsed ? ctx.guild.emojis.cache.get(parsed.id) ?? null : null;
+						};
+				}
+				await add(fn);
+				break;
+			}
+			case ArgTypes.Emote:
+				await add((str: string) => (remainder ? parseEmotes(str) : parseEmote(str)));
+				break;
+			case ArgTypes.Emoji:
+				await add((str: string) => (remainder ? parseEmojis(str) : parseEmoji(str)));
+				break;
+			case ArgTypes.EmoteOrEmoji:
+				await add((str: string) => (remainder ? parseEmojisOrEmotes(str) : parseEmojiOrEmote(str)));
 		}
 	}
 
@@ -130,7 +152,11 @@ export enum ArgTypes {
 	Message = "message",
 	User = "user",
 	Role = "role",
-	Url = "url"
+	Url = "url",
+	GuildEmoji = "server emote",
+	Emote = "custom emote",
+	Emoji = "default emoji",
+	EmoteOrEmoji = "custom emote or default emoji"
 }
 
 export interface Argument<T = unknown> {
@@ -144,5 +170,20 @@ export interface Argument<T = unknown> {
 
 export type ICommandArgs = Record<string, Argument | Argument["type"]>;
 
-type ICommandInvokeArg = string | number | boolean | Channel | Message | User | Role;
+type ICommandInvokeArg =
+	| string
+	| number
+	| boolean
+	| Channel
+	| Message
+	| User
+	| Role
+	| GuildEmoji
+	| ParsedEmoji
+	| ParsedEmote
+	| GuildEmoji[]
+	| ParsedEmoji[]
+	| ParsedEmote[]
+	| Array<ParsedEmoji | ParsedEmote>;
+
 export type ICommandInvokeArgs = Record<string, ICommandInvokeArg>;

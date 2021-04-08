@@ -17,8 +17,8 @@
 
 import { PermissionString } from "discord.js";
 import { partition } from "../../util/arrayUtilts";
-import { Emotes, NitroTiers } from "../../util/constants";
-import { parseUniqueEmojis } from "../../util/parsers";
+import { Emotes } from "../../util/constants";
+import { getFreeEmojiSlots } from "../../util/discordUtils";
 import { convertSvg } from "../../util/sharpUtils";
 import { ParsedEmoji, ParsedEmote } from "../../util/types";
 import { ArgTypes, ICommandArgs } from "../CommandArguments";
@@ -34,28 +34,26 @@ export default class Command implements IBaseCommand {
 	public userPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
 	public clientPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
 	public args: ICommandArgs = {
-		input: { type: ArgTypes.String, remainder: true, description: "One or more emojis/emotes to clone" }
+		emojis: { type: ArgTypes.EmoteOrEmoji, remainder: true }
 	};
 
-	public async callback(ctx: GuildCommandContext, { input }: Args) {
-		const tier = NitroTiers[ctx.guild.premiumTier.toString() as keyof typeof NitroTiers] ?? NitroTiers["0"];
-		const limit = tier.emojiSlots;
+	public async callback(ctx: GuildCommandContext, { emojis }: Args) {
+		if (!emojis.length) throw new ArgumentError("Please specify some emotes to clone");
 
-		const emotes = parseUniqueEmojis(input);
-		if (!emotes.length) throw new ArgumentError("Please specify some emotes to clone");
+		const slots = getFreeEmojiSlots(ctx.guild);
+		const [animToAdd, toAdd] = partition(emojis, e => e.type === "custom" && e.animated).map(x => x.length);
 
-		const [animFreeSlots, freeSlots] = ctx.guild.emojis.cache.partition(e => e.animated).map(x => limit - x.size);
-		const [animToAdd, toAdd] = partition(emotes, e => e.type === "custom" && e.animated).map(x => x.length);
-
-		if (animToAdd > animFreeSlots)
+		if (animToAdd > slots.animated)
 			throw new ArgumentError(
 				`Too many animated emotes! This server ${
-					animFreeSlots > 0 ? `only has ${animFreeSlots} free slots but you tried cloning ${animToAdd}` : "has no free slots"
+					slots.animated > 0 ? `only has ${slots.animated} free slots but you tried cloning ${animToAdd}` : "has no free slots"
 				}.`
 			);
-		if (toAdd > freeSlots)
+		if (toAdd > slots.regular)
 			throw new ArgumentError(
-				`Too many regular emotes! This server ${freeSlots > 0 ? `only has ${freeSlots} free slots but you tried cloning ${toAdd}` : "has no free slots"}.`
+				`Too many regular emotes! This server ${
+					slots.regular > 0 ? `only has ${slots.regular} free slots but you tried cloning ${toAdd}` : "has no free slots"
+				}.`
 			);
 
 		const regStr = toAdd ? `${toAdd} regular emotes` : "";
@@ -64,14 +62,14 @@ export default class Command implements IBaseCommand {
 		const counts = `${regStr}${joinStr}${animStr}`;
 		const msg = await ctx.reply(`${Emotes.LOADING} Cloning ${counts}...`);
 
-		const result = await this.uploadEmotes(ctx, emotes);
+		const result = await this.uploadEmotes(ctx, emojis);
 		let output: string;
-		if (result.length === emotes.length) {
+		if (result.length === emojis.length) {
 			output = `${Emotes.SUCCESS} Done! Successfully cloned ${counts}:\n${result.join(" ")}`;
 		} else {
 			output = `${
 				result.length
-					? `${Emotes.ERROR} Sorry, I was only able to clone ${result.length}/${emotes.length} emotes:\n${result.join(" ")}`
+					? `${Emotes.ERROR} Sorry, I was only able to clone ${result.length}/${emojis.length} emotes:\n${result.join(" ")}`
 					: `${Emotes.ERROR} Sorry, something went wrong.`
 			}\n\nThis is most likely related to rate limit, which usually lasts for an hour. Please try again later.`;
 		}
@@ -105,5 +103,5 @@ export default class Command implements IBaseCommand {
 }
 
 interface Args {
-	input: string;
+	emojis: Array<ParsedEmoji | ParsedEmote>;
 }

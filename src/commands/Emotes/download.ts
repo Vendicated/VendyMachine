@@ -26,8 +26,8 @@ import { fileExists } from "../../util//fsUtils";
 import { fetch } from "../../util//helpers";
 import { convertImage } from "../../util//sharpUtils";
 import { removeTokens } from "../../util//stringHelpers";
+import { removeDuplicates } from "../../util/arrayUtilts";
 import { defaultFormat } from "../../util/constants";
-import { parseUniqueEmojis } from "../../util/parsers";
 import { ParsedEmoji, ParsedEmote } from "../../util/types";
 import { ArgTypes, ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
@@ -42,7 +42,7 @@ export default class Command implements IBaseCommand {
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = ["ATTACH_FILES"];
 	public args: ICommandArgs = {
-		emotes: { type: ArgTypes.String, remainder: true, optional: true, description: "One or more emotes to download. Defaults to all server emotes" }
+		emotes: { type: ArgTypes.EmoteOrEmoji, remainder: true, optional: true, description: "emotes to download (defaults to all server emotes)" }
 	};
 	public flags = { force: "Skip cache and force redownload" };
 
@@ -66,16 +66,16 @@ export default class Command implements IBaseCommand {
 		return this.downloadEmotes(ctx, `Emotes-${ctx.guild.id}`, emotes, noCache, true);
 	}
 
-	public async handleEmoteInvoke(ctx: CommandContext, emotes: string, noCache?: boolean) {
-		const emojis = parseUniqueEmojis(emotes);
+	public async handleEmoteInvoke(ctx: CommandContext, emotes: Args["emotes"], noCache?: boolean) {
+		emotes = removeDuplicates(emotes ?? [], e => (e as ParsedEmote).id ?? e.name);
 
-		if (!emojis.length)
+		if (!emotes.length)
 			throw new ArgumentError(
 				`Please specify some emotes to download or run this command ${
 					ctx.isGuild() ? "without arguments to download all emotes of this server" : "on a server"
 				}.`
 			);
-		return this.downloadEmotes(ctx, `Emotes-${ctx.author.id}`, emojis, noCache);
+		return this.downloadEmotes(ctx, `Emotes-${ctx.author.id}`, emotes, noCache);
 	}
 
 	public async downloadEmotes(
@@ -137,6 +137,6 @@ export default class Command implements IBaseCommand {
 }
 
 interface Args {
-	emotes?: string;
+	emotes?: Array<ParsedEmoji | ParsedEmote>;
 	force?: true;
 }

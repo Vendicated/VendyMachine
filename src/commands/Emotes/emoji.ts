@@ -16,11 +16,9 @@
  */
 
 import { MessageOptions, PermissionString } from "discord.js";
-import { emoteParser } from "../../util//parsers";
 import { formatOutput } from "../../util//stringHelpers";
 import { removeDuplicates } from "../../util/arrayUtilts";
 import { defaultFormat } from "../../util/constants";
-import { emojiParser } from "../../util/parsers";
 import { convertSvg } from "../../util/sharpUtils";
 import { ParsedEmoji, ParsedEmote } from "../../util/types";
 import { ArgTypes, ICommandArgs } from "../CommandArguments";
@@ -35,18 +33,15 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: ICommandArgs = { input: { type: ArgTypes.String, remainder: true, description: "One or more emojis/emotes" } };
+	public args: ICommandArgs = { emojis: { type: ArgTypes.EmoteOrEmoji, remainder: true } };
 
-	public async callback(ctx: CommandContext, { input }: Args) {
-		const emotes: Array<ParsedEmoji | ParsedEmote> = removeDuplicates(
-			emoteParser(input).concat((emojiParser(input) as unknown) as ParsedEmote[]),
-			e => e.id ?? e.name
-		);
+	public async callback(ctx: CommandContext, { emojis }: Args) {
+		emojis = removeDuplicates(emojis, e => (e as ParsedEmote).id ?? e.name);
 
-		if (!emotes.length) {
+		if (!emojis.length) {
 			throw new ArgumentError("No emojis provided.");
-		} else if (emotes.length === 1) {
-			const [e] = emotes;
+		} else if (emojis.length === 1) {
+			const [e] = emojis;
 			const url = e.url();
 			// Convert svgs
 			if (e.type === "default") {
@@ -57,11 +52,11 @@ export default class Command implements IBaseCommand {
 				await ctx.reply(url);
 			}
 		} else {
-			const info = emotes.some(e => e.type === "default")
+			const info = emojis.some(e => e.type === "default")
 				? "Hint: To automatically convert default emojis to your preferred image format, use this command with one emoji at a time.\n\n"
 				: "";
-			let urls = emotes.map(e => e.url());
-			const characterCount = urls.reduce((acc, curr) => acc + curr.length, 0) + emotes.length * 2 + info.length;
+			let urls = emojis.map(e => e.url());
+			const characterCount = urls.reduce((acc, curr) => acc + curr.length, 0) + emojis.length * 2 + info.length;
 			// If longer than 2000 character we upload to hastebin instead, so do not surround links with <> in that case
 			if (characterCount < 2000) urls = urls.map(u => `<${u}>`);
 
@@ -73,5 +68,5 @@ export default class Command implements IBaseCommand {
 }
 
 interface Args {
-	input: string;
+	emojis: Array<ParsedEmoji | ParsedEmote>;
 }

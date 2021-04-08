@@ -15,31 +15,35 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { PermissionString } from "discord.js";
-import { baseInvite } from "../../util/constants";
-import { snowflakeRegex } from "../../util/regex";
+import { GuildEmoji, PermissionString } from "discord.js";
 import { ArgTypes, ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
+import { CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
 
 export default class Command implements IBaseCommand {
-	public description = "Invite me to your server";
+	public description = "Rename an emote";
 	public aliases = [];
 	public ownerOnly = false;
-	public guildOnly = false;
-	public userPermissions: PermissionString[] = [];
-	public clientPermissions: PermissionString[] = [];
+	public guildOnly = true;
+	public userPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
+	public clientPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
 	public args: ICommandArgs = {
-		id: { type: ArgTypes.String, description: "user id of bot to invite", optional: true }
+		emoji: ArgTypes.GuildEmoji,
+		name: { type: ArgTypes.String, description: "The new name" }
 	};
 
-	public async callback(ctx: CommandContext, { id }: Args) {
-		const invite = id && snowflakeRegex().test(id) ? `${baseInvite}&client_id=${id}` : ctx.client.invite;
+	public async callback(ctx: CommandContext, { emoji, name }: Args) {
+		if (emoji.name === name) throw new CommandError(`That emote is already called ${name}.`);
 
-		await ctx.reply(invite);
+		const emote = await emoji.edit({ name }, `Renamed by ${ctx.author.tag}`).catch(() => void 0);
+
+		if (!emote) throw new CommandError(`I'm sorry, something went wrong while renaming ${emoji}`);
+		await ctx.reply(`Done! ${emote}`);
 	}
 }
 
 interface Args {
-	id?: string;
+	emoji: GuildEmoji;
+	name: string;
 }

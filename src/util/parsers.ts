@@ -17,7 +17,6 @@
 
 import { Client, Guild, TextChannel } from "discord.js";
 import emojiUnicode from "emoji-unicode";
-import { removeDuplicates } from "./arrayUtilts";
 import { emojiMap } from "./constants";
 import { emojiRegex, emoteRegex, mentionRegex, roleRegex, snowflakeRegex } from "./regex";
 import { ParsedEmoji, ParsedEmote } from "./types";
@@ -72,7 +71,21 @@ export async function roleParser(guild: Guild, str: string) {
 	}
 }
 
-export function emoteParser(str: string) {
+export function parseEmote(str: string): ParsedEmote | null {
+	const [, anim, name, id] = str.match(emoteRegex("")) ?? [];
+	if (!id) return null;
+	return {
+		type: "custom",
+		animated: Boolean(anim),
+		name,
+		id,
+		url() {
+			return `https://cdn.discordapp.com/emojis/${this.id}.${this.animated ? "gif" : "png"}`;
+		}
+	};
+}
+
+export function parseEmotes(str: string) {
 	const regex = emoteRegex();
 	const result: ParsedEmote[] = [];
 	let match: RegExpExecArray | null = null;
@@ -83,7 +96,7 @@ export function emoteParser(str: string) {
 			animated: Boolean(match[1]),
 			name: match[2],
 			id: match[3],
-			url: function () {
+			url() {
 				return `https://cdn.discordapp.com/emojis/${this.id}.${this.animated ? "gif" : "png"}`;
 			}
 		};
@@ -92,7 +105,26 @@ export function emoteParser(str: string) {
 	return result;
 }
 
-export function emojiParser(str: string): ParsedEmoji[] {
+export function parseEmoji(str: string): ParsedEmoji | null {
+	const [raw] = str.match(emojiRegex("")) ?? [];
+	if (!raw) return null;
+	const definition = emojiMap[raw as keyof typeof emojiMap] as typeof emojiMap["\uD83D\uDE00"];
+	if (!definition) return null;
+
+	return {
+		type: "default",
+		raw,
+		name: definition.b,
+		url() {
+			return `https://discord.com/assets/${definition.a}.svg`;
+		},
+		unicode() {
+			return `\\u${emojiUnicode(this.raw).toUpperCase()}`;
+		}
+	};
+}
+
+export function parseEmojis(str: string): ParsedEmoji[] {
 	const regex = emojiRegex();
 	const result: ParsedEmoji[] = [];
 	let match: RegExpExecArray | null = null;
@@ -119,7 +151,10 @@ export function emojiParser(str: string): ParsedEmoji[] {
 	return result;
 }
 
-export function parseUniqueEmojis(str: string): Array<ParsedEmoji | ParsedEmote> {
-	const matches = emoteParser(str).concat((emojiParser(str) as unknown) as Array<ParsedEmote>);
-	return removeDuplicates(matches, e => e.id ?? e.name);
+export function parseEmojiOrEmote(str: string) {
+	return parseEmote(str) ?? parseEmoji(str);
+}
+
+export function parseEmojisOrEmotes(str: string): Array<ParsedEmoji | ParsedEmote> {
+	return parseEmotes(str).concat((parseEmojis(str) as unknown) as Array<ParsedEmote>);
 }

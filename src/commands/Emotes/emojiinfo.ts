@@ -18,13 +18,11 @@
 import { MessageEmbed, PermissionString } from "discord.js";
 import { InlineEmbed } from "../../Embed";
 import { ZWSP } from "../../util//constants";
-import { emojiParser, emoteParser } from "../../util//parsers";
 import { ParsedEmote } from "../../util//types";
 import { formatDate } from "../../util/dateUtils";
 import { ParsedEmoji } from "../../util/types";
 import { ArgTypes, ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
-import { ArgumentError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
 
 export default class Command implements IBaseCommand {
@@ -34,31 +32,18 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: ICommandArgs = { input: { type: ArgTypes.String, remainder: true, description: "An emoji or custom emote" } };
+	public args: ICommandArgs = { emoji: ArgTypes.EmoteOrEmoji };
 
-	private isCustom(emoji: ParsedEmoji | ParsedEmote): emoji is ParsedEmote {
-		return Object.prototype.hasOwnProperty.call(emoji, "animated");
-	}
-
-	public async callback(ctx: CommandContext, { input }: Args) {
-		const emoji = this.getEmoji(input);
-
-		if (!emoji) throw new ArgumentError("Please specify an emoji or a custom emote.");
+	public async callback(ctx: CommandContext, { emoji }: Args) {
 		const embed = new InlineEmbed("INFO");
 
-		if (this.isCustom(emoji)) {
+		if (emoji.type === "custom") {
 			await this.handleCustomEmote(ctx, emoji, embed);
 		} else {
 			this.handleDefaultEmoji(emoji, embed);
 		}
 
 		await ctx.reply(embed);
-	}
-
-	public getEmoji(str: string) {
-		const emotes = emoteParser(str);
-		if (emotes.length) return emotes[0];
-		return emojiParser(str)[0];
 	}
 
 	public handleDefaultEmoji(emoji: ParsedEmoji, embed: MessageEmbed) {
@@ -95,5 +80,5 @@ export default class Command implements IBaseCommand {
 }
 
 interface Args {
-	input: string;
+	emoji: ParsedEmoji | ParsedEmote;
 }
