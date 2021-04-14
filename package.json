@@ -51,7 +51,7 @@
 		"mkdirp": "^1.0.4",
 		"node-fetch": "^2.6.1",
 		"ordinal": "^1.0.3",
-		"pg": "^8.5.1",
+		"pg": "^8.6.0",
 		"reflect-metadata": "^0.1.13",
 		"sharp": "^0.28.1",
 		"typeorm": "^0.2.32",
