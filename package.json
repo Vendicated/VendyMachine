@@ -55,7 +55,7 @@
 		"reflect-metadata": "^0.1.13",
 		"sharp": "^0.28.1",
 		"typeorm": "^0.2.32",
-		"validator": "^13.5.2",
+		"validator": "^13.6.0",
 		"winston": "^3.3.3"
 	},
 	"devDependencies": {
