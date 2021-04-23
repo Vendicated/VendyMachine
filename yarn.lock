@@ -635,8 +635,8 @@ dir-glob@^3.0.1:
 
 discord.js@discordjs/discord.js:
   version "12.5.0"
-  uid "599f0f5cef3fc3038db4de654f8035976df3c991"
-  resolved "https://codeload.github.com/discordjs/discord.js/tar.gz/599f0f5cef3fc3038db4de654f8035976df3c991"
+  uid "1b827fe13638279fe57c7a4f897b38e749ac06f6"
+  resolved "https://codeload.github.com/discordjs/discord.js/tar.gz/1b827fe13638279fe57c7a4f897b38e749ac06f6"
   dependencies:
     "@discordjs/collection" "^0.1.6"
     "@discordjs/form-data" "^3.0.1"
