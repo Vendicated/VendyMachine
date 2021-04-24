@@ -17,12 +17,13 @@
 
 import { Channel, GuildEmoji, Message, Role, User } from "discord.js";
 import validator from "validator";
+import { IMessage } from "../IMessage";
 import { boolParser, channelParser } from "../util//parsers";
 import { parseEmoji, parseEmojiOrEmote, parseEmojis, parseEmojisOrEmotes, parseEmote, parseEmotes } from "../util/parsers";
 import { ParsedEmoji, ParsedEmote } from "../util/types";
 import { CommandContext } from "./CommandContext";
 import { ArgumentError } from "./CommandErrors";
-import { ICommand } from "./ICommand";
+import { IBaseCommand, ICommand } from "./ICommand";
 
 export async function parseArgs(command: ICommand, ctx: CommandContext) {
 	const output: ICommandInvokeArgs = {};
@@ -113,50 +114,44 @@ export async function parseArgs(command: ICommand, ctx: CommandContext) {
 				await add((str: string) => channelParser(ctx.client, str));
 				break;
 			case ArgTypes.GuildEmoji: {
-				let fn: (str: string) => ICommandInvokeArg | null = () => null;
-				if (ctx.isGuild()) {
-					if (remainder)
-						fn = (str: string) =>
-							parseEmotes(str)
-								.map(e => ctx.guild.emojis.cache.get(e.id))
-								.filter(Boolean) as GuildEmoji[];
-					else
-						fn = (str: string) => {
-							const parsed = parseEmote(str);
-							return parsed ? ctx.guild.emojis.cache.get(parsed.id) ?? null : null;
-						};
-				}
-				await add(fn);
+				if (!ctx.isGuild()) throw new Error(`Expected Guild emoji argument but received DM`);
+				await add((str: string) => {
+					const parsed = parseEmote(str);
+					return (parsed && ctx.guild.emojis.cache.get(parsed.id)) ?? null;
+				});
+				break;
+			}
+			case ArgTypes.GuildEmojis: {
+				if (!ctx.isGuild()) throw new Error(`Expected Guild emojis argument but received DM`);
+				await add(
+					(str: string) =>
+						parseEmotes(str)
+							.map(e => ctx.guild.emojis.cache.get(e.id))
+							.filter(Boolean) as GuildEmoji[]
+				);
 				break;
 			}
 			case ArgTypes.Emote:
-				await add((str: string) => (remainder ? parseEmotes(str) : parseEmote(str)));
+				await add((str: string) => parseEmote(str));
+				break;
+			case ArgTypes.Emotes:
+				await add((str: string) => parseEmotes(str));
 				break;
 			case ArgTypes.Emoji:
-				await add((str: string) => (remainder ? parseEmojis(str) : parseEmoji(str)));
+				await add((str: string) => parseEmoji(str));
+				break;
+			case ArgTypes.Emojis:
+				await add((str: string) => parseEmojis(str));
 				break;
 			case ArgTypes.EmoteOrEmoji:
-				await add((str: string) => (remainder ? parseEmojisOrEmotes(str) : parseEmojiOrEmote(str)));
+				await add((str: string) => parseEmojiOrEmote(str));
+				break;
+			case ArgTypes.EmotesOrEmojis:
+				await add((str: string) => parseEmojisOrEmotes(str));
 		}
 	}
 
 	return output;
-}
-
-export enum ArgTypes {
-	String = "text",
-	Bool = "boolean",
-	Int = "number",
-	Float = "floating point number",
-	Channel = "channel",
-	Message = "message",
-	User = "user",
-	Role = "role",
-	Url = "url",
-	GuildEmoji = "server emote",
-	Emote = "custom emote",
-	Emoji = "default emoji",
-	EmoteOrEmoji = "custom emote or default emoji"
 }
 
 export interface Argument<T = unknown> {
@@ -165,7 +160,7 @@ export interface Argument<T = unknown> {
 	type: ArgTypes;
 	optional?: boolean;
 	remainder?: boolean;
-	choices?: T[];
+	choices?: readonly T[];
 }
 
 export type ICommandArgs = Record<string, Argument | Argument["type"]>;
@@ -187,3 +182,64 @@ type ICommandInvokeArg =
 	| Array<ParsedEmoji | ParsedEmote>;
 
 export type ICommandInvokeArgs = Record<string, ICommandInvokeArg>;
+
+export enum ArgTypes {
+	String = "text",
+	Bool = "boolean",
+	Int = "number",
+	Float = "float",
+	Channel = "channel",
+	Message = "message",
+	User = "user",
+	Role = "role",
+	Url = "url",
+	GuildEmoji = "server emote",
+	GuildEmojis = "server emotes",
+	Emote = "custom emote",
+	Emotes = "custom emotes",
+	Emoji = "default emoji",
+	Emojis = "default emojis",
+	EmoteOrEmoji = "custom emote or default emoji",
+	EmotesOrEmojis = "custom emotes or default emojis"
+}
+interface ArgLookup {
+	text: string;
+	boolean: boolean;
+	number: number;
+	float: number;
+	channel: Channel;
+	message: IMessage;
+	user: User;
+	role: Role;
+	url: string;
+	"server emote": GuildEmoji;
+	"server emotes": GuildEmoji[];
+	"custom emote": ParsedEmote;
+	"custom emotes": ParsedEmote[];
+	"default emoji": ParsedEmoji;
+	"default emojis": ParsedEmoji[];
+	"custom emote or default emoji": ParsedEmoji | ParsedEmote;
+	"custom emotes or default emojis": Array<ParsedEmoji | ParsedEmote>;
+	_empty: undefined;
+	_never: never;
+}
+
+// This hurts my brain but I somehow made it work
+type IParsedArg<Arg> = Arg extends Argument
+	? Arg["choices"] extends ReadonlyArray<infer T>
+		? T
+		: Arg["optional"] extends true
+		? ArgLookup[Arg["type"]] | undefined
+		: ArgLookup[Arg["type"]]
+	: /* --------------------------------- */
+	Arg extends ArgTypes
+	? ArgLookup[Arg]
+	: never;
+
+/* Converts Command args object to interface with strongly typed parsed arguments */
+export type IParsedArgs<Command extends IBaseCommand, Args = Command["args"], Flags = Command["flags"]> = {
+	-readonly [prop in keyof Args]: IParsedArg<Args[prop]>;
+} &
+	{
+		[prop in keyof Flags]: boolean;
+	};
