@@ -224,13 +224,13 @@ interface ArgLookup {
   _never: never;
 }
 
+type IPossiblyOptionalArg<Arg extends Argument, T = ArgLookup[Arg["type"]]> = Arg["optional"] extends true ? T | undefined : T;
+
 // This hurts my brain but I somehow made it work
 type IParsedArg<Arg> = Arg extends Argument
   ? Arg["choices"] extends ReadonlyArray<infer T>
-    ? T
-    : Arg["optional"] extends true
-    ? ArgLookup[Arg["type"]] | undefined
-    : ArgLookup[Arg["type"]]
+    ? IPossiblyOptionalArg<Arg, T>
+    : IPossiblyOptionalArg<Arg>
   : /* --------------------------------- */
   Arg extends ArgTypes
   ? ArgLookup[Arg]
