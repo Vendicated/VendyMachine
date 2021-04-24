@@ -52,7 +52,9 @@ export default class Command implements IBaseCommand {
   } as const;
 
   public async callback(ctx: CommandContext, { outputFormat, url, width }: IParsedArgs<Command>) {
-    // TODO Change to ??= once typescript properly supports this
+    // TODO: Switch to ??= once this properly narrows the type to not undefined
+    // Should be fixed in TypeScript 4.3.1 https://github.com/microsoft/TypeScript/issues/40494
+    // outputFormat ??= ctx.settings.user?.imageFormat ?? defaultFormat;
     if (!outputFormat) outputFormat = ctx.settings.user?.imageFormat ?? defaultFormat;
 
     let name;
