@@ -19,7 +19,7 @@ import { PermissionString } from "discord.js";
 import { fetch } from "../../util//helpers";
 import { NitroTiers } from "../../util/constants";
 import { bytesToHumanReadable, parseBytes, reduceSize } from "../../util/sharpUtils";
-import { ArgTypes, ICommandArgs } from "../CommandArguments";
+import { ArgTypes, IParsedArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { ArgumentError, CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
@@ -31,13 +31,13 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = ["ATTACH_FILES"];
-	public args: ICommandArgs = {
+	public args = {
 		size: { type: ArgTypes.String, default: "256KB", description: "size e.g. one of 100B/10.7KB/2MB" },
 		url: { type: ArgTypes.Url, description: "image url", optional: true }
-	};
+	} as const;
 	public flags: { maxRes: "start with original image width instead of 512px. slower" };
 
-	public async callback(ctx: CommandContext, { size, url, maxRes }: Args) {
+	public async callback(ctx: CommandContext, { size, url, maxRes }: IParsedArgs<Command>) {
 		const bytes = parseBytes(size);
 		if (!bytes) return ctx.reply(`Invalid size \`${size}\``);
 
@@ -72,10 +72,4 @@ export default class Command implements IBaseCommand {
 			else throw err;
 		}
 	}
-}
-
-interface Args {
-	size: string;
-	url?: string;
-	maxRes?: boolean;
 }

@@ -18,7 +18,6 @@
 import { PermissionString, Util } from "discord.js";
 import { Embed } from "../../Embed";
 import { Emojis } from "../../util/constants";
-import { ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -29,7 +28,7 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: ICommandArgs = {};
+	public args = {};
 
 	public async callback(ctx: CommandContext) {
 		if (ctx.rawArgs.length === 3) {

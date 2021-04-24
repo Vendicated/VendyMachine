@@ -20,8 +20,8 @@ import { formatOutput } from "../../util//stringHelpers";
 import { removeDuplicates } from "../../util/arrayUtilts";
 import { defaultFormat } from "../../util/constants";
 import { convertSvg } from "../../util/sharpUtils";
-import { ParsedEmoji, ParsedEmote } from "../../util/types";
-import { ArgTypes, ICommandArgs } from "../CommandArguments";
+import { ParsedEmote } from "../../util/types";
+import { ArgTypes, IParsedArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { ArgumentError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
@@ -33,9 +33,9 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: ICommandArgs = { emojis: { type: ArgTypes.EmoteOrEmoji, remainder: true } };
+	public args = { emojis: { type: ArgTypes.EmotesOrEmojis } } as const;
 
-	public async callback(ctx: CommandContext, { emojis }: Args) {
+	public async callback(ctx: CommandContext, { emojis }: IParsedArgs<Command>) {
 		emojis = removeDuplicates(emojis, e => (e as ParsedEmote).id ?? e.name);
 
 		if (!emojis.length) {
@@ -65,8 +65,4 @@ export default class Command implements IBaseCommand {
 			await ctx.reply(options);
 		}
 	}
-}
-
-interface Args {
-	emojis: Array<ParsedEmoji | ParsedEmote>;
 }

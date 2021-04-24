@@ -15,9 +15,9 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { GuildEmoji, PermissionString } from "discord.js";
+import { PermissionString } from "discord.js";
 import { Emotes } from "../../util/constants";
-import { ArgTypes, ICommandArgs } from "../CommandArguments";
+import { ArgTypes, IParsedArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
@@ -29,11 +29,11 @@ export default class Command implements IBaseCommand {
 	public guildOnly = true;
 	public userPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
 	public clientPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
-	public args: ICommandArgs = {
-		emotes: { type: ArgTypes.GuildEmoji, remainder: true }
-	};
+	public args = {
+		emotes: { type: ArgTypes.GuildEmojis }
+	} as const;
 
-	public async callback(ctx: CommandContext, { emotes }: Args) {
+	public async callback(ctx: CommandContext, { emotes }: IParsedArgs<Command>) {
 		await ctx.reply(`${Emotes.LOADING} Deleting ${emotes.length} emotes...`);
 
 		for (const [idx, emote] of emotes.entries()) {
@@ -50,8 +50,4 @@ export default class Command implements IBaseCommand {
 
 		return ctx.edit(`${Emotes.SUCCESS} All done! Deleted ${emotes.length} emotes`);
 	}
-}
-
-interface Args {
-	emotes: GuildEmoji[];
 }

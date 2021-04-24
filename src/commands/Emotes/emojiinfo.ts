@@ -21,7 +21,7 @@ import { ZWSP } from "../../util//constants";
 import { ParsedEmote } from "../../util//types";
 import { formatDate } from "../../util/dateUtils";
 import { ParsedEmoji } from "../../util/types";
-import { ArgTypes, ICommandArgs } from "../CommandArguments";
+import { ArgTypes, IParsedArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -32,9 +32,9 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: ICommandArgs = { emoji: ArgTypes.EmoteOrEmoji };
+	public args = { emoji: ArgTypes.EmoteOrEmoji } as const;
 
-	public async callback(ctx: CommandContext, { emoji }: Args) {
+	public async callback(ctx: CommandContext, { emoji }: IParsedArgs<Command>) {
 		const embed = new InlineEmbed("INFO");
 
 		if (emoji.type === "custom") {
@@ -77,8 +77,4 @@ export default class Command implements IBaseCommand {
 			embed.setDescription("I do not have access to this emoji, so I sadly can't provide more info.");
 		}
 	}
-}
-
-interface Args {
-	emoji: ParsedEmoji | ParsedEmote;
 }

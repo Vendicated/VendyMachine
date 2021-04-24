@@ -15,7 +15,7 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ArgTypes, ICommandArgs } from "../CommandArguments";
+import { ArgTypes, IParsedArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -26,9 +26,15 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions = [];
 	public clientPermissions = [];
-	public args: ICommandArgs = { error: { type: ArgTypes.String, optional: true, remainder: true } };
+	public args = {
+		error: {
+			type: ArgTypes.String,
+			optional: true,
+			remainder: true
+		}
+	} as const;
 
-	public async callback(ctx: CommandContext, { error }: { error: string }) {
+	public async callback(ctx: CommandContext, { error }: IParsedArgs<Command>) {
 		throw new Error(error ?? "Method not implemented");
 	}
 }

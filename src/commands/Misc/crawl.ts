@@ -20,7 +20,7 @@ import { PermissionString } from "discord.js";
 import fetch from "node-fetch";
 import { Emotes } from "../../util//constants";
 import { removeSuffix } from "../../util//stringHelpers";
-import { ArgTypes, ICommandArgs } from "../CommandArguments";
+import { ArgTypes, IParsedArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -31,11 +31,11 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: ICommandArgs = {
+	public args = {
 		url: ArgTypes.Url
-	};
+	} as const;
 
-	public async callback(ctx: CommandContext, { url }: Args) {
+	public async callback(ctx: CommandContext, { url }: IParsedArgs<Command>) {
 		if (!url.includes("://")) url = `http://${url}`;
 		const content = `${Emotes.LOADING} Tracing ${this.formatUrl(url)}...\n\n>>> `;
 		let traceResult = "";
@@ -76,8 +76,4 @@ export default class Command implements IBaseCommand {
 	private formatUrl(url: string) {
 		return `<${removeSuffix(url, "/")}>`;
 	}
-}
-
-interface Args {
-	url: string;
 }

@@ -18,7 +18,7 @@
 import { PermissionString } from "discord.js";
 import { baseInvite } from "../../util/constants";
 import { snowflakeRegex } from "../../util/regex";
-import { ArgTypes, ICommandArgs } from "../CommandArguments";
+import { ArgTypes, IParsedArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -29,17 +29,17 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: ICommandArgs = {
-		id: { type: ArgTypes.String, description: "user id of bot to invite", optional: true }
-	};
+	public args = {
+		id: {
+			type: ArgTypes.String,
+			description: "user id of bot to invite",
+			optional: true
+		}
+	} as const;
 
-	public async callback(ctx: CommandContext, { id }: Args) {
+	public async callback(ctx: CommandContext, { id }: IParsedArgs<Command>) {
 		const invite = id && snowflakeRegex().test(id) ? `${baseInvite}&client_id=${id}` : ctx.client.invite;
 
 		await ctx.reply(invite);
 	}
-}
-
-interface Args {
-	id?: string;
 }

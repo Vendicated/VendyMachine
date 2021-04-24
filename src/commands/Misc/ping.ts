@@ -17,7 +17,6 @@
 
 import { PermissionString } from "discord.js";
 import { Random } from "../../util//random";
-import { ICommandArgs } from "../CommandArguments";
 import { GuildCommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -28,7 +27,7 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: ICommandArgs = {};
+	public args = {};
 
 	private responses = [
 		"Created emotes",

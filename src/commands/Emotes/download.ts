@@ -29,7 +29,7 @@ import { removeTokens } from "../../util//stringHelpers";
 import { removeDuplicates } from "../../util/arrayUtilts";
 import { defaultFormat } from "../../util/constants";
 import { ParsedEmoji, ParsedEmote } from "../../util/types";
-import { ArgTypes, ICommandArgs } from "../CommandArguments";
+import { ArgTypes, IParsedArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { ArgumentError, CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
@@ -41,16 +41,16 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = ["ATTACH_FILES"];
-	public args: ICommandArgs = {
-		emotes: { type: ArgTypes.EmoteOrEmoji, remainder: true, optional: true, description: "emotes to download (defaults to all server emotes)" }
-	};
+	public args = {
+		emotes: { type: ArgTypes.EmotesOrEmojis, optional: true, description: "emotes to download (defaults to all server emotes)" }
+	} as const;
 	public flags = { force: "Skip cache and force redownload" };
 
 	public constructor() {
 		void mkdirp(path.join(__dirname, "../../..", ".cache"));
 	}
 
-	public async callback(ctx: CommandContext, { emotes, force }: Args): Promise<IMessage> {
+	public async callback(ctx: CommandContext, { emotes, force }: IParsedArgs<Command>): Promise<IMessage> {
 		const { cached, zipPath, name } = emotes ? await this.handleEmoteInvoke(ctx, emotes, force) : await this.handleGuildInvoke(ctx, force);
 
 		const content = cached ? "I found this zip in my cache. Run the command with the `--force` flag in case this zip is outdated." : null;
@@ -66,7 +66,7 @@ export default class Command implements IBaseCommand {
 		return this.downloadEmotes(ctx, `Emotes-${ctx.guild.id}`, emotes, noCache, true);
 	}
 
-	public async handleEmoteInvoke(ctx: CommandContext, emotes: Args["emotes"], noCache?: boolean) {
+	public async handleEmoteInvoke(ctx: CommandContext, emotes: IParsedArgs<Command>["emotes"], noCache?: boolean) {
 		emotes = removeDuplicates(emotes ?? [], e => (e as ParsedEmote).id ?? e.name);
 
 		if (!emotes.length)
@@ -134,9 +134,4 @@ export default class Command implements IBaseCommand {
 			throw new CommandError(`Sorry, something went wrong while downloading emotes: \`${removeTokens(msg)}\``);
 		}
 	}
-}
-
-interface Args {
-	emotes?: Array<ParsedEmoji | ParsedEmote>;
-	force?: true;
 }

@@ -19,7 +19,7 @@ import { PermissionString, Util } from "discord.js";
 import { GuildSettings } from "../../db/Entities/GuildSettings";
 import { UserSettings } from "../../db/Entities/UserSettings";
 import { hasPermission } from "../../util//helpers";
-import { ArgTypes, ICommandArgs } from "../CommandArguments";
+import { ArgTypes, IParsedArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { ArgumentError, CommandError, UserPermissionError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
@@ -31,7 +31,7 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions = [];
-	public args: ICommandArgs = {
+	public args = {
 		scope: {
 			type: ArgTypes.String,
 			choices: ["server", "user"],
@@ -42,9 +42,9 @@ export default class Command implements IBaseCommand {
 			choices: ["add", "remove", "set"]
 		},
 		prefix: { type: ArgTypes.String, default: process.env.DEFAULT_PREFIX, description: "new prefix" }
-	};
+	} as const;
 
-	public async callback(ctx: CommandContext, args: Args) {
+	public async callback(ctx: CommandContext, args: IParsedArgs<Command>) {
 		args.prefix = args.prefix.toLowerCase();
 		if (args.scope === "server") {
 			if (!ctx.isGuild())
@@ -60,7 +60,7 @@ export default class Command implements IBaseCommand {
 		}
 	}
 
-	private async updatePrefix(target: "guild" | "user", ctx: CommandContext, { action, scope, prefix }: Args, id: string) {
+	private async updatePrefix(target: "guild" | "user", ctx: CommandContext, { action, scope, prefix }: IParsedArgs<Command>, id: string) {
 		const settings = ctx.settings[target] ?? (target === "guild" ? new GuildSettings() : new UserSettings());
 		settings.id ||= id;
 		settings.prefixes ||= [process.env.DEFAULT_PREFIX];
@@ -95,10 +95,4 @@ export default class Command implements IBaseCommand {
 	private formatPrefixes(prefixes: string[]) {
 		return `\`${prefixes.map(prefix => Util.escapeInlineCode(prefix)).join("`, `")}\``;
 	}
-}
-
-interface Args {
-	scope: "server" | "user";
-	action: "add" | "remove" | "set";
-	prefix: string;
 }

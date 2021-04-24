@@ -17,7 +17,7 @@
 
 import { MessageOptions, PermissionString } from "discord.js";
 import { formatOutput, removePrefix } from "../../util/stringHelpers";
-import { ArgTypes, ICommandArgs } from "../CommandArguments";
+import { ArgTypes, IParsedArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -28,11 +28,11 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: ICommandArgs = {
+	public args = {
 		query: { type: ArgTypes.String, remainder: true }
-	};
+	} as const;
 
-	public async callback(ctx: CommandContext, { query }: Args) {
+	public async callback(ctx: CommandContext, { query }: IParsedArgs<Command>) {
 		query = query.trim();
 
 		// Remove codeblocks
@@ -50,8 +50,4 @@ export default class Command implements IBaseCommand {
 
 		await ctx.reply(messageOptions);
 	}
-}
-
-interface Args {
-	query: string;
 }

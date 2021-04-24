@@ -19,7 +19,7 @@ import { PermissionString } from "discord.js";
 import { getFreeEmojiSlots } from "../../util/discordUtils";
 import { fetch } from "../../util/helpers";
 import { Bytes, convertSvg, reduceSize } from "../../util/sharpUtils";
-import { ArgTypes, ICommandArgs } from "../CommandArguments";
+import { ArgTypes, IParsedArgs } from "../CommandArguments";
 import { GuildCommandContext } from "../CommandContext";
 import { ArgumentError, CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
@@ -31,12 +31,12 @@ export default class Command implements IBaseCommand {
 	public guildOnly = true;
 	public userPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
 	public clientPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
-	public args: ICommandArgs = {
+	public args = {
 		name: { type: ArgTypes.String, description: "emoji name" },
 		url: { type: ArgTypes.Url, description: "image url", optional: true }
-	};
+	} as const;
 
-	public async callback(ctx: GuildCommandContext, { name, url }: Args) {
+	public async callback(ctx: GuildCommandContext, { name, url }: IParsedArgs<Command>) {
 		url ||= ctx.msg.attachments.first()?.url;
 		if (!url) throw new ArgumentError("Please specify an image url or attach a file");
 
@@ -55,9 +55,4 @@ export default class Command implements IBaseCommand {
 
 		await ctx.reply(`Done! ${emote.toString()}`);
 	}
-}
-
-interface Args {
-	name: string;
-	url?: string;
 }

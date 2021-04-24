@@ -21,7 +21,6 @@ import { InlineEmbed } from "../../Embed";
 import { PACKAGE_JSON } from "../../util//constants";
 import { ownerFallback } from "../../util/constants";
 import { msToHumanReadable } from "../../util/dateUtils";
-import { ICommandArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -32,7 +31,7 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: ICommandArgs = {};
+	public args = {};
 
 	public async callback(ctx: CommandContext) {
 		const { client } = ctx;

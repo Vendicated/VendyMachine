@@ -20,8 +20,7 @@ import { bytesToHumanReadable, convertImage, getMetadata } from "../../util//sha
 import { defaultFormat, NitroTiers } from "../../util/constants";
 import { fetch } from "../../util/helpers";
 import { removeTokens } from "../../util/stringHelpers";
-import { ImageFormat } from "../../util/types";
-import { ArgTypes, ICommandArgs } from "../CommandArguments";
+import { ArgTypes, IParsedArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { ArgumentError, CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
@@ -33,7 +32,7 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = ["ATTACH_FILES"];
-	public args: ICommandArgs = {
+	public args = {
 		outputFormat: {
 			type: ArgTypes.String,
 			optional: true,
@@ -50,9 +49,9 @@ export default class Command implements IBaseCommand {
 			optional: true,
 			description: "width in px"
 		}
-	};
+	} as const;
 
-	public async callback(ctx: CommandContext, { outputFormat, url, width }: Args) {
+	public async callback(ctx: CommandContext, { outputFormat, url, width }: IParsedArgs<Command>) {
 		// TODO Change to ??= once typescript properly supports this
 		if (!outputFormat) outputFormat = ctx.settings.user?.imageFormat ?? defaultFormat;
 
@@ -92,10 +91,4 @@ export default class Command implements IBaseCommand {
 			await ctx.reply(removeTokens(msg));
 		}
 	}
-}
-
-interface Args {
-	outputFormat?: ImageFormat;
-	url?: string;
-	width?: number;
 }

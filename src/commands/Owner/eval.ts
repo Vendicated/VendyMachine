@@ -23,7 +23,7 @@ import { logger } from "../../Logger";
 import * as constants from "../../util//constants";
 import * as regex from "../../util//regex";
 import * as stringHelpers from "../../util//stringHelpers";
-import { ArgTypes, ICommandArgs } from "../CommandArguments";
+import { ArgTypes, IParsedArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
@@ -36,14 +36,19 @@ while (false) {
 
 export default class Command implements IBaseCommand {
 	public description = "Evaluate js code";
-	public args: ICommandArgs = { script: { type: ArgTypes.String, remainder: true } };
 	public aliases = [];
 	public ownerOnly = true;
 	public guildOnly = false;
 	public userPermissions = [];
 	public clientPermissions = [];
+	public args = {
+		script: {
+			type: ArgTypes.String,
+			remainder: true
+		}
+	} as const;
 
-	public async callback(ctx: CommandContext, { script }: { script: string }) {
+	public async callback(ctx: CommandContext, { script }: IParsedArgs<Command>) {
 		// Shortcuts for use in eval command
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { client, channel, msg, rawArgs: args, author, commandName, db, guild, me, member } = ctx;
@@ -53,6 +58,9 @@ export default class Command implements IBaseCommand {
 		// Remove codeblocks
 		if (script.startsWith("```") && script.endsWith("```")) {
 			script = stringHelpers.removePrefix(script.substring(3, script.length - 3), ["js", "ts"]);
+		}
+		if (script.includes("await")) {
+			script = `(async () => { ${script} })();`;
 		}
 
 		// Create a dummy console for use in eval command
@@ -71,7 +79,6 @@ export default class Command implements IBaseCommand {
 		// @ts-ignore
 		console.log = console.error = console.warn = console.info = console._log.bind(console);
 
-		const stopwatch = new Stopwatch();
 		const messageOptions: MessageOptions = {};
 
 		let result,
@@ -79,6 +86,8 @@ export default class Command implements IBaseCommand {
 			asyncTime,
 			isPromise,
 			success = true;
+
+		const stopwatch = new Stopwatch();
 
 		try {
 			result = eval(script);

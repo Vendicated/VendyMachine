@@ -18,7 +18,7 @@
 import { PermissionString } from "discord.js";
 import { Embed } from "../../Embed";
 import { toTitleCase } from "../../util//stringHelpers";
-import { ArgTypes, ICommandArgs } from "../CommandArguments";
+import { ArgTypes, IParsedArgs } from "../CommandArguments";
 import { CommandContext } from "../CommandContext";
 import { CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
@@ -30,9 +30,15 @@ export default class Command implements IBaseCommand {
 	public guildOnly = false;
 	public userPermissions: PermissionString[] = [];
 	public clientPermissions: PermissionString[] = [];
-	public args: ICommandArgs = { name: { type: ArgTypes.String, description: "command name / category", optional: true } };
+	public args = {
+		name: {
+			type: ArgTypes.String,
+			description: "command name / category",
+			optional: true
+		}
+	} as const;
 
-	public async callback(ctx: CommandContext, { name }: Args) {
+	public async callback(ctx: CommandContext, { name }: IParsedArgs<Command>) {
 		const { client, prefix } = ctx;
 
 		const isOwner = client.isOwner(ctx);
@@ -88,8 +94,4 @@ export default class Command implements IBaseCommand {
 
 		await ctx.reply(embed);
 	}
-}
-
-interface Args {
-	name: string | null;
 }

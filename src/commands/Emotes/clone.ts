@@ -21,7 +21,7 @@ import { Emotes } from "../../util/constants";
 import { getFreeEmojiSlots } from "../../util/discordUtils";
 import { convertSvg } from "../../util/sharpUtils";
 import { ParsedEmoji, ParsedEmote } from "../../util/types";
-import { ArgTypes, ICommandArgs } from "../CommandArguments";
+import { ArgTypes, IParsedArgs } from "../CommandArguments";
 import { GuildCommandContext } from "../CommandContext";
 import { ArgumentError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
@@ -33,11 +33,12 @@ export default class Command implements IBaseCommand {
 	public guildOnly = true;
 	public userPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
 	public clientPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
-	public args: ICommandArgs = {
-		emojis: { type: ArgTypes.EmoteOrEmoji, remainder: true }
-	};
+	public args = {
+		emojis: { type: ArgTypes.EmotesOrEmojis },
+		foo: ArgTypes.Bool
+	} as const;
 
-	public async callback(ctx: GuildCommandContext, { emojis }: Args) {
+	public async callback(ctx: GuildCommandContext, { emojis }: IParsedArgs<Command>) {
 		if (!emojis.length) throw new ArgumentError("Please specify some emotes to clone");
 
 		const slots = getFreeEmojiSlots(ctx.guild);
@@ -100,8 +101,4 @@ export default class Command implements IBaseCommand {
 
 		return passed;
 	}
-}
-
-interface Args {
-	emojis: Array<ParsedEmoji | ParsedEmote>;
 }
