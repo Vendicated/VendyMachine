@@ -22,32 +22,32 @@ import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
 export default class Command implements IBaseCommand {
-	public description = "Execute a SQL query. Dangerous";
-	public aliases = [];
-	public ownerOnly = true;
-	public guildOnly = false;
-	public userPermissions: PermissionString[] = [];
-	public clientPermissions: PermissionString[] = [];
-	public args = {
-		query: { type: ArgTypes.String, remainder: true }
-	} as const;
+  public description = "Execute a SQL query. Dangerous";
+  public aliases = [];
+  public ownerOnly = true;
+  public guildOnly = false;
+  public userPermissions: PermissionString[] = [];
+  public clientPermissions: PermissionString[] = [];
+  public args = {
+    query: { type: ArgTypes.String, remainder: true }
+  } as const;
 
-	public async callback(ctx: CommandContext, { query }: IParsedArgs<Command>) {
-		query = query.trim();
+  public async callback(ctx: CommandContext, { query }: IParsedArgs<Command>) {
+    query = query.trim();
 
-		// Remove codeblocks
-		if (query.startsWith("```") && query.endsWith("```")) {
-			query = removePrefix(query.substring(3, query.length - 3), ["sql", "postgres", "postgresql"]);
-		}
+    // Remove codeblocks
+    if (query.startsWith("```") && query.endsWith("```")) {
+      query = removePrefix(query.substring(3, query.length - 3), ["sql", "postgres", "postgresql"]);
+    }
 
-		const messageOptions: MessageOptions = { files: [] };
-		try {
-			const result = await ctx.db.connection.query(query);
-			messageOptions.content = (await formatOutput(result, 2000, "js", messageOptions, "QueryResult.txt")) || "-";
-		} catch (err) {
-			messageOptions.content = (await formatOutput(err, 2000, "js", messageOptions, "QueryError.txt")) || "-";
-		}
+    const messageOptions: MessageOptions = { files: [] };
+    try {
+      const result = await ctx.db.connection.query(query);
+      messageOptions.content = (await formatOutput(result, 2000, "js", messageOptions, "QueryResult.txt")) || "-";
+    } catch (err) {
+      messageOptions.content = (await formatOutput(err, 2000, "js", messageOptions, "QueryError.txt")) || "-";
+    }
 
-		await ctx.reply(messageOptions);
-	}
+    await ctx.reply(messageOptions);
+  }
 }

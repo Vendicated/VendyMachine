@@ -19,12 +19,12 @@ import { Column, Entity, PrimaryColumn } from "typeorm";
 
 @Entity()
 export class GuildSettings {
-	@PrimaryColumn("bigint")
-	public id: string;
+  @PrimaryColumn("bigint")
+  public id: string;
 
-	@Column("varchar", {
-		length: 20,
-		array: true
-	})
-	public prefixes: string[];
+  @Column("varchar", {
+    length: 20,
+    array: true
+  })
+  public prefixes: string[];
 }

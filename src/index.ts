@@ -21,25 +21,25 @@ import { logger } from "./Logger";
 import { errorToEmbed, postError } from "./util/helpers";
 
 const client = new Client({
-	// Enable channel partials to get DM events
-	partials: ["CHANNEL"],
-	// No Mentions!!!!!
-	allowedMentions: { repliedUser: false, parse: [] },
-	// Do not cache messages, no need
-	messageCacheMaxSize: 0,
-	intents: Intents.NON_PRIVILEGED
+  // Enable channel partials to get DM events
+  partials: ["CHANNEL"],
+  // No Mentions!!!!!
+  allowedMentions: { repliedUser: false, parse: [] },
+  // Do not cache messages, no need
+  messageCacheMaxSize: 0,
+  intents: Intents.NON_PRIVILEGED
 });
 
 void client.registerCommands().registerHandlers().connect();
 
 process.on("uncaughtException", err => {
-	const embed = errorToEmbed(err, null);
-	void postError(embed);
+  const embed = errorToEmbed(err, null);
+  void postError(embed);
 });
 
 process.on("unhandledRejection", rej => {
-	const embed = errorToEmbed(rej, null);
-	void postError(embed);
+  const embed = errorToEmbed(rej, null);
+  void postError(embed);
 });
 
 client.on("debug", msg => logger.debug(msg));

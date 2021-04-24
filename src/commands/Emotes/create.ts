@@ -25,34 +25,34 @@ import { ArgumentError, CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
 
 export default class Command implements IBaseCommand {
-	public description = "Create an emote";
-	public aliases = ["new", "add"];
-	public ownerOnly = false;
-	public guildOnly = true;
-	public userPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
-	public clientPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
-	public args = {
-		name: { type: ArgTypes.String, description: "emoji name" },
-		url: { type: ArgTypes.Url, description: "image url", optional: true }
-	} as const;
+  public description = "Create an emote";
+  public aliases = ["new", "add"];
+  public ownerOnly = false;
+  public guildOnly = true;
+  public userPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
+  public clientPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
+  public args = {
+    name: { type: ArgTypes.String, description: "emoji name" },
+    url: { type: ArgTypes.Url, description: "image url", optional: true }
+  } as const;
 
-	public async callback(ctx: GuildCommandContext, { name, url }: IParsedArgs<Command>) {
-		url ||= ctx.msg.attachments.first()?.url;
-		if (!url) throw new ArgumentError("Please specify an image url or attach a file");
+  public async callback(ctx: GuildCommandContext, { name, url }: IParsedArgs<Command>) {
+    url ||= ctx.msg.attachments.first()?.url;
+    if (!url) throw new ArgumentError("Please specify an image url or attach a file");
 
-		const eType = url.endsWith(".gif") ? "animated" : "regular";
-		const freeSlots = getFreeEmojiSlots(ctx.guild)[eType];
-		if (!freeSlots) throw new CommandError(`This guild has no space for more ${eType} emotes.`);
+    const eType = url.endsWith(".gif") ? "animated" : "regular";
+    const freeSlots = getFreeEmojiSlots(ctx.guild)[eType];
+    if (!freeSlots) throw new CommandError(`This guild has no space for more ${eType} emotes.`);
 
-		let buf = url.endsWith(".svg") ? await convertSvg(url, "webp") : await fetch(url).catch(() => null);
+    let buf = url.endsWith(".svg") ? await convertSvg(url, "webp") : await fetch(url).catch(() => null);
 
-		if (!buf || !Buffer.isBuffer(buf)) throw new ArgumentError("That's not a valid image!");
+    if (!buf || !Buffer.isBuffer(buf)) throw new ArgumentError("That's not a valid image!");
 
-		buf = await reduceSize(buf, 256 * Bytes.KILO).then(r => r.buffer);
-		const emote = await ctx.guild.emojis.create(buf as Buffer, name, { reason: `Created by ${ctx.author.tag}` }).catch(() => void 0);
+    buf = await reduceSize(buf, 256 * Bytes.KILO).then(r => r.buffer);
+    const emote = await ctx.guild.emojis.create(buf as Buffer, name, { reason: `Created by ${ctx.author.tag}` }).catch(() => void 0);
 
-		if (!emote) throw new ArgumentError("I'm sorry, something went wrong while creating the emote");
+    if (!emote) throw new ArgumentError("I'm sorry, something went wrong while creating the emote");
 
-		await ctx.reply(`Done! ${emote.toString()}`);
-	}
+    await ctx.reply(`Done! ${emote.toString()}`);
+  }
 }

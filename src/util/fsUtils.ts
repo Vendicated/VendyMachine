@@ -19,7 +19,7 @@ import { constants as FsConstants } from "fs";
 import { access } from "fs/promises";
 
 export async function fileExists(fp: string) {
-	return access(fp, FsConstants.F_OK)
-		.then(() => true)
-		.catch(() => false);
+  return access(fp, FsConstants.F_OK)
+    .then(() => true)
+    .catch(() => false);
 }

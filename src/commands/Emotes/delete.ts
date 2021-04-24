@@ -23,31 +23,31 @@ import { CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
 
 export default class Command implements IBaseCommand {
-	public description = "Delete one or more emotes";
-	public aliases = ["del", "rm"];
-	public ownerOnly = false;
-	public guildOnly = true;
-	public userPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
-	public clientPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
-	public args = {
-		emotes: { type: ArgTypes.GuildEmojis }
-	} as const;
+  public description = "Delete one or more emotes";
+  public aliases = ["del", "rm"];
+  public ownerOnly = false;
+  public guildOnly = true;
+  public userPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
+  public clientPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
+  public args = {
+    emotes: { type: ArgTypes.GuildEmojis }
+  } as const;
 
-	public async callback(ctx: CommandContext, { emotes }: IParsedArgs<Command>) {
-		await ctx.reply(`${Emotes.LOADING} Deleting ${emotes.length} emotes...`);
+  public async callback(ctx: CommandContext, { emotes }: IParsedArgs<Command>) {
+    await ctx.reply(`${Emotes.LOADING} Deleting ${emotes.length} emotes...`);
 
-		for (const [idx, emote] of emotes.entries()) {
-			if (emote.deleted) continue;
-			else if (!emote.deletable) throw new CommandError(`I'm sorry, I can't delete ${emote}`);
+    for (const [idx, emote] of emotes.entries()) {
+      if (emote.deleted) continue;
+      else if (!emote.deletable) throw new CommandError(`I'm sorry, I can't delete ${emote}`);
 
-			try {
-				await emote.delete(`Deleted by ${ctx.author.id}`);
-				if (idx && idx !== emotes.length - 1) await ctx.edit(`${Emotes.LOADING} Deleted ${idx}/${emotes.length} emotes`);
-			} catch {
-				throw new CommandError(`${Emotes.ERROR} I'm sorry, I failed to delete ${emote}`);
-			}
-		}
+      try {
+        await emote.delete(`Deleted by ${ctx.author.id}`);
+        if (idx && idx !== emotes.length - 1) await ctx.edit(`${Emotes.LOADING} Deleted ${idx}/${emotes.length} emotes`);
+      } catch {
+        throw new CommandError(`${Emotes.ERROR} I'm sorry, I failed to delete ${emote}`);
+      }
+    }
 
-		return ctx.edit(`${Emotes.SUCCESS} All done! Deleted ${emotes.length} emotes`);
-	}
+    return ctx.edit(`${Emotes.SUCCESS} All done! Deleted ${emotes.length} emotes`);
+  }
 }

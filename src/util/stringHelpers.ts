@@ -20,68 +20,68 @@ import { inspect } from "util";
 import { haste } from "./helpers";
 
 export function codeblock(content: string, language?: string) {
-	return `\`\`\`${language ?? ""}\n${Util.cleanCodeBlockContent(content)}\`\`\``;
+  return `\`\`\`${language ?? ""}\n${Util.cleanCodeBlockContent(content)}\`\`\``;
 }
 
 export function trim(text: string, max: number) {
-	return text.length > max ? `${text.slice(0, max - 3)}...` : text;
+  return text.length > max ? `${text.slice(0, max - 3)}...` : text;
 }
 
 export function longestLineLength(...lines: string[]): number {
-	return lines.reduce((acc, curr) => {
-		const individualLines = curr.split("\n");
-		const lineLength = individualLines.length > 1 ? longestLineLength(...individualLines) : curr.length;
-		return acc > lineLength ? acc : lineLength;
-	}, 0);
+  return lines.reduce((acc, curr) => {
+    const individualLines = curr.split("\n");
+    const lineLength = individualLines.length > 1 ? longestLineLength(...individualLines) : curr.length;
+    return acc > lineLength ? acc : lineLength;
+  }, 0);
 }
 
 export function toTitleCase(text: string): string;
 export function toTitleCase(text: string[]): string[];
 export function toTitleCase(text: string | string[]): string[] | string {
-	if (Array.isArray(text)) return text.map(word => toTitleCase(word));
+  if (Array.isArray(text)) return text.map(word => toTitleCase(word));
 
-	return text
-		.split(/_ +/)
-		.map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-		.join(" ");
+  return text
+    .split(/_ +/)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
 }
 
 export function pluralise(i: number, name: string) {
-	return i === 1 ? `${i} ${name}` : `${i} ${name}s`;
+  return i === 1 ? `${i} ${name}` : `${i} ${name}s`;
 }
 
 export function removeTokens(str: string) {
-	return str.replaceAll(process.env.TOKEN, "[TOKEN]").replaceAll(process.env.POSTGRES_PASSWORD, "[DB]");
+  return str.replaceAll(process.env.TOKEN, "[TOKEN]").replaceAll(process.env.POSTGRES_PASSWORD, "[DB]");
 }
 
 export function removePrefix(str: string, prefix: string | string[]) {
-	if (Array.isArray(prefix)) {
-		let curr;
-		while ((curr = prefix.find(p => str.startsWith(p)))) {
-			str = str.substr(curr.length);
-		}
-	} else {
-		while (str.startsWith(prefix)) {
-			str = str.substr(prefix.length);
-		}
-	}
+  if (Array.isArray(prefix)) {
+    let curr;
+    while ((curr = prefix.find(p => str.startsWith(p)))) {
+      str = str.substr(curr.length);
+    }
+  } else {
+    while (str.startsWith(prefix)) {
+      str = str.substr(prefix.length);
+    }
+  }
 
-	return str;
+  return str;
 }
 
 export function removeSuffix(str: string, prefix: string | string[]) {
-	if (Array.isArray(prefix)) {
-		let curr;
-		while ((curr = prefix.find(p => str.endsWith(p)))) {
-			str = str.substring(0, str.length - curr.length);
-		}
-	} else {
-		while (str.endsWith(prefix)) {
-			str = str.substring(0, str.length - prefix.length);
-		}
-	}
+  if (Array.isArray(prefix)) {
+    let curr;
+    while ((curr = prefix.find(p => str.endsWith(p)))) {
+      str = str.substring(0, str.length - curr.length);
+    }
+  } else {
+    while (str.endsWith(prefix)) {
+      str = str.substring(0, str.length - prefix.length);
+    }
+  }
 
-	return str;
+  return str;
 }
 
 /**
@@ -94,31 +94,31 @@ export function removeSuffix(str: string, prefix: string | string[]) {
  * @param {string} altFilename Filename that should be given to this file
  */
 export async function formatOutput(rawContent: unknown, limit: number, codeLang: string | null, messageOptions?: MessageOptions, altFilename?: string) {
-	if (!rawContent) return null;
+  if (!rawContent) return null;
 
-	if (typeof rawContent !== "string") {
-		rawContent = inspect(rawContent, { getters: true });
-	}
-	if (codeLang) limit -= 8 + codeLang.length;
+  if (typeof rawContent !== "string") {
+    rawContent = inspect(rawContent, { getters: true });
+  }
+  if (codeLang) limit -= 8 + codeLang.length;
 
-	let content = removeTokens(rawContent as string);
+  let content = removeTokens(rawContent as string);
 
-	if (content.length > limit) {
-		try {
-			content = `That was too long for discord, so I uploaded it to hastebin instead\n${await haste(content)}`;
-		} catch {
-			if (messageOptions && altFilename) {
-				const attachment = Buffer.from(content, "utf-8");
-				messageOptions.files ||= [];
-				messageOptions.files.push({ name: altFilename, attachment });
-				content = "That was too long for discord, so I attached the output as file instead.";
-			} else {
-				content = "That was too long for discord and I was unable to upload it to hastebin. Sorry :(";
-			}
-		}
-	} else if (codeLang) {
-		content = codeblock(content, codeLang);
-	}
+  if (content.length > limit) {
+    try {
+      content = `That was too long for discord, so I uploaded it to hastebin instead\n${await haste(content)}`;
+    } catch {
+      if (messageOptions && altFilename) {
+        const attachment = Buffer.from(content, "utf-8");
+        messageOptions.files ||= [];
+        messageOptions.files.push({ name: altFilename, attachment });
+        content = "That was too long for discord, so I attached the output as file instead.";
+      } else {
+        content = "That was too long for discord and I was unable to upload it to hastebin. Sorry :(";
+      }
+    }
+  } else if (codeLang) {
+    content = codeblock(content, codeLang);
+  }
 
-	return content;
+  return content;
 }

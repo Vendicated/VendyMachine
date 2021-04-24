@@ -24,74 +24,74 @@ import { CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
 
 export default class Command implements IBaseCommand {
-	public description = "Get help on command usage";
-	public aliases = ["h", "command"];
-	public ownerOnly = false;
-	public guildOnly = false;
-	public userPermissions: PermissionString[] = [];
-	public clientPermissions: PermissionString[] = [];
-	public args = {
-		name: {
-			type: ArgTypes.String,
-			description: "command name / category",
-			optional: true
-		}
-	} as const;
+  public description = "Get help on command usage";
+  public aliases = ["h", "command"];
+  public ownerOnly = false;
+  public guildOnly = false;
+  public userPermissions: PermissionString[] = [];
+  public clientPermissions: PermissionString[] = [];
+  public args = {
+    name: {
+      type: ArgTypes.String,
+      description: "command name / category",
+      optional: true
+    }
+  } as const;
 
-	public async callback(ctx: CommandContext, { name }: IParsedArgs<Command>) {
-		const { client, prefix } = ctx;
+  public async callback(ctx: CommandContext, { name }: IParsedArgs<Command>) {
+    const { client, prefix } = ctx;
 
-		const isOwner = client.isOwner(ctx);
-		if (!name) return await this.mainMenu(ctx, isOwner);
+    const isOwner = client.isOwner(ctx);
+    if (!name) return await this.mainMenu(ctx, isOwner);
 
-		const commandEmbed = client.commands.formatHelpEmbed(name, prefix, isOwner);
-		if (commandEmbed) return ctx.reply(commandEmbed);
+    const commandEmbed = client.commands.formatHelpEmbed(name, prefix, isOwner);
+    if (commandEmbed) return ctx.reply(commandEmbed);
 
-		if (client.commands.some(cmd => cmd.category === name.toLowerCase() && (isOwner ? true : cmd.ownerOnly === false)))
-			return await this.categoryHelp(ctx, name);
+    if (client.commands.some(cmd => cmd.category === name.toLowerCase() && (isOwner ? true : cmd.ownerOnly === false)))
+      return await this.categoryHelp(ctx, name);
 
-		throw new CommandError(`Sorry, no command or category with name \`${name}\` found.`);
-	}
+    throw new CommandError(`Sorry, no command or category with name \`${name}\` found.`);
+  }
 
-	public async mainMenu(ctx: CommandContext, isOwner: boolean) {
-		const { client, commandName, prefix } = ctx;
+  public async mainMenu(ctx: CommandContext, isOwner: boolean) {
+    const { client, commandName, prefix } = ctx;
 
-		const commandList = client.commands.reduce((acc, curr) => {
-			if (curr.ownerOnly && !isOwner) return acc;
+    const commandList = client.commands.reduce((acc, curr) => {
+      if (curr.ownerOnly && !isOwner) return acc;
 
-			acc[curr.category] ||= [];
-			acc[curr.category].push(curr.name);
-			return acc;
-		}, {} as Record<string, string[]>);
+      acc[curr.category] ||= [];
+      acc[curr.category].push(curr.name);
+      return acc;
+    }, {} as Record<string, string[]>);
 
-		const fields = Object.entries(commandList).map(([name, value]) => ({ name, value: `\`${value.join("`,`")}\`` }));
+    const fields = Object.entries(commandList).map(([name, value]) => ({ name, value: `\`${value.join("`,`")}\`` }));
 
-		const embed = new Embed("INFO")
-			.setTitle("Help")
-			.setDescription(`Use \`${prefix}${commandName} command / category\` for more info on a command or category`)
-			.addFields(fields);
+    const embed = new Embed("INFO")
+      .setTitle("Help")
+      .setDescription(`Use \`${prefix}${commandName} command / category\` for more info on a command or category`)
+      .addFields(fields);
 
-		await ctx.reply(embed);
-	}
+    await ctx.reply(embed);
+  }
 
-	public async categoryHelp(ctx: CommandContext, name: string) {
-		const { client, commandName, prefix } = ctx;
+  public async categoryHelp(ctx: CommandContext, name: string) {
+    const { client, commandName, prefix } = ctx;
 
-		const commandList = client.commands
-			.filter(cmd => cmd.category === name.toLowerCase())
-			.reduce((acc, curr) => {
-				acc[curr.name] = curr.description;
-				return acc;
-			}, {} as Record<string, string>);
+    const commandList = client.commands
+      .filter(cmd => cmd.category === name.toLowerCase())
+      .reduce((acc, curr) => {
+        acc[curr.name] = curr.description;
+        return acc;
+      }, {} as Record<string, string>);
 
-		const description = Object.entries(commandList)
-			.map(([name, value]) => `\`${name}\`: ${value}`)
-			.join("\n");
+    const description = Object.entries(commandList)
+      .map(([name, value]) => `\`${name}\`: ${value}`)
+      .join("\n");
 
-		const embed = new Embed("INFO")
-			.setTitle(toTitleCase(`${name} Help`))
-			.setDescription(`Use \`${prefix}${commandName} command\` for more info on a command\n\n${description}`);
+    const embed = new Embed("INFO")
+      .setTitle(toTitleCase(`${name} Help`))
+      .setDescription(`Use \`${prefix}${commandName} command\` for more info on a command\n\n${description}`);
 
-		await ctx.reply(embed);
-	}
+    await ctx.reply(embed);
+  }
 }

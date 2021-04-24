@@ -31,44 +31,44 @@ import { JsonObject, LogCategory } from "./types";
  * @param {object} [options] Request Options
  */
 export function fetch(url: RequestInfo, options?: RequestInit) {
-	return new Promise((resolve, reject) => {
-		nodeFetch(url, options)
-			.then(res => {
-				if (res.status > 299 || res.status < 200) reject(`${res.status.toString() as string}: ${res.statusText as string}`);
+  return new Promise((resolve, reject) => {
+    nodeFetch(url, options)
+      .then(res => {
+        if (res.status > 299 || res.status < 200) reject(`${res.status.toString() as string}: ${res.statusText as string}`);
 
-				const contentType = res.headers.get("content-type") || "application/json";
+        const contentType = res.headers.get("content-type") || "application/json";
 
-				if (contentType.includes("image")) {
-					res.buffer().then(resolve).catch(reject);
-				} else if (contentType.includes("json")) {
-					res.json().then(resolve).catch(reject);
-				} else {
-					res.text().then(resolve).catch(reject);
-				}
-			})
-			.catch(reject);
-	});
+        if (contentType.includes("image")) {
+          res.buffer().then(resolve).catch(reject);
+        } else if (contentType.includes("json")) {
+          res.json().then(resolve).catch(reject);
+        } else {
+          res.text().then(resolve).catch(reject);
+        }
+      })
+      .catch(reject);
+  });
 }
 
 export function fetchJson(url: RequestInfo, options?: RequestInit) {
-	return fetch(url, {
-		...options,
-		headers: {
-			...options?.headers,
-			"content-type": "application/json",
-			accept: "application/json"
-		}
-	}) as Promise<JsonObject>;
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...options?.headers,
+      "content-type": "application/json",
+      accept: "application/json"
+    }
+  }) as Promise<JsonObject>;
 }
 
 /**
  * @see fetch
  */
 export function post(url: RequestInfo, options?: RequestInit) {
-	return fetch(url, {
-		...options,
-		method: "post"
-	});
+  return fetch(url, {
+    ...options,
+    method: "post"
+  });
 }
 
 /**
@@ -79,86 +79,86 @@ export function post(url: RequestInfo, options?: RequestInit) {
  * @param {object} [options] Request Options
  */
 export function postJson(url: RequestInfo, json: JsonObject, options?: RequestInit): Promise<JsonObject> {
-	return fetch(url, {
-		...options,
-		method: "post",
-		body: JSON.stringify(json),
-		headers: { ...options?.headers, "content-type": "application/json", accept: "application/json" }
-	}) as Promise<JsonObject>;
+  return fetch(url, {
+    ...options,
+    method: "post",
+    body: JSON.stringify(json),
+    headers: { ...options?.headers, "content-type": "application/json", accept: "application/json" }
+  }) as Promise<JsonObject>;
 }
 
 export async function haste(content: string) {
-	const { key } = (await post(`${hastebinMirror}/documents`, {
-		body: content,
-		headers: { "content-type": "text/plain" }
-	})) as JsonObject<string>;
-	return `${hastebinMirror}/${key}`;
+  const { key } = (await post(`${hastebinMirror}/documents`, {
+    body: content,
+    headers: { "content-type": "text/plain" }
+  })) as JsonObject<string>;
+  return `${hastebinMirror}/${key}`;
 }
 
 export function errorToEmbed(error: unknown, ctx: unknown) {
-	const errorString = typeof error === "string" ? error : (error as Error).stack || (error as Error).name || "Unknown error";
-	const errorText = trim(removeTokens(errorString), 2000);
+  const errorString = typeof error === "string" ? error : (error as Error).stack || (error as Error).name || "Unknown error";
+  const errorText = trim(removeTokens(errorString), 2000);
 
-	const embed = new InlineEmbed("ERROR").setTitle("Oops!").setDescription("I'm sorry, an error occurred while executing this command.");
+  const embed = new InlineEmbed("ERROR").setTitle("Oops!").setDescription("I'm sorry, an error occurred while executing this command.");
 
-	if (ctx instanceof CommandContext) {
-		const { commandName, msg, guild, rawArgs } = ctx;
-		embed
-			.addField("Command", commandName)
-			.addField("User", `${msg.author.tag} (${msg.author.id})`)
-			.addField("Server", guild ? `${guild.name} (${guild.id})` : "-")
-			.addField("Message ID", msg.id)
-			.addField("Arguments", rawArgs.join(" ") || "-", false);
-	}
-	embed.addField("Error", codeblock(errorText, "js"), false);
+  if (ctx instanceof CommandContext) {
+    const { commandName, msg, guild, rawArgs } = ctx;
+    embed
+      .addField("Command", commandName)
+      .addField("User", `${msg.author.tag} (${msg.author.id})`)
+      .addField("Server", guild ? `${guild.name} (${guild.id})` : "-")
+      .addField("Message ID", msg.id)
+      .addField("Arguments", rawArgs.join(" ") || "-", false);
+  }
+  embed.addField("Error", codeblock(errorText, "js"), false);
 
-	return embed;
+  return embed;
 }
 
 export function postInfo(embeds: MessageEmbed | MessageEmbed[]) {
-	if (process.env.NODE_ENV !== "production") return;
+  if (process.env.NODE_ENV !== "production") return;
 
-	return executeWebhook("INFO", null, embeds);
+  return executeWebhook("INFO", null, embeds);
 }
 
 export function postError(embeds: MessageEmbed | MessageEmbed[]) {
-	if (!Array.isArray(embeds)) embeds = [embeds.setDescription("")];
+  if (!Array.isArray(embeds)) embeds = [embeds.setDescription("")];
 
-	for (const embed of embeds) {
-		embed.fields.map(field => `${field.name !== "Error" ? `${field.name}: ` : ""}${field.value.replace(/```[^\n]*/g, "")}`).forEach(logger.error);
-	}
+  for (const embed of embeds) {
+    embed.fields.map(field => `${field.name !== "Error" ? `${field.name}: ` : ""}${field.value.replace(/```[^\n]*/g, "")}`).forEach(logger.error);
+  }
 
-	if (process.env.NODE_ENV !== "production") return;
-	return executeWebhook("ERROR", null, embeds);
+  if (process.env.NODE_ENV !== "production") return;
+  return executeWebhook("ERROR", null, embeds);
 }
 
 export function executeWebhook(url: LogCategory, content: string | null, embeds?: MessageEmbed[] | MessageEmbed): Promise<JsonObject<unknown>>;
 export function executeWebhook(url: string, content: string | null, embeds?: MessageEmbed[] | MessageEmbed): Promise<JsonObject<unknown>>;
 export function executeWebhook(url: string, content: string | null, embeds?: MessageEmbed[] | MessageEmbed) {
-	if (!content && !embeds?.length) throw new Error("Invalid webhook body. Neither content nor embeds are specified.");
+  if (!content && !embeds?.length) throw new Error("Invalid webhook body. Neither content nor embeds are specified.");
 
-	if (url === "ERROR") url = process.env.ERROR_WEBHOOK;
-	else if (url === "INFO") url = process.env.INFO_WEBHOOK;
+  if (url === "ERROR") url = process.env.ERROR_WEBHOOK;
+  else if (url === "INFO") url = process.env.INFO_WEBHOOK;
 
-	if (embeds && !Array.isArray(embeds)) embeds = [embeds];
+  if (embeds && !Array.isArray(embeds)) embeds = [embeds];
 
-	return postJson(url, {
-		content,
-		embeds: embeds?.map(e => e.toJSON())
-	});
+  return postJson(url, {
+    content,
+    embeds: embeds?.map(e => e.toJSON())
+  });
 }
 
 export function hasPermission(permissions: PermissionString | PermissionString[], member: CommandContext | GuildMember, channel?: Channel) {
-	// If DMChannel or not guild return true
-	if ((channel && !(channel instanceof GuildChannel)) || (member instanceof CommandContext && !member.isGuild())) return true;
+  // If DMChannel or not guild return true
+  if ((channel && !(channel instanceof GuildChannel)) || (member instanceof CommandContext && !member.isGuild())) return true;
 
-	if (!Array.isArray(permissions)) permissions = [permissions];
+  if (!Array.isArray(permissions)) permissions = [permissions];
 
-	const target = member instanceof GuildMember ? member : member.member;
-	// If channel specified use channel permissions else guild permissions
-	const perms = channel ? channel.permissionsFor(target) : target.permissions;
+  const target = member instanceof GuildMember ? member : member.member;
+  // If channel specified use channel permissions else guild permissions
+  const perms = channel ? channel.permissionsFor(target) : target.permissions;
 
-	if (!perms) return false;
+  if (!perms) return false;
 
-	return permissions.every(perm => perms.has(perm));
+  return permissions.every(perm => perms.has(perm));
 }

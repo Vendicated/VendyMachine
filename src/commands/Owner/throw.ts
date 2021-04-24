@@ -20,21 +20,21 @@ import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
 export default class Command implements IBaseCommand {
-	public description = "Test command error handling";
-	public aliases = [];
-	public ownerOnly = true;
-	public guildOnly = false;
-	public userPermissions = [];
-	public clientPermissions = [];
-	public args = {
-		error: {
-			type: ArgTypes.String,
-			optional: true,
-			remainder: true
-		}
-	} as const;
+  public description = "Test command error handling";
+  public aliases = [];
+  public ownerOnly = true;
+  public guildOnly = false;
+  public userPermissions = [];
+  public clientPermissions = [];
+  public args = {
+    error: {
+      type: ArgTypes.String,
+      optional: true,
+      remainder: true
+    }
+  } as const;
 
-	public async callback(ctx: CommandContext, { error }: IParsedArgs<Command>) {
-		throw new Error(error ?? "Method not implemented");
-	}
+  public async callback(ctx: CommandContext, { error }: IParsedArgs<Command>) {
+    throw new Error(error ?? "Method not implemented");
+  }
 }

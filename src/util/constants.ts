@@ -28,23 +28,23 @@ export const baseInvite = "https://discord.com/api/oauth2/authorize?scope=bot";
 export const permissions = "1074121792";
 
 export const Colours = {
-	RED: 0xff403c,
-	BLUE: 0x0d7dff,
-	GREEN: 0x75f1bd
+  RED: 0xff403c,
+  BLUE: 0x0d7dff,
+  GREEN: 0x75f1bd
 };
 
 export const Emojis = {
-	CHECK_MARK: "✅",
-	X: "❌",
-	INFO: "ℹ️"
+  CHECK_MARK: "✅",
+  X: "❌",
+  INFO: "ℹ️"
 };
 
 export const Emotes = {
-	CIRNO_WAVE: "<:cirnoWave:824835204672782366>",
-	DOWNLOADING: "<a:downloading:825221439288377424>",
-	LOADING: "<a:loading:825221441648721940>",
-	SUCCESS: "<:check:825221440479559720>",
-	ERROR: "<:cross:825221437349953588>"
+  CIRNO_WAVE: "<:cirnoWave:824835204672782366>",
+  DOWNLOADING: "<a:downloading:825221439288377424>",
+  LOADING: "<a:loading:825221441648721940>",
+  SUCCESS: "<:check:825221440479559720>",
+  ERROR: "<:cross:825221437349953588>"
 };
 
 // Zero Width Space
@@ -54,20 +54,20 @@ export const months = ["January", "February", "March", "April", "May", "June", "
 export const monthsShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 export const NitroTiers: Record<"0" | "1" | "2" | "3", Record<"emojiSlots" | "uploadSizeLimit", number>> = {
-	"0": {
-		emojiSlots: 50,
-		uploadSizeLimit: 8 * Bytes.MEGA
-	},
-	"1": {
-		emojiSlots: 100,
-		uploadSizeLimit: 8 * Bytes.MEGA
-	},
-	"2": {
-		emojiSlots: 150,
-		uploadSizeLimit: 50 * Bytes.MEGA
-	},
-	"3": {
-		emojiSlots: 250,
-		uploadSizeLimit: 100 * Bytes.MEGA
-	}
+  "0": {
+    emojiSlots: 50,
+    uploadSizeLimit: 8 * Bytes.MEGA
+  },
+  "1": {
+    emojiSlots: 100,
+    uploadSizeLimit: 8 * Bytes.MEGA
+  },
+  "2": {
+    emojiSlots: 150,
+    uploadSizeLimit: 50 * Bytes.MEGA
+  },
+  "3": {
+    emojiSlots: 250,
+    uploadSizeLimit: 100 * Bytes.MEGA
+  }
 };

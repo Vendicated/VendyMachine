@@ -25,11 +25,11 @@
 export function removeDuplicates<T>(arr: T[], mapper: (val: T) => string): T[];
 export function removeDuplicates(arr: string[]): string[];
 export function removeDuplicates(arr: any[], mapper?: (val: any) => string) {
-	const seen: Record<string, true> = {};
-	return arr.filter(item => {
-		const key: string = mapper ? mapper(item) : item;
-		return Object.prototype.hasOwnProperty.call(seen, key) ? false : (seen[key] = true);
-	});
+  const seen: Record<string, true> = {};
+  return arr.filter(item => {
+    const key: string = mapper ? mapper(item) : item;
+    return Object.prototype.hasOwnProperty.call(seen, key) ? false : (seen[key] = true);
+  });
 }
 
 /**
@@ -39,13 +39,13 @@ export function removeDuplicates(arr: any[], mapper?: (val: any) => string) {
  * @returns
  */
 export function partition<T>(arr: T[], test: (item: T) => boolean): [T[], T[]] {
-	const passed = [] as T[];
-	const failed = [] as T[];
+  const passed = [] as T[];
+  const failed = [] as T[];
 
-	for (const item of arr) {
-		if (test(item)) passed.push(item);
-		else failed.push(item);
-	}
+  for (const item of arr) {
+    if (test(item)) passed.push(item);
+    else failed.push(item);
+  }
 
-	return [passed, failed];
+  return [passed, failed];
 }

@@ -22,23 +22,23 @@ import { CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
 
 export default class Command implements IBaseCommand {
-	public description = "Rename an emote";
-	public aliases = [];
-	public ownerOnly = false;
-	public guildOnly = true;
-	public userPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
-	public clientPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
-	public args = {
-		emoji: ArgTypes.GuildEmoji,
-		name: { type: ArgTypes.String, description: "The new name" }
-	} as const;
+  public description = "Rename an emote";
+  public aliases = [];
+  public ownerOnly = false;
+  public guildOnly = true;
+  public userPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
+  public clientPermissions: PermissionString[] = ["MANAGE_EMOJIS"];
+  public args = {
+    emoji: ArgTypes.GuildEmoji,
+    name: { type: ArgTypes.String, description: "The new name" }
+  } as const;
 
-	public async callback(ctx: CommandContext, { emoji, name }: IParsedArgs<Command>) {
-		if (emoji.name === name) throw new CommandError(`That emote is already called ${name}.`);
+  public async callback(ctx: CommandContext, { emoji, name }: IParsedArgs<Command>) {
+    if (emoji.name === name) throw new CommandError(`That emote is already called ${name}.`);
 
-		const emote = await emoji.edit({ name }, `Renamed by ${ctx.author.tag}`).catch(() => void 0);
+    const emote = await emoji.edit({ name }, `Renamed by ${ctx.author.tag}`).catch(() => void 0);
 
-		if (!emote) throw new CommandError(`I'm sorry, something went wrong while renaming ${emoji}`);
-		await ctx.reply(`Done! ${emote}`);
-	}
+    if (!emote) throw new CommandError(`I'm sorry, something went wrong while renaming ${emoji}`);
+    await ctx.reply(`Done! ${emote}`);
+  }
 }

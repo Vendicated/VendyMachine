@@ -25,51 +25,51 @@ import { ArgumentError, CommandError } from "../CommandErrors";
 import { IBaseCommand } from "../ICommand";
 
 export default class Command implements IBaseCommand {
-	public description = "Downscale images until they are below a certain size";
-	public aliases = ["downscale", "reduce"];
-	public ownerOnly = false;
-	public guildOnly = false;
-	public userPermissions: PermissionString[] = [];
-	public clientPermissions: PermissionString[] = ["ATTACH_FILES"];
-	public args = {
-		size: { type: ArgTypes.String, default: "256KB", description: "size e.g. one of 100B/10.7KB/2MB" },
-		url: { type: ArgTypes.Url, description: "image url", optional: true }
-	} as const;
-	public flags: { maxRes: "start with original image width instead of 512px. slower" };
+  public description = "Downscale images until they are below a certain size";
+  public aliases = ["downscale", "reduce"];
+  public ownerOnly = false;
+  public guildOnly = false;
+  public userPermissions: PermissionString[] = [];
+  public clientPermissions: PermissionString[] = ["ATTACH_FILES"];
+  public args = {
+    size: { type: ArgTypes.String, default: "256KB", description: "size e.g. one of 100B/10.7KB/2MB" },
+    url: { type: ArgTypes.Url, description: "image url", optional: true }
+  } as const;
+  public flags: { maxRes: "start with original image width instead of 512px. slower" };
 
-	public async callback(ctx: CommandContext, { size, url, maxRes }: IParsedArgs<Command>) {
-		const bytes = parseBytes(size);
-		if (!bytes) return ctx.reply(`Invalid size \`${size}\``);
+  public async callback(ctx: CommandContext, { size, url, maxRes }: IParsedArgs<Command>) {
+    const bytes = parseBytes(size);
+    if (!bytes) return ctx.reply(`Invalid size \`${size}\``);
 
-		let name;
-		if (!url) {
-			const attachment = ctx.msg.attachments.first();
-			if (!attachment) throw new ArgumentError("Please attach a file or pass a link");
-			({ name, url } = attachment);
-		} else {
-			name = url.split("/").pop();
-		}
+    let name;
+    if (!url) {
+      const attachment = ctx.msg.attachments.first();
+      if (!attachment) throw new ArgumentError("Please attach a file or pass a link");
+      ({ name, url } = attachment);
+    } else {
+      name = url.split("/").pop();
+    }
 
-		const buffer = (await fetch(url).catch(() => void 0)) as Buffer;
-		if (!buffer) throw new CommandError("I was unable to fetch that file, sorry.");
+    const buffer = (await fetch(url).catch(() => void 0)) as Buffer;
+    if (!buffer) throw new CommandError("I was unable to fetch that file, sorry.");
 
-		try {
-			const { originalSize, newSize, format, buffer: attachment } = await reduceSize(buffer, bytes, !maxRes);
+    try {
+      const { originalSize, newSize, format, buffer: attachment } = await reduceSize(buffer, bytes, !maxRes);
 
-			if (!newSize) {
-				return ctx.reply(`File is already smaller than ${bytesToHumanReadable(bytes)} (${bytesToHumanReadable(originalSize)})`);
-			} else {
-				const nitroLevel = ctx.guild?.premiumTier.toString() ?? "0";
-				const limit = NitroTiers[nitroLevel as keyof typeof NitroTiers];
-				if (newSize > limit.uploadSizeLimit) return ctx.reply(`That file is too large (${bytesToHumanReadable(newSize)}), sorry :(\n\nTry a smaller size`);
-			}
+      if (!newSize) {
+        return ctx.reply(`File is already smaller than ${bytesToHumanReadable(bytes)} (${bytesToHumanReadable(originalSize)})`);
+      } else {
+        const nitroLevel = ctx.guild?.premiumTier.toString() ?? "0";
+        const limit = NitroTiers[nitroLevel as keyof typeof NitroTiers];
+        if (newSize > limit.uploadSizeLimit) return ctx.reply(`That file is too large (${bytesToHumanReadable(newSize)}), sorry :(\n\nTry a smaller size`);
+      }
 
-			name ||= `RESIZED-${Date.now().toString(16)}.${format}`;
+      name ||= `RESIZED-${Date.now().toString(16)}.${format}`;
 
-			return ctx.reply(`Resized from ${bytesToHumanReadable(originalSize)} to ${bytesToHumanReadable(newSize)}`, { files: [{ attachment, name }] });
-		} catch (err) {
-			if (err?.message?.startsWith("Input")) throw new CommandError(err.message);
-			else throw err;
-		}
-	}
+      return ctx.reply(`Resized from ${bytesToHumanReadable(originalSize)} to ${bytesToHumanReadable(newSize)}`, { files: [{ attachment, name }] });
+    } catch (err) {
+      if (err?.message?.startsWith("Input")) throw new CommandError(err.message);
+      else throw err;
+    }
+  }
 }

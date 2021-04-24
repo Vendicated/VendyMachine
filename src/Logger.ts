@@ -22,25 +22,25 @@ const level = process.env.LOG_LEVEL || "info";
 const dirname = path.join(process.cwd(), "logs");
 
 const logFormat = format.combine(
-	format.timestamp({ format: "DD/MM/YYYY HH:mm:ss" }),
-	format.printf(info => `${info.timestamp} [${info.level.toUpperCase()}] ${info.message}`)
+  format.timestamp({ format: "DD/MM/YYYY HH:mm:ss" }),
+  format.printf(info => `${info.timestamp} [${info.level.toUpperCase()}] ${info.message}`)
 );
 const sharedOptions = {
-	dirname,
-	format: logFormat
+  dirname,
+  format: logFormat
 };
 
 const loggers = [
-	new transports.Console({
-		format: format.combine(logFormat, format.colorize({ all: true }))
-	}),
-	new transports.File({ ...sharedOptions, filename: "info.log", level: "info" }),
-	new transports.File({ ...sharedOptions, filename: "errors.log", level: "error" })
+  new transports.Console({
+    format: format.combine(logFormat, format.colorize({ all: true }))
+  }),
+  new transports.File({ ...sharedOptions, filename: "info.log", level: "info" }),
+  new transports.File({ ...sharedOptions, filename: "errors.log", level: "error" })
 ];
 
 if (level === "debug") loggers.push(new transports.File({ ...sharedOptions, filename: "debug.log", level: "debug" }));
 
 export const logger = createLogger({
-	level,
-	transports: loggers
+  level,
+  transports: loggers
 });

@@ -20,19 +20,19 @@ export type JsonObject<T = unknown> = Record<string, T>;
 export type LogCategory = "INFO" | "ERROR";
 
 export interface ParsedEmote {
-	type: "custom";
-	animated: boolean;
-	name: string;
-	id: string;
-	url(): string;
+  type: "custom";
+  animated: boolean;
+  name: string;
+  id: string;
+  url(): string;
 }
 
 export interface ParsedEmoji {
-	type: "default";
-	raw: string;
-	name: string;
-	url(): string;
-	unicode(): string;
+  type: "default";
+  raw: string;
+  name: string;
+  url(): string;
+  unicode(): string;
 }
 
 export type ImageFormat = "png" | "jpeg" | "webp";

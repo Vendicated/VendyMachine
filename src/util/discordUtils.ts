@@ -19,11 +19,11 @@ import { Guild } from "discord.js";
 import { NitroTiers } from "./constants";
 
 export function getFreeEmojiSlots(guild: Guild) {
-	const { emojiSlots } = NitroTiers[(guild.premiumTier.toString() || "0") as keyof typeof NitroTiers];
+  const { emojiSlots } = NitroTiers[(guild.premiumTier.toString() || "0") as keyof typeof NitroTiers];
 
-	const [animated, regular] = guild.emojis.cache.partition(e => e.animated).map(x => x.size);
-	return {
-		animated: emojiSlots - animated,
-		regular: emojiSlots - regular
-	};
+  const [animated, regular] = guild.emojis.cache.partition(e => e.animated).map(x => x.size);
+  return {
+    animated: emojiSlots - animated,
+    regular: emojiSlots - regular
+  };
 }

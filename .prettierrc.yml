@@ -4,5 +4,5 @@ printWidth: 160
 trailingComma: none
 bracketSpacing: true
 arrowParens: avoid
-useTabs: true
+useTabs: false
 endOfLine: auto

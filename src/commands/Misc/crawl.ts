@@ -25,55 +25,55 @@ import { CommandContext } from "../CommandContext";
 import { IBaseCommand } from "../ICommand";
 
 export default class Command implements IBaseCommand {
-	public description = "Follow a link's redirects to find out where it leads";
-	public aliases = ["trace", "wheregoes", "follow", "redirects", "301"];
-	public ownerOnly = false;
-	public guildOnly = false;
-	public userPermissions: PermissionString[] = [];
-	public clientPermissions: PermissionString[] = [];
-	public args = {
-		url: ArgTypes.Url
-	} as const;
+  public description = "Follow a link's redirects to find out where it leads";
+  public aliases = ["trace", "wheregoes", "follow", "redirects", "301"];
+  public ownerOnly = false;
+  public guildOnly = false;
+  public userPermissions: PermissionString[] = [];
+  public clientPermissions: PermissionString[] = [];
+  public args = {
+    url: ArgTypes.Url
+  } as const;
 
-	public async callback(ctx: CommandContext, { url }: IParsedArgs<Command>) {
-		if (!url.includes("://")) url = `http://${url}`;
-		const content = `${Emotes.LOADING} Tracing ${this.formatUrl(url)}...\n\n>>> `;
-		let traceResult = "";
-		await ctx.reply(`${content}...`);
+  public async callback(ctx: CommandContext, { url }: IParsedArgs<Command>) {
+    if (!url.includes("://")) url = `http://${url}`;
+    const content = `${Emotes.LOADING} Tracing ${this.formatUrl(url)}...\n\n>>> `;
+    let traceResult = "";
+    await ctx.reply(`${content}...`);
 
-		let location = url;
-		let redirected = false;
-		let redirects = 0;
-		const controller = new AbortController();
-		do {
-			// Abort after 5 seconds
-			const timeout = setTimeout(() => controller.abort(), 5000);
-			try {
-				// Try head first
-				let res = await fetch(location, { method: "HEAD", redirect: "manual", signal: controller.signal });
-				// Method not allowed
-				if (res.status === 405) res = await fetch(location, { method: "GET", redirect: "manual", signal: controller.signal });
+    let location = url;
+    let redirected = false;
+    let redirects = 0;
+    const controller = new AbortController();
+    do {
+      // Abort after 5 seconds
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      try {
+        // Try head first
+        let res = await fetch(location, { method: "HEAD", redirect: "manual", signal: controller.signal });
+        // Method not allowed
+        if (res.status === 405) res = await fetch(location, { method: "GET", redirect: "manual", signal: controller.signal });
 
-				traceResult += `${redirected ? "\n\n==>" : ""}${this.formatUrl(location)} => ${res.status} ${res.statusText}`;
-				location = res.headers.raw().location?.[0];
-				redirected = Boolean(location);
-			} catch (err) {
-				const reason = err?.name === "AbortError" ? "Took too long (+5s)" : "Failed to fetch";
-				traceResult += `${this.formatUrl(location)} => ${reason}`;
-				redirected = false;
-			} finally {
-				clearTimeout(timeout);
-				if (redirected) {
-					redirects++;
-					await ctx.edit(content + traceResult);
-				}
-			}
-		} while (redirected);
+        traceResult += `${redirected ? "\n\n==>" : ""}${this.formatUrl(location)} => ${res.status} ${res.statusText}`;
+        location = res.headers.raw().location?.[0];
+        redirected = Boolean(location);
+      } catch (err) {
+        const reason = err?.name === "AbortError" ? "Took too long (+5s)" : "Failed to fetch";
+        traceResult += `${this.formatUrl(location)} => ${reason}`;
+        redirected = false;
+      } finally {
+        clearTimeout(timeout);
+        if (redirected) {
+          redirects++;
+          await ctx.edit(content + traceResult);
+        }
+      }
+    } while (redirected);
 
-		await ctx.edit(`${redirects || "No"} redirects found for ${this.formatUrl(url)}\n\n>>> ${traceResult}`);
-	}
+    await ctx.edit(`${redirects || "No"} redirects found for ${this.formatUrl(url)}\n\n>>> ${traceResult}`);
+  }
 
-	private formatUrl(url: string) {
-		return `<${removeSuffix(url, "/")}>`;
-	}
+  private formatUrl(url: string) {
+    return `<${removeSuffix(url, "/")}>`;
+  }
 }

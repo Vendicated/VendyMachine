@@ -25,7 +25,7 @@ import { pluralise } from "./stringHelpers";
  * @returns {string} MMM D. YYYY
  */
 export function formatDate(date: Date) {
-	return `${toMonth(date.getMonth())} ${ordinal(date.getDate())} ${date.getFullYear()}`;
+  return `${toMonth(date.getMonth())} ${ordinal(date.getDate())} ${date.getFullYear()}`;
 }
 
 /**
@@ -34,7 +34,7 @@ export function formatDate(date: Date) {
  * @returns {string} hh:mm:ss
  */
 export function formatTime(date: Date) {
-	return `${fix(date.getHours(), 2)}:${fix(date.getMinutes(), 2)}:${fix(date.getSeconds(), 2)}`;
+  return `${fix(date.getHours(), 2)}:${fix(date.getMinutes(), 2)}:${fix(date.getSeconds(), 2)}`;
 }
 
 /**
@@ -43,7 +43,7 @@ export function formatTime(date: Date) {
  * @returns {string} MMM D. YYYY at hh:mm:ss
  */
 export function formatDateHumanReadable(date: Date) {
-	return `${formatDate(date)} at ${formatTime(date)}`;
+  return `${formatDate(date)} at ${formatTime(date)}`;
 }
 
 /**
@@ -52,16 +52,16 @@ export function formatDateHumanReadable(date: Date) {
  * @returns {string} DD.MM.YYYY hh:mm:ss
  */
 export function formatDateCompact(date: Date) {
-	return `${fix(date.getDate(), 2)}.${fix(date.getMonth() + 1, 2)}.${date.getFullYear()} ${formatTime(date)}`;
+  return `${fix(date.getDate(), 2)}.${fix(date.getMonth() + 1, 2)}.${date.getFullYear()} ${formatTime(date)}`;
 }
 
 export function msToHumanReadable(ms: number, short = false) {
-	const seconds = Math.floor((ms / 1000) % 60),
-		minutes = Math.floor((ms / (1000 * 60)) % 60),
-		hours = Math.floor((ms / (1000 * 60 * 60)) % 24),
-		days = Math.floor(ms / (1000 * 60 * 60 * 24));
+  const seconds = Math.floor((ms / 1000) % 60),
+    minutes = Math.floor((ms / (1000 * 60)) % 60),
+    hours = Math.floor((ms / (1000 * 60 * 60)) % 24),
+    days = Math.floor(ms / (1000 * 60 * 60 * 24));
 
-	if (short) return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  if (short) return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 
-	return `${pluralise(days, "day")}, ${pluralise(hours, "hour")}, ${pluralise(minutes, "minute")} and ${pluralise(seconds, "second")}`;
+  return `${pluralise(days, "day")}, ${pluralise(hours, "hour")}, ${pluralise(minutes, "minute")} and ${pluralise(seconds, "second")}`;
 }

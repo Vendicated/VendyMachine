@@ -16,59 +16,59 @@
  */
 
 export class Random {
-	public static choice<T>(arr: T[]): T | undefined {
-		if (!arr.length) return;
-		else if (arr.length === 1) return arr[0];
+  public static choice<T>(arr: T[]): T | undefined {
+    if (!arr.length) return;
+    else if (arr.length === 1) return arr[0];
 
-		return arr[this.next(arr.length - 1)];
-	}
+    return arr[this.next(arr.length - 1)];
+  }
 
-	public static chooseMultiple<T>(amount: number, arr: T[]): T[] | undefined {
-		if (arr.length < amount) return;
+  public static chooseMultiple<T>(amount: number, arr: T[]): T[] | undefined {
+    if (arr.length < amount) return;
 
-		return this.nextN(amount, arr.length - 1).map(x => arr[x]);
-	}
+    return this.nextN(amount, arr.length - 1).map(x => arr[x]);
+  }
 
-	public static next(min: number, max: number): number;
-	public static next(max: number): number;
-	public static next(min: number, max?: number) {
-		// Allow omitting min
-		if (max === undefined) {
-			max = min;
-			min = 0;
-		} else if (min > max) throw SyntaxError("Minimum may not be lower than maximum.");
+  public static next(min: number, max: number): number;
+  public static next(max: number): number;
+  public static next(min: number, max?: number) {
+    // Allow omitting min
+    if (max === undefined) {
+      max = min;
+      min = 0;
+    } else if (min > max) throw SyntaxError("Minimum may not be lower than maximum.");
 
-		return min + Math.floor(Math.random() * (max - min + 1));
-	}
+    return min + Math.floor(Math.random() * (max - min + 1));
+  }
 
-	public static nextN(n: number, min: number, max: number): number[];
-	public static nextN(n: number, max: number): number[];
-	public static nextN(n: number, min: number, max?: number) {
-		if (max === undefined) {
-			max = min;
-			min = 0;
-		} else if (min > max) throw SyntaxError("Minimum may not be lower than maximum.");
-		else if (max - min < n) throw new RangeError("Difference between min and max lower than n");
+  public static nextN(n: number, min: number, max: number): number[];
+  public static nextN(n: number, max: number): number[];
+  public static nextN(n: number, min: number, max?: number) {
+    if (max === undefined) {
+      max = min;
+      min = 0;
+    } else if (min > max) throw SyntaxError("Minimum may not be lower than maximum.");
+    else if (max - min < n) throw new RangeError("Difference between min and max lower than n");
 
-		const outputs = [] as number[];
+    const outputs = [] as number[];
 
-		do {
-			const next = this.next(min, max);
-			if (!outputs.includes(next)) outputs.push(next);
-		} while (outputs.length !== n);
+    do {
+      const next = this.next(min, max);
+      if (!outputs.includes(next)) outputs.push(next);
+    } while (outputs.length !== n);
 
-		return outputs;
-	}
+    return outputs;
+  }
 
-	public static shuffle<T>(arr: T[]): T[] {
-		// Make copy of array
-		const array = arr.slice();
+  public static shuffle<T>(arr: T[]): T[] {
+    // Make copy of array
+    const array = arr.slice();
 
-		for (let i = array.length - 1; i > 0; i--) {
-			const j = Math.floor(Math.random() * (i + 1));
-			[array[i], array[j]] = [array[j], array[i]];
-		}
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
 
-		return array;
-	}
+    return array;
+  }
 }

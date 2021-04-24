@@ -24,9 +24,9 @@ import { months, monthsShort } from "./constants";
  * @returns {string} month
  */
 export function toMonth(num: number, short = true) {
-	const month = (short ? monthsShort : months)[num];
-	if (!month) throw new RangeError(`Month ${num} is out of bounds. Remember that January should be 0, and December should be 11.`);
-	return month;
+  const month = (short ? monthsShort : months)[num];
+  if (!month) throw new RangeError(`Month ${num} is out of bounds. Remember that January should be 0, and December should be 11.`);
+  return month;
 }
 
 /**
@@ -36,6 +36,6 @@ export function toMonth(num: number, short = true) {
  * @returns {string} fixed number
  */
 export function fix(num: number, digits = 2) {
-	const str = num.toString();
-	return str.length >= digits ? str : `${"0".repeat(digits - str.length)}${str}`;
+  const str = num.toString();
+  return str.length >= digits ? str : `${"0".repeat(digits - str.length)}${str}`;
 }

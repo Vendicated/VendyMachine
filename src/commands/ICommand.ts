@@ -20,18 +20,18 @@ import { ICommandArgs } from "./CommandArguments";
 import { CommandContext } from "./CommandContext";
 
 export interface IBaseCommand {
-	description: string;
-	aliases: string[];
-	ownerOnly: boolean;
-	guildOnly: boolean;
-	userPermissions: PermissionString[];
-	clientPermissions: PermissionString[];
-	args: ICommandArgs;
-	flags?: Record<string, string>;
-	callback(ctx: CommandContext, args: Record<string, any>): Promise<unknown>;
+  description: string;
+  aliases: string[];
+  ownerOnly: boolean;
+  guildOnly: boolean;
+  userPermissions: PermissionString[];
+  clientPermissions: PermissionString[];
+  args: ICommandArgs;
+  flags?: Record<string, string>;
+  callback(ctx: CommandContext, args: Record<string, any>): Promise<unknown>;
 }
 
 export interface ICommand extends IBaseCommand {
-	name: string;
-	category: string;
+  name: string;
+  category: string;
 }

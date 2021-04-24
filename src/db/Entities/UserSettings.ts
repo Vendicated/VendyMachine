@@ -20,15 +20,15 @@ import { ImageFormat } from "../../util/types";
 
 @Entity()
 export class UserSettings {
-	@PrimaryColumn("bigint")
-	public id: string;
+  @PrimaryColumn("bigint")
+  public id: string;
 
-	@Column("varchar", {
-		length: 20,
-		array: true
-	})
-	public prefixes: string[];
+  @Column("varchar", {
+    length: 20,
+    array: true
+  })
+  public prefixes: string[];
 
-	@Column("enum", { enum: ["png", "jpeg", "webp"], default: "webp" })
-	public imageFormat: ImageFormat;
+  @Column("enum", { enum: ["png", "jpeg", "webp"], default: "webp" })
+  public imageFormat: ImageFormat;
 }

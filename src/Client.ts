@@ -26,81 +26,81 @@ import { baseInvite, permissions } from "./util/constants";
 import { mentionRegex } from "./util/regex";
 
 interface ClientEvents extends BaseClientEvents {
-	message: [IMessage];
-	messageUpdate: [IMessage, IMessage];
+  message: [IMessage];
+  messageUpdate: [IMessage, IMessage];
 }
 
 export class Client extends BaseClient {
-	// Type user as not null for convenience
-	public user!: ClientUser;
-	public application!: ClientApplication;
-	// Add typing for own Events
-	public readonly on!: <Event extends keyof ClientEvents>(event: Event, listener: (...args: ClientEvents[Event]) => void) => this;
-	public readonly emit!: <Event extends keyof ClientEvents>(event: Event, ...args: ClientEvents[Event]) => boolean;
+  // Type user as not null for convenience
+  public user!: ClientUser;
+  public application!: ClientApplication;
+  // Add typing for own Events
+  public readonly on!: <Event extends keyof ClientEvents>(event: Event, listener: (...args: ClientEvents[Event]) => void) => this;
+  public readonly emit!: <Event extends keyof ClientEvents>(event: Event, ...args: ClientEvents[Event]) => boolean;
 
-	public db = new Database();
-	public commands = new CommandManager();
-	public owners = new Collection<string, User>();
+  public db = new Database();
+  public commands = new CommandManager();
+  public owners = new Collection<string, User>();
 
-	public get invite() {
-		return `${baseInvite}&client_id=${this.user.id}&permissions=${permissions}`;
-	}
+  public get invite() {
+    return `${baseInvite}&client_id=${this.user.id}&permissions=${permissions}`;
+  }
 
-	public get mentionRegex() {
-		return mentionRegex(this.user.id);
-	}
+  public get mentionRegex() {
+    return mentionRegex(this.user.id);
+  }
 
-	private async _registerHandlers() {
-		const listenerDir = path.join(__dirname, "events");
-		for (const name of await fs.readdir(listenerDir)) {
-			const listenerPath = path.join(listenerDir, name);
-			const listener = await import(listenerPath);
-			this.on(name.replace(/\.[jt]s/, "") as keyof ClientEvents, (listener.default ?? listener.listener).bind(null, this));
+  private async _registerHandlers() {
+    const listenerDir = path.join(__dirname, "events");
+    for (const name of await fs.readdir(listenerDir)) {
+      const listenerPath = path.join(listenerDir, name);
+      const listener = await import(listenerPath);
+      this.on(name.replace(/\.[jt]s/, "") as keyof ClientEvents, (listener.default ?? listener.listener).bind(null, this));
 
-			delete require.cache[listenerPath];
-		}
-	}
+      delete require.cache[listenerPath];
+    }
+  }
 
-	public registerHandlers() {
-		logger.debug("Registering all handlers...");
-		void this._registerHandlers();
-		return this;
-	}
+  public registerHandlers() {
+    logger.debug("Registering all handlers...");
+    void this._registerHandlers();
+    return this;
+  }
 
-	public registerCommands() {
-		logger.debug("Registering all commands...");
-		void this.commands.registerAll();
-		return this;
-	}
+  public registerCommands() {
+    logger.debug("Registering all commands...");
+    void this.commands.registerAll();
+    return this;
+  }
 
-	private async initDb() {
-		await this.db.init();
-	}
+  private async initDb() {
+    await this.db.init();
+  }
 
-	public isOwner(ctx: User | GuildMember | CommandContext) {
-		if (ctx instanceof User || ctx instanceof GuildMember) return this.owners.has(ctx.id);
-		return this.owners.has(ctx.author.id);
-	}
+  public isOwner(ctx: User | GuildMember | CommandContext) {
+    if (ctx instanceof User || ctx instanceof GuildMember) return this.owners.has(ctx.id);
+    return this.owners.has(ctx.author.id);
+  }
 
-	private async addOwner(owner: Team | User) {
-		if (owner instanceof Team) owner.members.forEach(member => this.addOwner(member.user));
-		else this.owners.set(owner.id, owner);
-	}
+  private async addOwner(owner: Team | User) {
+    if (owner instanceof Team) owner.members.forEach(member => this.addOwner(member.user));
+    else this.owners.set(owner.id, owner);
+  }
 
-	public async fetchOwners() {
-		if (!this.application) throw new Error("Client is not ready");
+  public async fetchOwners() {
+    if (!this.application) throw new Error("Client is not ready");
 
-		let { owner } = this.application.partial ? await this.application.fetch() : this.application;
-		owner ||= await this.users.fetch(process.env.OWNER_ID!).catch(() => null);
-		if (!owner) throw new Error("I was not able to get data about my owners from Discord. Please set an enviroment variable OWNER_ID");
-		await this.addOwner(owner);
-	}
+    let { owner } = this.application.partial ? await this.application.fetch() : this.application;
+    owner ||= await this.users.fetch(process.env.OWNER_ID!).catch(() => null);
+    if (!owner) throw new Error("I was not able to get data about my owners from Discord. Please set an enviroment variable OWNER_ID");
+    await this.addOwner(owner);
+  }
 
-	public async connect() {
-		logger.debug("Connecting to Discord...");
-		await this.initDb()
-			.then(() => this.login(process.env.TOKEN))
-			.then(() => this.fetchOwners());
-		return this;
-	}
+  public async connect() {
+    logger.debug("Connecting to Discord...");
+    await this.initDb()
+      .then(() => this.login(process.env.TOKEN))
+      .then(() => this.fetchOwners());
+    return this;
+  }
 }

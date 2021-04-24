@@ -16,12 +16,12 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 declare module "emoji-unicode" {
-	/**
-	 * Get the unicode code of an emoji in base 16.
-	 */
-	export default function (input: string): string;
-	/**
-	 * Get the unicode code points of an emoji in base 16.
-	 */
-	export function raw(input: string): string;
+  /**
+   * Get the unicode code of an emoji in base 16.
+   */
+  export default function (input: string): string;
+  /**
+   * Get the unicode code points of an emoji in base 16.
+   */
+  export function raw(input: string): string;
 }

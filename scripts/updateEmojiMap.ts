@@ -21,21 +21,21 @@ import fetch from "node-fetch";
 import path from "path";
 
 void (async () => {
-	const { version, emojiDefinitions } = await fetch("https://static.emzi0767.com/misc/discordEmojiMap.json", {
-		headers: { accept: "application/json", "content-type": "application/json" }
-	})
-		.then(res => res.text())
-		.then(text => JSON.parse(text.trim()));
+  const { version, emojiDefinitions } = await fetch("https://static.emzi0767.com/misc/discordEmojiMap.json", {
+    headers: { accept: "application/json", "content-type": "application/json" }
+  })
+    .then(res => res.text())
+    .then(text => JSON.parse(text.trim()));
 
-	const out: Record<string, Record<string, string>> = { version };
+  const out: Record<string, Record<string, string>> = { version };
 
-	for (const emoji of emojiDefinitions) {
-		const e: Record<string, string> = (out[emoji.surrogates] = {});
+  for (const emoji of emojiDefinitions) {
+    const e: Record<string, string> = (out[emoji.surrogates] = {});
 
-		// Use short names and remove .svg extension to save space
-		e.a = emoji.assetFileName.replace(".svg", "");
-		e.b = emoji.primaryName;
-	}
+    // Use short names and remove .svg extension to save space
+    e.a = emoji.assetFileName.replace(".svg", "");
+    e.b = emoji.primaryName;
+  }
 
-	writeFileSync(path.join(__dirname, "..", "assets", "emojiMap.json"), JSON.stringify(out));
+  writeFileSync(path.join(__dirname, "..", "assets", "emojiMap.json"), JSON.stringify(out));
 })();

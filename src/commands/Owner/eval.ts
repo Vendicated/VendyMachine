@@ -30,109 +30,109 @@ import { IBaseCommand } from "../ICommand";
 // Unreachable block referencing unused imports as otherwise vscode removes them automatically
 // eslint-disable-next-line no-constant-condition
 while (false) {
-	constants;
-	regex;
+  constants;
+  regex;
 }
 
 export default class Command implements IBaseCommand {
-	public description = "Evaluate js code";
-	public aliases = [];
-	public ownerOnly = true;
-	public guildOnly = false;
-	public userPermissions = [];
-	public clientPermissions = [];
-	public args = {
-		script: {
-			type: ArgTypes.String,
-			remainder: true
-		}
-	} as const;
+  public description = "Evaluate js code";
+  public aliases = [];
+  public ownerOnly = true;
+  public guildOnly = false;
+  public userPermissions = [];
+  public clientPermissions = [];
+  public args = {
+    script: {
+      type: ArgTypes.String,
+      remainder: true
+    }
+  } as const;
 
-	public async callback(ctx: CommandContext, { script }: IParsedArgs<Command>) {
-		// Shortcuts for use in eval command
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { client, channel, msg, rawArgs: args, author, commandName, db, guild, me, member } = ctx;
+  public async callback(ctx: CommandContext, { script }: IParsedArgs<Command>) {
+    // Shortcuts for use in eval command
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { client, channel, msg, rawArgs: args, author, commandName, db, guild, me, member } = ctx;
 
-		script = script.trim();
+    script = script.trim();
 
-		// Remove codeblocks
-		if (script.startsWith("```") && script.endsWith("```")) {
-			script = stringHelpers.removePrefix(script.substring(3, script.length - 3), ["js", "ts"]);
-		}
-		if (script.includes("await")) {
-			script = `(async () => { ${script} })();`;
-		}
+    // Remove codeblocks
+    if (script.startsWith("```") && script.endsWith("```")) {
+      script = stringHelpers.removePrefix(script.substring(3, script.length - 3), ["js", "ts"]);
+    }
+    if (script.includes("await")) {
+      script = `(async () => { ${script} })();`;
+    }
 
-		// Create a dummy console for use in eval command
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const console = {
-			_lines: [] as string[],
-			_log(...things: string[]) {
-				this._lines.push(
-					...things
-						.map(x => inspect(x, { getters: true }))
-						.join(" ")
-						.split("\n")
-				);
-			}
-		};
-		// @ts-ignore
-		console.log = console.error = console.warn = console.info = console._log.bind(console);
+    // Create a dummy console for use in eval command
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const console = {
+      _lines: [] as string[],
+      _log(...things: string[]) {
+        this._lines.push(
+          ...things
+            .map(x => inspect(x, { getters: true }))
+            .join(" ")
+            .split("\n")
+        );
+      }
+    };
+    // @ts-ignore
+    console.log = console.error = console.warn = console.info = console._log.bind(console);
 
-		const messageOptions: MessageOptions = {};
+    const messageOptions: MessageOptions = {};
 
-		let result,
-			syncTime,
-			asyncTime,
-			isPromise,
-			success = true;
+    let result,
+      syncTime,
+      asyncTime,
+      isPromise,
+      success = true;
 
-		const stopwatch = new Stopwatch();
+    const stopwatch = new Stopwatch();
 
-		try {
-			result = eval(script);
-			syncTime = stopwatch.toString();
+    try {
+      result = eval(script);
+      syncTime = stopwatch.toString();
 
-			// Is promise?
-			if (result instanceof Promise) {
-				const content = (await stringHelpers.formatOutput(result, 1900, "js")) || "-";
-				await ctx.reply(`${content}\n${stringHelpers.codeblock(`⏱ ${syncTime}`)}`);
+      // Is promise?
+      if (result instanceof Promise) {
+        const content = (await stringHelpers.formatOutput(result, 1900, "js")) || "-";
+        await ctx.reply(`${content}\n${stringHelpers.codeblock(`⏱ ${syncTime}`)}`);
 
-				isPromise = true;
-				stopwatch.restart();
-				result = await result;
-				asyncTime = stopwatch.toString();
-			}
-		} catch (err) {
-			if (!syncTime) syncTime = stopwatch.toString();
-			if (isPromise && !asyncTime) asyncTime = stopwatch.toString();
-			result = err;
+        isPromise = true;
+        stopwatch.restart();
+        result = await result;
+        asyncTime = stopwatch.toString();
+      }
+    } catch (err) {
+      if (!syncTime) syncTime = stopwatch.toString();
+      if (isPromise && !asyncTime) asyncTime = stopwatch.toString();
+      result = err;
 
-			success = false;
-		}
+      success = false;
+    }
 
-		stopwatch.stop();
+    stopwatch.stop();
 
-		const successStr = success ? "SUCCESS" : "ERROR";
-		const timeString = asyncTime ? `⏱ ${asyncTime}<${syncTime}>` : `⏱ ${syncTime}`;
-		const consoleOutput = console._lines.join("\n");
+    const successStr = success ? "SUCCESS" : "ERROR";
+    const timeString = asyncTime ? `⏱ ${asyncTime}<${syncTime}>` : `⏱ ${syncTime}`;
+    const consoleOutput = console._lines.join("\n");
 
-		logger.debug(`Evaluated ${script}`);
-		logger.debug(`Result: ${result}`);
+    logger.debug(`Evaluated ${script}`);
+    logger.debug(`Result: ${result}`);
 
-		if (consoleOutput) {
-			logger.debug(`Console Output: ${consoleOutput}`);
-			messageOptions.embed = new Embed(successStr)
-				.setAuthor("Eval", client.user.displayAvatarURL())
-				.addField("Result", (await stringHelpers.formatOutput(result, 1000, "js", messageOptions, "EvalOutput.txt")) || "-")
-				.addField("Console", await stringHelpers.formatOutput(consoleOutput, 1000, "js" || "-", messageOptions, "EvalConsole.txt"))
-				.setFooter(timeString);
-		} else {
-			messageOptions.content = `${success ? "" : `${constants.Emotes.ERROR} Oops! That didn't work :(\n`}${
-				(await stringHelpers.formatOutput(result, 1900, "js")) || "-"
-			}\n${stringHelpers.codeblock(timeString)}`;
-		}
+    if (consoleOutput) {
+      logger.debug(`Console Output: ${consoleOutput}`);
+      messageOptions.embed = new Embed(successStr)
+        .setAuthor("Eval", client.user.displayAvatarURL())
+        .addField("Result", (await stringHelpers.formatOutput(result, 1000, "js", messageOptions, "EvalOutput.txt")) || "-")
+        .addField("Console", await stringHelpers.formatOutput(consoleOutput, 1000, "js" || "-", messageOptions, "EvalConsole.txt"))
+        .setFooter(timeString);
+    } else {
+      messageOptions.content = `${success ? "" : `${constants.Emotes.ERROR} Oops! That didn't work :(\n`}${
+        (await stringHelpers.formatOutput(result, 1900, "js")) || "-"
+      }\n${stringHelpers.codeblock(timeString)}`;
+    }
 
-		await ctx.edit(messageOptions);
-	}
+    await ctx.edit(messageOptions);
+  }
 }
