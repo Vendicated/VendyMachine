@@ -15,7 +15,7 @@
  * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Guild, GuildMember, MessageOptions, User } from "discord.js";
+import { Guild, GuildMember, Message, MessageOptions, User } from "discord.js";
 import { Client } from "../Client";
 import { GuildSettings } from "../db/Entities/GuildSettings";
 import { UserSettings } from "../db/Entities/UserSettings";
@@ -109,7 +109,7 @@ export class CommandContext {
   }
 
   private get filter() {
-    return (msg: IMessage) => msg.author.id === this.msg.author.id;
+    return (msg: Message) => msg.author.id === this.msg.author.id;
   }
 
   /**
