@@ -32,11 +32,11 @@ interface ClientEvents extends BaseClientEvents {
 
 export class Client extends BaseClient {
   // Type user as not null for convenience
-  public user!: ClientUser;
-  public application!: ClientApplication;
+  declare public user: ClientUser;
+  declare public application: ClientApplication;
   // Add typing for own Events
-  public readonly on!: <Event extends keyof ClientEvents>(event: Event, listener: (...args: ClientEvents[Event]) => void) => this;
-  public readonly emit!: <Event extends keyof ClientEvents>(event: Event, ...args: ClientEvents[Event]) => boolean;
+  declare public readonly on: <Event extends keyof ClientEvents>(event: Event, listener: (...args: ClientEvents[Event]) => void) => this;
+  declare public readonly emit: <Event extends keyof ClientEvents>(event: Event, ...args: ClientEvents[Event]) => boolean;
 
   public db = new Database();
   public commands = new CommandManager();
