@@ -1,19 +1,19 @@
 /**
- * This file is part of Emotely, a Discord Bot providing all sorts of emote related commands.
+ * This file is part of VendyMachine, a Discord Bot providing all sorts of emote related commands.
  * Copyright (C) 2021 Vendicated
  *
- * Emotely is free software: you can redistribute it and/or modify
+ * VendyMachine is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Emotely is distributed in the hope that it will be useful,
+ * VendyMachine is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
+ * along with VendyMachine.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 import { execSync } from "child_process";
@@ -47,7 +47,7 @@ void (async () => {
     return acc;
   }, {} as Record<string, ICommand[]>);
 
-  let markdown = "# EmoteBot Command List\n\nYou can find a list of all commands below. For more info, simply click on the desired command!\n\n";
+  let markdown = "# VendyMachine Command List\n\nYou can find a list of all commands below. For more info, simply click on the desired command!\n\n";
 
   // Create table of contents
   for (const [category, commands] of Object.entries(categories)) {
@@ -93,7 +93,7 @@ void (async () => {
   }
 
   markdown += "___\n\n";
-  markdown += `This markdown file was [auto generated](../scripts/gencmdmd.ts) based on [commit ${commitShort}](https://github.com/Vendicated/EmoteBot/commit/${commit})`;
+  markdown += `This markdown file was [auto generated](../scripts/gencmdmd.ts) based on [commit ${commitShort}](https://github.com/Vendicated/VendyMachine/commit/${commit})`;
 
   fs.writeFileSync(path.join(assetDir, "commands.md"), markdown, "utf8");
   console.info("All done!");

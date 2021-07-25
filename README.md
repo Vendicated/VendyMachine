@@ -1,8 +1,8 @@
-# EmoteBot
+# VendyMachine
 
-Emote bot is an open source discord bot focused all around emotes
+VendyMachine is an open source discord bot focused all around emotes
 
-You can find a list of commands [here](docs/commands.md)
+You can find a list of commands [here](assets/commands.md)
 
 ## Running the bot
 

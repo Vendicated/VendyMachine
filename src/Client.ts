@@ -1,18 +1,18 @@
-/** This file is part of Emotely, a Discord Bot providing all sorts of emote related commands.
+/** This file is part of VendyMachine, a Discord Bot providing all sorts of emote related commands.
  * Copyright (C) 2021 Vendicated
  *
- * Emotely is free software: you can redistribute it and/or modify
+ * VendyMachine is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Emotely is distributed in the hope that it will be useful,
+ * VendyMachine is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public License
- * along with Emotely.  If not, see <https://www.gnu.org/licenses/>.
+ * along with VendyMachine.  If not, see <https://www.gnu.org/licenses/>.
  */
 import { Client as BaseClient, ClientApplication, ClientEvents as BaseClientEvents, ClientUser, Collection, GuildMember, Team, User } from "discord.js";
 import fs from "fs/promises";
@@ -32,11 +32,11 @@ interface ClientEvents extends BaseClientEvents {
 
 export class Client extends BaseClient {
   // Type user as not null for convenience
-  declare public user: ClientUser;
-  declare public application: ClientApplication;
+  public declare user: ClientUser;
+  public declare application: ClientApplication;
   // Add typing for own Events
-  declare public readonly on: <Event extends keyof ClientEvents>(event: Event, listener: (...args: ClientEvents[Event]) => void) => this;
-  declare public readonly emit: <Event extends keyof ClientEvents>(event: Event, ...args: ClientEvents[Event]) => boolean;
+  public declare readonly on: <Event extends keyof ClientEvents>(event: Event, listener: (...args: ClientEvents[Event]) => void) => this;
+  public declare readonly emit: <Event extends keyof ClientEvents>(event: Event, ...args: ClientEvents[Event]) => boolean;
 
   public db = new Database();
   public commands = new CommandManager();

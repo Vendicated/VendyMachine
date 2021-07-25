@@ -1,13 +1,15 @@
-# EmoteBot Command List
+# VendyMachine Command List
 
 You can find a list of all commands below. For more info, simply click on the desired command!
 
 - [Emotes](#Emotes)
 	- [clone](#clone)
 	- [create](#create)
+	- [delete](#delete)
 	- [download](#download)
 	- [emoji](#emoji)
 	- [emojiinfo](#emojiinfo)
+	- [rename](#rename)
 - [Images](#Images)
 	- [convert](#convert)
 	- [resize](#resize)
@@ -35,9 +37,10 @@ ___
 <details>
 	<summary>Arguments</summary>
 
-| Required |  Name | Type |             Description            | Choices | Default |
-| :------: | :---: | :--: | :--------------------------------: | :-----: | :-----: |
-|     ✅    | input | text | One or more emojis/emotes to clone |    -    |    -    |
+| Required |   Name  |               Type              | Description | Choices | Default |
+| :------: | :-----: | :-----------------------------: | :---------: | :-----: | :-----: |
+|     ✅    |  emojis | custom emotes or default emojis |      -      |    -    |    -    |
+|     ✅    | boolean |                -                |      -      |    -    |         |
 
 </details>
 
@@ -51,10 +54,26 @@ ___
 <details>
 	<summary>Arguments</summary>
 
-| Required | Name | Type |       Description       | Choices | Default |
-| :------: | :--: | :--: | :---------------------: | :-----: | :-----: |
-|     ✅    | name | text | Name to give this emote |    -    |    -    |
-|     ❌    |  url |  url |        Image url        |    -    |    -    |
+| Required | Name | Type | Description | Choices | Default |
+| :------: | :--: | :--: | :---------: | :-----: | :-----: |
+|     ✅    | name | text |  emoji name |    -    |    -    |
+|     ❌    |  url |  url |  image url  |    -    |    -    |
+
+</details>
+
+### delete
+
+*Delete one or more emotes*
+
+- Guild only: Yes
+- Required permissions: `Manage_emojis`
+
+<details>
+	<summary>Arguments</summary>
+
+| Required |  Name  |      Type     | Description | Choices | Default |
+| :------: | :----: | :-----------: | :---------: | :-----: | :-----: |
+|     ✅    | emotes | server emotes |      -      |    -    |    -    |
 
 </details>
 
@@ -68,9 +87,9 @@ ___
 <details>
 	<summary>Arguments</summary>
 
-| Required |  Name  | Type |                          Description                          | Choices | Default |
-| :------: | :----: | :--: | :-----------------------------------------------------------: | :-----: | :-----: |
-|     ❌    | emotes | text | One or more emotes to download. Defaults to all server emotes |    -    |    -    |
+| Required |  Name  |               Type              |                     Description                    | Choices | Default |
+| :------: | :----: | :-----------------------------: | :------------------------------------------------: | :-----: | :-----: |
+|     ❌    | emotes | custom emotes or default emojis | emotes to download (defaults to all server emotes) |    -    |    -    |
 
 </details>
 
@@ -84,9 +103,9 @@ ___
 <details>
 	<summary>Arguments</summary>
 
-| Required |  Name | Type |        Description        | Choices | Default |
-| :------: | :---: | :--: | :-----------------------: | :-----: | :-----: |
-|     ✅    | input | text | One or more emojis/emotes |    -    |    -    |
+| Required |  Name  |               Type              | Description | Choices | Default |
+| :------: | :----: | :-----------------------------: | :---------: | :-----: | :-----: |
+|     ✅    | emojis | custom emotes or default emojis |      -      |    -    |    -    |
 
 </details>
 
@@ -100,9 +119,26 @@ ___
 <details>
 	<summary>Arguments</summary>
 
-| Required |  Name | Type |        Description       | Choices | Default |
-| :------: | :---: | :--: | :----------------------: | :-----: | :-----: |
-|     ✅    | input | text | An emoji or custom emote |    -    |    -    |
+| Required |              Name             | Type | Description | Choices | Default |
+| :------: | :---------------------------: | :--: | :---------: | :-----: | :-----: |
+|     ✅    | custom emote or default emoji |   -  |      -      |    -    |         |
+
+</details>
+
+### rename
+
+*Rename an emote*
+
+- Guild only: Yes
+- Required permissions: `Manage_emojis`
+
+<details>
+	<summary>Arguments</summary>
+
+| Required |     Name     | Type |  Description | Choices | Default |
+| :------: | :----------: | :--: | :----------: | :-----: | :-----: |
+|     ✅    | server emote |   -  |       -      |    -    |         |
+|     ✅    |     name     | text | The new name |    -    |    -    |
 
 </details>
 
@@ -120,11 +156,11 @@ ___
 <details>
 	<summary>Arguments</summary>
 
-| Required |     Name     |  Type  |                                   Description                                  |     Choices     | Default |
-| :------: | :----------: | :----: | :----------------------------------------------------------------------------: | :-------------: | :-----: |
-|     ❌    | outputFormat |  text  | The image format to convert to. Defaults to the one specified in your settings | png, jpeg, webp |    -    |
-|     ❌    |      url     |   url  |                             Url of image to convert                            |        -        |    -    |
-|     ❌    |     width    | number |   Width that image should be scaled to. (Height is automatically calculated)   |        -        |    -    |
+| Required |     Name     |  Type  |  Description |     Choices     | Default |
+| :------: | :----------: | :----: | :----------: | :-------------: | :-----: |
+|     ❌    | outputFormat |  text  | image format | png, jpeg, webp |    -    |
+|     ❌    |      url     |   url  |   image url  |        -        |    -    |
+|     ❌    |     width    | number |  width in px |        -        |    -    |
 
 </details>
 
@@ -138,10 +174,10 @@ ___
 <details>
 	<summary>Arguments</summary>
 
-| Required | Name | Type |                 Description                | Choices | Default |
-| :------: | :--: | :--: | :----------------------------------------: | :-----: | :-----: |
-|     ✅    | size | text | Size to resize to. Format: 100B/10.7KB/2MB |    -    |  256KB  |
-|     ❌    |  url |  url |           Url of image to resize           |    -    |    -    |
+| Required | Name | Type |            Description           | Choices | Default |
+| :------: | :--: | :--: | :------------------------------: | :-----: | :-----: |
+|     ✅    | size | text | size e.g. one of 100B/10.7KB/2MB |    -    |  256KB  |
+|     ❌    |  url |  url |             image url            |    -    |    -    |
 
 </details>
 
@@ -166,9 +202,9 @@ ___
 <details>
 	<summary>Arguments</summary>
 
-| Required | Name | Type |    Description   | Choices | Default |
-| :------: | :--: | :--: | :--------------: | :-----: | :-----: |
-|     ✅    |  url |  url | The url to trace |    -    |    -    |
+| Required | Name | Type | Description | Choices | Default |
+| :------: | :--: | :--: | :---------: | :-----: | :-----: |
+|     ✅    |  url |   -  |      -      |    -    |         |
 
 </details>
 
@@ -182,9 +218,9 @@ ___
 <details>
 	<summary>Arguments</summary>
 
-| Required | Name | Type |         Description        | Choices | Default |
-| :------: | :--: | :--: | :------------------------: | :-----: | :-----: |
-|     ❌    | name | text | command / command category |    -    |    -    |
+| Required | Name | Type |       Description       | Choices | Default |
+| :------: | :--: | :--: | :---------------------: | :-----: | :-----: |
+|     ❌    | name | text | command name / category |    -    |    -    |
 
 </details>
 
@@ -198,9 +234,9 @@ ___
 <details>
 	<summary>Arguments</summary>
 
-| Required | Name | Type |                               Description                              | Choices | Default |
-| :------: | :--: | :--: | :--------------------------------------------------------------------: | :-----: | :-----: |
-|     ❌    |  id  | text | Alternatively, you may specify the user ID of a bot you wish to invite |    -    |    -    |
+| Required | Name | Type |        Description       | Choices | Default |
+| :------: | :--: | :--: | :----------------------: | :-----: | :-----: |
+|     ❌    |  id  | text | user id of bot to invite |    -    |    -    |
 
 </details>
 
@@ -232,14 +268,14 @@ ___
 <details>
 	<summary>Arguments</summary>
 
-| Required |  Name  | Type |                             Description                            |      Choices     | Default |
-| :------: | :----: | :--: | :----------------------------------------------------------------: | :--------------: | :-----: |
-|     ✅    |  scope | text | whether this prefix should be set on a server or only for yourself |   server, user   |    -    |
-|     ✅    | action | text |                                  -                                 | add, remove, set |    -    |
-|     ✅    | prefix | text |                           the new prefix                           |         -        |    -    |
+| Required |  Name  | Type |  Description |      Choices     | Default |
+| :------: | :----: | :--: | :----------: | :--------------: | :-----: |
+|     ✅    |  scope | text | prefix scope |   server, user   |    -    |
+|     ✅    | action | text |       -      | add, remove, set |    -    |
+|     ✅    | prefix | text |  new prefix  |         -        |    -    |
 
 </details>
 
 ___
 
-This markdown file was [auto generated](../scripts/gencmdmd.ts) based on [commit f5c946f](https://github.com/Vendicated/EmoteBot/commit/f5c946f2ffb4f22f3e11317c5e985aed33aa567d)
+This markdown file was [auto generated](../scripts/gencmdmd.ts) based on [commit ca97438](https://github.com/Vendicated/VendyMachine/commit/ca974387a54da89f2f906fd3fd2821c36a00e476)
