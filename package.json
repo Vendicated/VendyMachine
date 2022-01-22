@@ -50,7 +50,7 @@
     "emoji-unicode": "^2.0.1",
     "jszip": "^3.7.0",
     "mkdirp": "^1.0.4",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^3.1.1",
     "ordinal": "^1.0.3",
     "pg": "^8.6.0",
     "reflect-metadata": "^0.1.13",
