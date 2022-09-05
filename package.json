@@ -54,7 +54,7 @@
     "ordinal": "^1.0.3",
     "pg": "^8.6.0",
     "reflect-metadata": "^0.1.13",
-    "sharp": "^0.28.1",
+    "sharp": "^0.31.0",
     "typeorm": "^0.2.32",
     "validator": "^13.6.0",
     "winston": "^3.3.3"
